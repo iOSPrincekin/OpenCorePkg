@@ -325,8 +325,9 @@ RegisterBootOption (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Registering entry %s [%a] (T:%d|F:%d|G:%d|E:%d|B:%d) - %s\n",
+    "OCB: Registering entry Name:%s,PathName:%s, [%a] (T:%d|F:%d|G:%d|E:%d|B:%d) - %s\n",
     BootEntry->Name,
+    BootEntry->PathName,
     BootEntry->Flavour,
     BootEntry->Type,
     BootEntry->IsFolder,

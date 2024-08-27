@@ -191,6 +191,7 @@
   MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
+  OpenCorePkg/Application/boot/boot.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf {
     <LibraryClasses>
