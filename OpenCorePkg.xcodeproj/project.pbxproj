@@ -245,6 +245,7 @@
 		35366CE2240C213500D54CBB /* OcSmcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF5240C213500D54CBB /* OcSmcLib.c */; };
 		35366CE3240C213500D54CBB /* OcSmcLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BF7240C213500D54CBB /* OcSmcLibInternal.h */; };
 		35F6ACA6240C22EE00D6FA49 /* Canary.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B48240C213400D54CBB /* Canary.c */; };
+		9B8E798F2C7E95DD0007E2A5 /* boot.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B8E798E2C7E8D9D0007E2A5 /* boot.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -664,6 +665,8 @@
 		35529AD22461768100CF8169 /* VirtualMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMemory.h; sourceTree = "<group>"; };
 		35529AD32461768100CF8169 /* ProcessorInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessorInfo.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		9B8E798D2C7E8D9D0007E2A5 /* boot.inf */ = {isa = PBXFileReference; lastKnownFileType = text; path = boot.inf; sourceTree = "<group>"; };
+		9B8E798E2C7E8D9D0007E2A5 /* boot.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = boot.c; sourceTree = "<group>"; };
 		EC81B0C5248DA5D4005033B6 /* ControlMsrE2 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ControlMsrE2; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -810,6 +813,7 @@
 			isa = PBXGroup;
 			children = (
 				EC81B0C5248DA5D4005033B6 /* ControlMsrE2 */,
+				9B8E798C2C7E8D9D0007E2A5 /* boot */,
 				3511D57E23FDB2A800CC3B17 /* Bootstrap */,
 			);
 			path = Application;
@@ -1789,6 +1793,15 @@
 			path = IndustryStandard;
 			sourceTree = "<group>";
 		};
+		9B8E798C2C7E8D9D0007E2A5 /* boot */ = {
+			isa = PBXGroup;
+			children = (
+				9B8E798D2C7E8D9D0007E2A5 /* boot.inf */,
+				9B8E798E2C7E8D9D0007E2A5 /* boot.c */,
+			);
+			path = boot;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1937,6 +1950,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B8E798F2C7E95DD0007E2A5 /* boot.c in Sources */,
 				35366C21240C213500D54CBB /* Aes.c in Sources */,
 				35366C8B240C213500D54CBB /* AIKSource.c in Sources */,
 				35366C7E240C213500D54CBB /* NativeOverflow.c in Sources */,
