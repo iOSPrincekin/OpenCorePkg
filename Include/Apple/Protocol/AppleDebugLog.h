@@ -138,11 +138,11 @@ VOID
   Apple debug log protocol.
 **/
 struct APPLE_DEBUG_LOG_PROTOCOL_ {
-  UINTN                             Revision;
-  APPLE_DEBUG_LOG_PRINT             Print;
-  APPLE_DEBUG_LOG_EXTRACT_BUFFER    ExtractBuffer;
-  APPLE_DEBUG_LOG_WRITE_FILES       WriteFiles;
-  APPLE_DEBUG_LOG_SETUP_FILES       SetupFiles;
+  UINTN                             Revision;  // 8
+  APPLE_DEBUG_LOG_PRINT             Print; // 8
+  APPLE_DEBUG_LOG_EXTRACT_BUFFER    ExtractBuffer; // 8
+  APPLE_DEBUG_LOG_WRITE_FILES       WriteFiles; // 8
+  APPLE_DEBUG_LOG_SETUP_FILES       SetupFiles; // 8
 };
 
 extern EFI_GUID  gAppleDebugLogProtocolGuid;

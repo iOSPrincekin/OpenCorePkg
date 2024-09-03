@@ -72,12 +72,12 @@ EFI_GUID  unknown_hob_guid = {
     0xef4ae2dd, 0xb736, 0x40e3, {0x80, 0x61, 0xa7, 0x46, 0x33, 0x34, 0x7f, 0x23 }
 };
 
-void sub_7CE43F47(void *GuidHob)
+void boot_func_7CE43F47(void *GuidHob)
 {
     GuidHob_24 = GuidHob;
 }
 
-EFI_STATUS sub_7CE43C58(
+EFI_STATUS boot_func_7CE43C58(
                         IN EFI_HANDLE        ImageHandle,
                         IN EFI_SYSTEM_TABLE  *SystemTable
                         )
@@ -91,7 +91,7 @@ EFI_STATUS sub_7CE43C58(
     Status = HobLibConstructorPtr (SystemTable,&hobList);
     
     void *GuidHob = GetNextGuidHob (&unknown_hob_guid, hobList);
-    sub_7CE43F47(GuidHob + 3);
+    boot_func_7CE43F47(GuidHob + 3);
     
     
     
@@ -107,32 +107,35 @@ void* AllocatePool_malloc(UINTN bufferSize)
     return bufferPtr;
 }
 
-void sub_7CE1E528(){
+void boot_func_7CE1E528(){
     
 }
 
-UINTN sub_7CE1E2B1(UINTN bufferSize)
+void* boot_func_7CE1E2B1(UINTN bufferSize)
 {
     void* buffer = NULL;
+    buffer = NULL;
+    /*
     UINTN *v1; // rax
+     */
     buffer = AllocatePool_malloc(bufferSize);
-    
+    return buffer;
 }
 
 void *qword_7CEA0E30 = NULL;
 
-EFI_STATUS sub_7CE0F68E()
+EFI_STATUS boot_func_7CE0F68E()
 {
     EFI_STATUS  Status;
+    /*
     UINT64 v1 = 0xAAAAAAAAAAAAAAAAuLL;
+     */
     EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
     
     UINTN  DataSizeArray[5];
-    UINT8  FailReason;
     
     
     
-    FailReason = 0;
     
     BOOLEAN hadBootercfg = FALSE;
     
@@ -165,7 +168,7 @@ EFI_STATUS sub_7CE0F68E()
         Status = SetVariable (
                         L"b",
                         &gAppleBootVariableGuid,
-                        NULL,
+                        0,
                         0,
                         NULL
                         );
@@ -182,12 +185,7 @@ EFI_STATUS sub_7CE0F68E()
 
 UINT32 dword_7CE9F820 = 0xFFFFFFFF;
 
-UINT64 unk_7CE9F370 = 0x00000002;
-
-UINT64 unk_7CE9F378 = 0x00000002;
-
-
-BOOLEAN sub_7CE090CB(){
+BOOLEAN boot_func_7CE090CB(){
     EFI_STATUS  Status;
     UINTN DataSizeArray[4];
     DataSizeArray[0] = 0xAAAAAAAAAAAAAAAAuLL;
@@ -234,13 +232,174 @@ BOOLEAN sub_7CE090CB(){
     return dword_7CE9F820 == 1;
 }
 
-EFI_STATUS sub_7CE14DC7(unsigned int a1){
-    EFI_STATUS  Status;
+UINT64 unk_7CE9F370 = 0x00000002;
+
+UINT64 unk_7CE9F378 = 0x00000002;
+
+
+UINT8 byte_7CEA2340 = 0;
+
+UINT8 byte_7CEA2342 = 0;
+
+UINT8 byte_7CEA2333 = 0;
+
+
+UINT64 qword_7CEA2348 = 0;
+
+UINT64 qword_7CE9F380 = 0;
+
+UINT64 qword_7CE9F388 = 1;
+
+UINT64 qword_7CEA2360 = 4261634048LL;
+
+UINT64* qword_7CECB358 = 0;
+
+UINT32* qword_7CECB360 = 0;
+
+UINT32* addr_FE03401C = (UINT32*)0xFE03401C;
+
+
+void boot_func_7CE42E8D()
+{
+    
+}
+
+void boot_func_7CE42F03()
+{
+    
+}
+
+void boot_func_7CE42F1C()
+{
+    
+}
+
+void boot_func_7CE42F2F()
+{
+    
+}
+
+void boot_func_7CE42F41()
+{
+    
+}
+
+void boot_func_7CE42F5E()
+{
+    
+}
+
+void *off_7CEC8A40[6] =
+{
+    (void*)boot_func_7CE42E8D,
+    (void*)boot_func_7CE42F03,
+    (void*)boot_func_7CE42F1C,
+    (void*)boot_func_7CE42F2F,
+    (void*)boot_func_7CE42F41,
+    (void*)boot_func_7CE42F5E
+};
+
+#define out8(port, v) ({ \
+    asm volatile ( \
+        "movb %1, %%al\n" \
+        "movw %0, %%dx\n" \
+        "out %%al, %%dx\n" \
+        : \
+        : "g" (port), "g" (v) \
+        :"%al","%dx" \
+    ); \
+})
+
+#define in8(port, v) ({ \
+    asm volatile ( \
+        "movw %1, %%dx\n" \
+        "in  %%dx, %%al\n" \
+        "movb %%al, %0\n" \
+        : "=g"(v)  \
+        : "g" (port) \
+        :"%al","%dx" \
+    ); \
+})
+
+#define write_read_addree(address, value) ({ \
+unsigned char read_value; \
+asm volatile ( \
+    "movb %[v], %%al\n" \
+    "movl %[addr], %%edi\n" \
+    "movb %%al, (%%edi)\n" \
+    "movb (%%edi), %%al\n" \
+    : "=a" (read_value) \
+    : [addr]"r" (address), [v]"g" (value) \
+    : "%rdi","memory" \
+); \
+read_value; \
+})
+
+
+
+EFI_STATUS boot_func_7CE42D1F(){
+    
+    DEBUG ((DEBUG_INFO, "This is a test boot.efi!!!, boot_func_7CE42D1F \n"));
+    
+    UINT8 data = 0x5A;
+    UINT16 port = 0x3FF;
+    out8(port,data);
+    int v = 0;
+    in8(port,v);
     
     
-    APPLE_DEBUG_LOG_PROTOCOL  *Protocol;
-    EFI_HANDLE                Handle;
+    if(v == data){
+        
+    }
     
+    UINT8 newV = write_read_addree(0xFE03401C, data);
+    
+    DEBUG ((DEBUG_INFO,"asm volatile , boot_func_7CE42D1F,%d,%d\n",v,newV));
+
+    
+    EFI_STATUS Status = 0;
+    UINT32* ptr1 = addr_FE03401C;
+    UINT32* ptr2 = addr_FE03401C + 0x1FE4;
+    qword_7CECB360 = ptr2;
+    UINT32* ptr3 = addr_FE03401C + 0x2000;
+    UINT32 V_5A = 0x5A;
+    UINT32 V_A5 = 0xA5;
+    
+    *ptr3 = V_5A;
+    if(*ptr3 == V_5A){
+        *ptr3 = V_A5;
+        if(*ptr3 == V_A5){
+            qword_7CECB358 = (UINT64*)off_7CEC8A40;
+            Status = 1;
+            return Status;
+        }
+    }else{
+        UINT32* ptr4 = addr_FE03401C - 0x1C;
+        qword_7CECB360 = ptr4;
+        *ptr1 = V_5A;
+        if(*ptr1 == V_5A){
+            *ptr1 = V_A5;
+            if(*ptr1 == V_A5){
+                qword_7CECB358 = (UINT64*)off_7CEC8A40;
+                Status = 1;
+                return Status;
+            }
+        }
+
+        
+        
+    }
+
+    return Status;
+}
+
+EFI_STATUS boot_func_7CE14DC7(unsigned int a1){
+    EFI_STATUS  Status = 0;
+    
+    
+    APPLE_DEBUG_LOG_PROTOCOL  *Protocol = NULL;
+
+    boot_func_7CE42D1F();
     switch (a1) {
         case 0:
         {
@@ -253,12 +412,28 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
             if (Status < 0) {
                 Protocol = NULL;
             }
-            BOOLEAN v2 = sub_7CE090CB();
+            BOOLEAN v2 = boot_func_7CE090CB();
             UINT64* v3 = &unk_7CE9F378;
             if(!v2){
                 v3 = &unk_7CE9F370;
             }
-            
+            byte_7CEA2342 = v2;
+            qword_7CEA2348 = *v3;
+            if(qword_7CEA2348 >= 4){
+                if(Protocol){
+                    byte_7CEA2340 = 1;
+                    if(v2){
+                        APPLE_DEBUG_LOG_SETUP_FILES SetupFiles = Protocol->SetupFiles;
+                        SetupFiles();
+                    }
+                }
+                if(qword_7CE9F380 > 1 || (qword_7CE9F380 == 1 && Protocol == NULL)){
+                    byte_7CEA2333 = 1;
+                }
+                if(qword_7CE9F388){
+                    boot_func_7CE42D1F();
+                }
+            }
         }
             break;
             
@@ -278,21 +453,25 @@ UefiMain (
     
     EFI_STATUS                       Status = 0;
     
-    
+    /*
     UINT64 a1 = 0xAAAAAAAAAAAAAAAA;
     UINT64 a2 = 0xAAAAAAAAAAAAAAAA;
     UINT64 a3 = 0xAAAAAAAAAAAAAAAA;
+
     
     int a4 = 0;
+     */
     
     mImageHandle  = ImageHandle;
     mSystemTable = SystemTable;
-    sub_7CE43C58(ImageHandle,SystemTable);
-    sub_7CE0F68E();
-    
+    boot_func_7CE43C58(ImageHandle,SystemTable);
+    boot_func_7CE0F68E();
+    boot_func_7CE14DC7(0);
     
     
     
     DEBUG ((DEBUG_INFO, "This is a test boot.efi!!!\n"));
+    DEBUG ((DEBUG_INFO, "This is a test boot.efi2!!!\n"));
+
     return Status;
 }
