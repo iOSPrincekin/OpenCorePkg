@@ -107,8 +107,41 @@ void* AllocatePool_malloc(UINTN bufferSize)
     return bufferPtr;
 }
 
-void sub_7CE1E528(){
-    
+UINT64** qword_7CECB1E8 = 0;
+
+UINT64* qword_7CECB1F8 = 0;
+
+UINT64* qword_7CECB1F0 = 0;
+
+UINT64* sub_7CE1E528(){
+    UINT64* result = qword_7CECB1F8;
+    UINT64** buffer = NULL;
+    UINT64 v1 = 0;
+    if(qword_7CECB1F8){
+        v1 = *(UINT64 *)(qword_7CECB1F8 + 24);
+    }else{
+        buffer = AllocatePool_malloc(4096);
+        if(buffer == NULL){
+            DEBUG ((DEBUG_INFO,"#[EB.M.GT|!] NULL <- EDK.ELAP\n"));
+        }
+        UINT64* v3 = qword_7CECB1F8;
+        for (int i = 0LL; i != 508; i += 4LL )
+        {
+            UINT64* v1 = v3;
+            v3 = (UINT64*)&buffer[i];
+            buffer[i + 3] = v1;
+        }
+        result = (UINT64*)buffer + 504;
+        qword_7CECB1F8 = result;
+        buffer[508] = (UINT64*)buffer;
+        buffer[510] = 0;
+        buffer[509] = 0;
+        buffer[511] = qword_7CECB1F0;
+        qword_7CECB1F0 = (UINT64*)buffer + 508;
+    }
+    qword_7CECB1F8 = (UINT64*)v1;
+    result[3] = 0;
+    return result;
 }
 
 void* sub_7CE1E2B1(UINTN bufferSize)
@@ -119,6 +152,13 @@ void* sub_7CE1E2B1(UINTN bufferSize)
      UINTN *v1; // rax
      */
     buffer = AllocatePool_malloc(bufferSize);
+    UINT64* v2 = sub_7CE1E528();
+    
+    v2[0] = (UINT64)buffer;
+    v2[2] = 0LL;
+    v2[1] = 0LL;
+    v2[3] = (UINT64)qword_7CECB1E8;
+    qword_7CECB1E8 = (UINT64**)v2;
     return buffer;
 }
 
@@ -159,7 +199,8 @@ EFI_STATUS sub_7CE0F68E()
     
     if(Status == RETURN_BUFFER_TOO_SMALL){
         if(DataSizeArray[0] <= 0x200){
-            
+            void *buffer = sub_7CE1E2B1(DataSizeArray[0] + 1);
+            DEBUG ((DEBUG_INFO,"buffer--::0x%x\n", buffer));
         }
     }
     
@@ -264,6 +305,8 @@ UINT64* qword_7CECB358 = 0;
 UINT32* qword_7CECB360 = 0;
 
 UINT32* qword_7CECD078 = 0;
+
+UINT32* qword_7CEC8398 = 0;
 
 UINT8* byte_7CECB370 = 0;
 
@@ -448,7 +491,7 @@ const char *debug_tag_strings[] = {
 
 EFI_STATUS sub_7CE42D1F(){
     
-
+    
     EFI_STATUS Status = 0;
     UINT32 ptr2 = addr_FE03401C + 0x1FE4;
     UINT64 baseZeroAddress = 0x0;
@@ -534,7 +577,7 @@ EFI_STATUS sub_7CE42D1F(){
             return Status;
         }
     }
-
+    
     
     return Status;
 }
@@ -545,7 +588,7 @@ void sub_7CE3DD1D(int a1){
         return;
     }
     EFI_TIME                LogTime;
-
+    
     EFI_GET_TIME GetTime = mRuntimeServices->GetTime;
     if(a1 > 9 ||  GetTime (&LogTime, NULL) < 0) {
         DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] _\n", debug_tag_strings[a1]));
@@ -554,12 +597,51 @@ void sub_7CE3DD1D(int a1){
     DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] %t\n", debug_tag_strings[a1], &LogTime));
 }
 
-EFI_STATUS sub_7CE38327(UINT64 a1)
+EFI_STATUS sub_7CE42E18()
 {
     EFI_STATUS  Status = 0;
+    if ( !qword_7CECB358 )
+        return Status;
+    (*(void (**)(void))qword_7CECB358)();
+    Status = 1;
     return Status;
 }
-    
+EFI_STATUS sub_7CE38327(void* buffer)
+{
+    EFI_STATUS  Status = 0;
+    EFI_FREE_POOL FreePool = mBootServices->FreePool;
+    UINT64* v3 = NULL;
+    Status = FreePool(buffer);
+    if(Status >= 0){
+        v3 = (UINT64*)qword_7CECB1E8;
+        if(v3 == NULL){
+            DEBUG ((DEBUG_INFO, "#[EB.M.BMF|UK!]\n"));
+            return Status;
+        }
+        if(*qword_7CECB1E8 != buffer){
+            while (TRUE) {
+                v3 = (UINT64*)*(v3 + 24);
+                if(v3 == NULL){
+                    DEBUG ((DEBUG_INFO, "#[EB.M.BMF|UK!]\n"));
+                    return Status;
+                }
+                if(*v3 == (UINT64)buffer){
+                    break;
+                }
+            }
+        }
+        v3 = NULL;
+        UINT64* v6 = (UINT64*)&qword_7CECB1E8;
+        if(v3){
+            v6 = v3 + 24;
+        }
+        *v6 = v3[3];
+        v3[3] = (UINT64)qword_7CECB1F8;
+        qword_7CECB1F8 = v3;
+    }
+    return Status;
+}
+
 EFI_STATUS sub_7CE14DC7(unsigned int a1){
     EFI_STATUS  Status = 0;
     
@@ -639,14 +721,36 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                     byte_7CECB341 = 1;
                 }else if(a1 == 9){
                     if(qword_7CECD078){
-                        
+                        sub_7CE38327(qword_7CECD078);
                         qword_7CECD078 = NULL;
                     }
+                    Status = 0LL;
+                    byte_7CECB332 = 0;
+                    byte_7CECB333 = 0;
+                    Protocol = NULL;
+                    qword_7CEC8398 = 0LL;
                 }
+            }else{
+                if ( qword_7CECD078 )
+                {
+                    Status = sub_7CE38327(qword_7CECD078);
+                    qword_7CECD078 = 0LL;
+                }
+                byte_7CECB332 = 0;
             }
         }
             break;
+        case 0xAu:{
+            if ( qword_7CE9F388 )
+            {
+                sub_7CE42E18();
+                byte_7CECB331 = 1;
+            }
+            sub_7CE3DD1D(a1);
+        }
+            break;
         default:
+            sub_7CE3DD1D(a1);
             break;
             
     }
