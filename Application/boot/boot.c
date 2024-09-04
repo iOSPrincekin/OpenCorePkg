@@ -237,12 +237,17 @@ UINT64 unk_7CE9F370 = 0x00000002;
 UINT64 unk_7CE9F378 = 0x00000002;
 
 
-UINT8 byte_7CEA2340 = 0;
+UINT8 byte_7CECB340 = 0;
 
-UINT8 byte_7CEA2342 = 0;
+UINT8 byte_7CECB342 = 0;
 
-UINT8 byte_7CEA2333 = 0;
+UINT8 byte_7CECB331 = 0;
 
+UINT8 byte_7CECB332 = 0;
+
+UINT8 byte_7CECB333 = 0;
+
+UINT8 byte_7CECB341 = 0;
 
 UINT64 qword_7CEA2348 = 0;
 
@@ -250,11 +255,15 @@ UINT64 qword_7CE9F380 = 0;
 
 UINT64 qword_7CE9F388 = 1;
 
+UINT64 qword_7CEC8390 = 1;
+
 UINT64 qword_7CEA2360 = 4261634048LL;
 
 UINT64* qword_7CECB358 = 0;
 
 UINT32* qword_7CECB360 = 0;
+
+UINT32* qword_7CECD078 = 0;
 
 UINT8* byte_7CECB370 = 0;
 
@@ -420,14 +429,26 @@ read_value; \
 })
 
 
+// 定义字符串数组，每个元素对应一个字符串
+const char *debug_tag_strings[] = {
+    "INIT",
+    "VERBOSE",
+    "EXIT",
+    "RESET:OK",
+    "RESET:FAIL",
+    "RESET:RECOVERY",
+    "REAN:START",
+    "REAN:END",
+    "DT",
+    "EXITBS:START",
+    "EXITBS:END",
+    "HANDOFF TO XNU",
+    "UNKNOWN"
+};
 
 EFI_STATUS sub_7CE42D1F(){
     
-    DEBUG ((DEBUG_INFO, "This is a test boot.efi!!!, sub_7CE42D1F \n"));
-    
-    DEBUG ((DEBUG_INFO,"asm volatile , sub_7CE42D1F,%d,%d\n",0,0));
-    
-    
+
     EFI_STATUS Status = 0;
     UINT32 ptr2 = addr_FE03401C + 0x1FE4;
     UINT64 baseZeroAddress = 0x0;
@@ -478,7 +499,6 @@ EFI_STATUS sub_7CE42D1F(){
         }
     }
     
-    UINT32 ptr5 = addr_FE03401C + 0x3DC014;
     
     unsigned char read_value = 0;
     asm volatile ( \
@@ -514,16 +534,32 @@ EFI_STATUS sub_7CE42D1F(){
             return Status;
         }
     }
-    
-    
-    DEBUG ((DEBUG_INFO,"asm volatile , sub_7CE42D1F,ptr5:%d,read_value:%d\n",ptr5,read_value));
-    
-    
-    
+
     
     return Status;
 }
 
+void sub_7CE3DD1D(int a1){
+    if(a1 >= 0xC){
+        DEBUG ((DEBUG_INFO, "#[EB|LOG:UNKNOWN] %d\n", a1));
+        return;
+    }
+    EFI_TIME                LogTime;
+
+    EFI_GET_TIME GetTime = mRuntimeServices->GetTime;
+    if(a1 > 9 ||  GetTime (&LogTime, NULL) < 0) {
+        DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] _\n", debug_tag_strings[a1]));
+        return;
+    }
+    DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] %t\n", debug_tag_strings[a1], &LogTime));
+}
+
+EFI_STATUS sub_7CE38327(UINT64 a1)
+{
+    EFI_STATUS  Status = 0;
+    return Status;
+}
+    
 EFI_STATUS sub_7CE14DC7(unsigned int a1){
     EFI_STATUS  Status = 0;
     
@@ -548,28 +584,71 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
             if(!v2){
                 v3 = &unk_7CE9F370;
             }
-            byte_7CEA2342 = v2;
+            byte_7CECB342 = v2;
             qword_7CEA2348 = *v3;
             if(qword_7CEA2348 >= 4){
                 if(Protocol){
-                    byte_7CEA2340 = 1;
+                    byte_7CECB340 = 1;
                     if(v2){
                         APPLE_DEBUG_LOG_SETUP_FILES SetupFiles = Protocol->SetupFiles;
                         SetupFiles();
                     }
                 }
-                if(qword_7CE9F380 > 1 || (qword_7CE9F380 == 1 && Protocol == NULL)){
-                    byte_7CEA2333 = 1;
+                
+            }
+            if(qword_7CE9F380 > 1 || (qword_7CE9F380 == 1 && Protocol == NULL)){
+                byte_7CECB333 = 1;
+            }
+            if(qword_7CE9F388){
+                sub_7CE42D1F();
+                if(qword_7CE9F388 > 3 || (qword_7CE9F388 == 1 && Protocol == NULL)){
+                    byte_7CECB331 = 1;
                 }
-                if(qword_7CE9F388){
-                    sub_7CE42D1F();
+            }
+            if(qword_7CEC8390){
+                byte_7CECB332 = 1;
+            }
+        }
+            break;
+        case 1:{
+            byte_7CECB333 = 1;
+        }
+            break;
+        case 7:{
+            byte_7CECB341 = 1;
+        }
+            break;
+        case 9:{
+            if(qword_7CE9F388 >= 2){
+                byte_7CECB331 = 1;
+            }
+            sub_7CE3DD1D(9);
+            if(qword_7CEA2348 >=3 ){
+                if(Protocol){
+                    if(byte_7CECB342){
+                        APPLE_DEBUG_LOG_SETUP_FILES SetupFiles = Protocol->SetupFiles;
+                        SetupFiles();
+                    }
+                    APPLE_DEBUG_LOG_WRITE_FILES WriteFiles = Protocol->WriteFiles;
+                    WriteFiles();
+                }
+            }
+            Status = a1 - 2;
+            if(Status >= 4){
+                if(a1 == 6){
+                    byte_7CECB341 = 1;
+                }else if(a1 == 9){
+                    if(qword_7CECD078){
+                        
+                        qword_7CECD078 = NULL;
+                    }
                 }
             }
         }
             break;
-            
         default:
             break;
+            
     }
     return Status;
 }
@@ -602,7 +681,6 @@ UefiMain (
     
     
     DEBUG ((DEBUG_INFO, "This is a test boot.efi!!!\n"));
-    DEBUG ((DEBUG_INFO, "This is a test boot.efi2!!!\n"));
     
     return Status;
 }
