@@ -290,7 +290,7 @@ UINT8 byte_7CECB333 = 0;
 
 UINT8 byte_7CECB341 = 0;
 
-UINT64 qword_7CEA2348 = 0;
+UINT64 qword_7CECB348 = 0;
 
 UINT64 qword_7CE9F380 = 0;
 
@@ -298,11 +298,9 @@ UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
 
-UINT64 qword_7CEA2360 = 4261634048LL;
+UINT32* qword_7CECB360 = (UINT32*)4261634048LL;
 
 UINT64* qword_7CECB358 = 0;
-
-UINT32* qword_7CECB360 = 0;
 
 UINT32* qword_7CECD078 = 0;
 
@@ -642,9 +640,16 @@ EFI_STATUS sub_7CE38327(void* buffer)
     return Status;
 }
 
+EFI_STATUS sub_7CE2D07F(char *a1, char a2)
+{
+    EFI_STATUS  Status = 0;
+    return Status;
+}
+
 EFI_STATUS sub_7CE14DC7(unsigned int a1){
     EFI_STATUS  Status = 0;
     
+    UINT64 v11[10];
     
     APPLE_DEBUG_LOG_PROTOCOL  *Protocol = NULL;
     
@@ -667,8 +672,8 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                 v3 = &unk_7CE9F370;
             }
             byte_7CECB342 = v2;
-            qword_7CEA2348 = *v3;
-            if(qword_7CEA2348 >= 4){
+            qword_7CECB348 = *v3;
+            if(qword_7CECB348 >= 4){
                 if(Protocol){
                     byte_7CECB340 = 1;
                     if(v2){
@@ -705,7 +710,9 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                 byte_7CECB331 = 1;
             }
             sub_7CE3DD1D(9);
-            if(qword_7CEA2348 >=3 ){
+        LABEL_29:
+            if(qword_7CECB348 >=3 ){
+            LABEL_30:
                 if(Protocol){
                     if(byte_7CECB342){
                         APPLE_DEBUG_LOG_SETUP_FILES SetupFiles = Protocol->SetupFiles;
@@ -715,9 +722,11 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                     WriteFiles();
                 }
             }
+        LABEL_34:
             Status = a1 - 2;
             if(Status >= 4){
                 if(a1 == 6){
+                LABEL_46:
                     byte_7CECB341 = 1;
                 }else if(a1 == 9){
                     if(qword_7CECD078){
@@ -731,6 +740,7 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                     qword_7CEC8398 = 0LL;
                 }
             }else{
+            LABEL_35:
                 if ( qword_7CECD078 )
                 {
                     Status = sub_7CE38327(qword_7CECD078);
@@ -751,6 +761,43 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
             break;
         default:
             sub_7CE3DD1D(a1);
+            unsigned int newA1 = a1 - 2;
+            switch (newA1) {
+                case 2:
+                case 4:
+                    if(qword_7CECB348 == 0){
+                        goto LABEL_34;
+                    }
+                    goto LABEL_30;
+                    break;
+                case 3:
+                    goto LABEL_29;
+                case 5:
+                    if(qword_7CECB348 >= 2){
+                        if(Protocol){
+                            if(byte_7CECB342){
+                                APPLE_DEBUG_LOG_SETUP_FILES SetupFiles = Protocol->SetupFiles;
+                                SetupFiles();
+                            }
+                            APPLE_DEBUG_LOG_WRITE_FILES WriteFiles = Protocol->WriteFiles;
+                            WriteFiles();
+                        }
+                    }
+                    goto LABEL_35;
+                    break;
+                case 6:
+                    goto LABEL_46;
+                    break;
+                case 8:
+                    if(qword_7CEC8390 == 1){
+                        v11[6] = 0xAAAAAAAA;
+                        v11[5] = 0xAAAAAAAAAAAAAAAA;
+                        int v4 = 1;
+                        sub_7CE2D07F("/efi/debug-log", v4);
+                    }
+                default:
+                    break;
+            }
             break;
             
     }
