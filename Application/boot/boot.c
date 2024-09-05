@@ -11,9 +11,11 @@
  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
  
  **/
-
+#include <string.h>
 #include <Library/OcMainLib.h>
 #include <Uefi.h>
+
+
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
@@ -31,8 +33,6 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/HobLib.h>
 #include <Guid/HobList.h>
-#include <string.h>  /* memcpy, memset */
-
 
 STATIC EFI_HANDLE  mImageHandle;
 
@@ -42,6 +42,21 @@ STATIC EFI_BOOT_SERVICES * mBootServices;
 
 STATIC EFI_RUNTIME_SERVICES *mRuntimeServices;
 
+
+typedef struct StringStruct1 {
+    void* string1;
+    char* string2;
+    char* string3;
+    void* next2;
+    void* next3;
+}StringStruct1;
+
+typedef struct StringStruct2 {
+    StringStruct1* next0;
+    char* string2;
+    void* next1;
+    void* next2;
+}StringStruct2;
 
 
 EFI_STATUS
@@ -114,7 +129,7 @@ UINT64* qword_7CECB1F8 = 0;
 
 UINT64* qword_7CECB1F0 = 0;
 
-UINT64* sub_7CE1E528(){
+UINT64* sub_7CE38528(){
     UINT64* result = qword_7CECB1F8;
     UINT64** buffer = NULL;
     UINT64 v1 = 0;
@@ -145,7 +160,7 @@ UINT64* sub_7CE1E528(){
     return result;
 }
 
-void* sub_7CE1E2B1(UINTN bufferSize)
+void* sub_7CE382B1(UINTN bufferSize)
 {
     void* buffer = NULL;
     buffer = NULL;
@@ -153,7 +168,7 @@ void* sub_7CE1E2B1(UINTN bufferSize)
      UINTN *v1; // rax
      */
     buffer = AllocatePool_malloc(bufferSize);
-    UINT64* v2 = sub_7CE1E528();
+    UINT64* v2 = sub_7CE38528();
     
     v2[0] = (UINT64)buffer;
     v2[2] = 0LL;
@@ -200,7 +215,7 @@ EFI_STATUS sub_7CE0F68E()
     
     if(Status == RETURN_BUFFER_TOO_SMALL){
         if(DataSizeArray[0] <= 0x200){
-            void *buffer = sub_7CE1E2B1(DataSizeArray[0] + 1);
+            void *buffer = sub_7CE382B1(DataSizeArray[0] + 1);
             DEBUG ((DEBUG_INFO,"buffer--::0x%x\n", buffer));
         }
     }
@@ -278,7 +293,6 @@ UINT64 unk_7CE9F370 = 0x00000002;
 
 UINT64 unk_7CE9F378 = 0x00000002;
 
-
 UINT8 byte_7CECB340 = 0;
 
 UINT8 byte_7CECB342 = 0;
@@ -299,7 +313,13 @@ UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
 
-UINT64 qword_7CEC9FC0 = 0;
+StringStruct2* qword_7CEC9FB0 = NULL;
+
+StringStruct2* qword_7CEC9FB8 = NULL;
+
+StringStruct2* qword_7CEC9FC0 = NULL;
+
+UINT32 dword_7CEC9FC8 = 0;
 
 UINT32* qword_7CECB360 = (UINT32*)4261634048LL;
 
@@ -643,20 +663,150 @@ EFI_STATUS sub_7CE38327(void* buffer)
     return Status;
 }
 
-EFI_STATUS sub_7CE2D07F(char *a1, char a2)
+const char * sub_7CE2D034(StringStruct2* a1)
+{
+    StringStruct1*fist_StringStruct1; // rbx
+    const char *v2; // rsi
+    
+    fist_StringStruct1 = a1->next0;
+    
+    v2 = "(null)";
+    if (fist_StringStruct1 )
+    {
+      //  while ( (unsigned int)sub_7CE43246(*v1, "name") ) strcmp
+        while (strcmp(fist_StringStruct1->string1, "name") != 0)
+        {
+            fist_StringStruct1 = fist_StringStruct1->next3;
+            if ( fist_StringStruct1 == NULL)
+                return v2;
+        }
+        return fist_StringStruct1->string3;
+    }
+    return v2;
+}
+// memset
+UINT64 sub_7CE295B3(void* buffer,UINT64 byteSize){
+    UINT64 result = 0;
+    memset(buffer, result, byteSize);
+    return result;
+}
+
+UINT64 sub_7CE295B0(void* buffer,UINT64 size){
+    return sub_7CE295B3(buffer,size);
+}
+
+// strlen
+UINT64 sub_7CE4322A(const char* a1)
+{
+    return strlen(a1);
+}
+
+void sub_7CE2CBA4(StringStruct2 *a1, char *a2, UINT64 a3, char a4, char a5){
+    
+}
+
+StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
+{
+    StringStruct2* buffer = NULL;
+    void** v5 = NULL;
+    StringStruct2* v6 = NULL;
+    StringStruct2 *v9 = NULL;
+    if(qword_7CEC9FB0){
+        v5 = &qword_7CEC9FB0->next2;
+        v6 = qword_7CEC9FB0->next2;
+    }else{
+        buffer = sub_7CE382B1(4096);
+        if(buffer == NULL){
+            return NULL;
+        }
+        sub_7CE295B0(buffer, 4096LL);
+        buffer->next2 = qword_7CEC9FB8;
+        qword_7CEC9FB8 = buffer;
+        buffer->next1 = buffer;
+        v9 = ++buffer;
+        char count = 127;
+        StringStruct2* v11 = qword_7CEC9FB0;
+        StringStruct2* lastStringStruct2 = NULL;
+        while (count-- == 0) {
+            v6 = v11;
+            v9->next2 = v11;
+            v11 = v9;
+            v9++;
+        }
+        v5 = &v9->next2;
+        qword_7CEC9FB0 = v9--;
+    }
+    qword_7CEC9FB0 = v6;
+    if(a1){
+        *v5 = a1->next1;
+        a1->next1 = v9;
+    }else{
+        qword_7CEC9FC0 = v9;
+        v9->next2 = NULL;
+    }
+    dword_7CEC9FC8++;
+    UINT64 strlen = sub_7CE4322A(a2);
+    
+    return v9;
+}
+
+StringStruct2* sub_7CE2D07F(char *a1, char a2)
 {
     EFI_STATUS  Status = 0;
-    UINT64 v13[10];
-    memset(v13,170,32);
+    StringStruct2* v2 = 0;
+    char *v5; // rax
+    char *v6; // rdx
+    char v7; // cl
+    StringStruct2* i;
+    const char* v11;
+    char v13[32];
+    memset(v13,0xAA,32);
+    v2 = qword_7CEC9FC0;
     if(qword_7CEC9FC0 == 0){
         
     }
     while (TRUE) {
+        v5 = a1 - 1;
+        v6 = a1 + 1;
         do{
+            a1 = v6;
+            v7 = *++v5;
+            ++v6;
+        }while(v7 == '/');
+        char v8 = 61;
+        char* v13_ptr = v13;
+        while (*a1 && *a1 != '/') {
+            *v13_ptr++ = *a1;
+            if(v8 == 0){
+                break;
+            }
+            v7 = *a1;
+            v8--;
+            ++a1;
+        }
+        --a1;
+        *v13_ptr = 0;
+        if(v13[0] == 0){
+            return v2;
+        }
         
-        }while(*++a1 == '/');
+        for ( i = v2->next1; i; i = v2->next2 )
+        {
+            v11 = sub_7CE2D034(i);
+            if(strcmp(v11, v13) == 0){
+                goto LABEL_17;
+            }
+        }
+        if(a2 == 0){
+            return NULL;
+        }
+        i = sub_7CE2CD29(v2, v13);
+    LABEL_17:
+        v2 = i;
+        if ( !i )
+          return 0LL;
     }
-    return Status;
+    return i;
 }
 
 EFI_STATUS sub_7CE14DC7(unsigned int a1){
