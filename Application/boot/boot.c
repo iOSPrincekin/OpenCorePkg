@@ -30,8 +30,9 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/HobLib.h>
-
 #include <Guid/HobList.h>
+#include <string.h>  /* memcpy, memset */
+
 
 STATIC EFI_HANDLE  mImageHandle;
 
@@ -297,6 +298,8 @@ UINT64 qword_7CE9F380 = 0;
 UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
+
+UINT64 qword_7CEC9FC0 = 0;
 
 UINT32* qword_7CECB360 = (UINT32*)4261634048LL;
 
@@ -643,6 +646,16 @@ EFI_STATUS sub_7CE38327(void* buffer)
 EFI_STATUS sub_7CE2D07F(char *a1, char a2)
 {
     EFI_STATUS  Status = 0;
+    UINT64 v13[10];
+    memset(v13,170,32);
+    if(qword_7CEC9FC0 == 0){
+        
+    }
+    while (TRUE) {
+        do{
+        
+        }while(*++a1 == '/');
+    }
     return Status;
 }
 
