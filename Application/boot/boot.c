@@ -53,11 +53,18 @@ typedef struct StringStruct1 {
 
 typedef struct StringStruct2 {
     StringStruct1* next0;
-    char* string2;
     void* next1;
     void* next2;
+    void* next3;
 }StringStruct2;
 
+typedef struct StringStruct3 {
+    void* string1;
+    UINT64 size;
+    void* next1;
+    char v1;
+    void* next3;
+}StringStruct3;
 
 EFI_STATUS
 EFIAPI
@@ -312,6 +319,10 @@ UINT64 qword_7CE9F380 = 0;
 UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
+
+StringStruct3* qword_7CEC9FA0 = NULL;
+
+StringStruct3* qword_7CEC9FA8 = NULL;
 
 StringStruct2* qword_7CEC9FB0 = NULL;
 
@@ -701,7 +712,70 @@ UINT64 sub_7CE4322A(const char* a1)
     return strlen(a1);
 }
 
-void sub_7CE2CBA4(StringStruct2 *a1, char *a2, UINT64 a3, char a4, char a5){
+void sub_7CE3F0B0(
+                  void        *DestinationBuffer,
+                  const void  *SourceBuffer,
+                  size_t      Length
+                  ){
+    memcpy(DestinationBuffer, SourceBuffer, Length);
+}
+
+StringStruct2* sub_7CE2CBA4(StringStruct2 *a1, char *a2, UINT64 a3, char* a4, char a5){
+    StringStruct1* next0 = a1->next0;
+    StringStruct3* buffer = NULL;
+    StringStruct3* v11 = NULL;
+    StringStruct3* v14 = NULL;
+    StringStruct3* v16 = NULL;
+    StringStruct3* v17 = NULL;
+    StringStruct2* v18 = NULL;
+
+    if(next0 == NULL){
+        if(qword_7CEC9FA0){
+            v11 = qword_7CEC9FA0->next3;
+        }
+    }else{
+        buffer = sub_7CE382B1(4096);
+        if(buffer == NULL){
+            return NULL;
+        }
+        sub_7CE295B0(buffer, 4096LL);
+        buffer->next3 = qword_7CEC9FA8;
+        qword_7CEC9FA8 = buffer;
+        buffer->next1 = buffer;
+        v14 = buffer;
+        v14++;
+        char count = 101;
+        v16 = qword_7CEC9FA0;
+        while (count-- > 0) {
+            v11 = v16;
+            v14->next3 = v16;
+            v16 = v14;
+            v14++;
+        }
+        qword_7CEC9FA0 = v16;
+    }
+    qword_7CEC9FA0 = v11;
+    v16->string1 = a2;
+    v16->size = a3;
+    if(a5 == 0){
+        v16->next1 = a4;
+        v16->v1 = 0;
+    }
+    v17 = sub_7CE382B1(4096);
+    v16->next1 = v17;
+    if ( v17 ){
+        v16->v1 = 1;
+        sub_7CE3F0B0(v17,a4,a3);
+    LABEL_15:
+        if(next0){
+            v18 = a1->next1;
+            v18++;
+        }else{
+            v18 = a1;
+        }
+        v18->next0 = v16;
+        v18->next1 = v16;
+    }
     
 }
 
@@ -712,27 +786,27 @@ StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
     StringStruct2* v6 = NULL;
     StringStruct2 *v9 = NULL;
     if(qword_7CEC9FB0){
-        v5 = &qword_7CEC9FB0->next2;
-        v6 = qword_7CEC9FB0->next2;
+        v5 = &qword_7CEC9FB0->next3;
+        v6 = qword_7CEC9FB0->next3;
     }else{
         buffer = sub_7CE382B1(4096);
         if(buffer == NULL){
             return NULL;
         }
         sub_7CE295B0(buffer, 4096LL);
-        buffer->next2 = qword_7CEC9FB8;
+        buffer->next3 = qword_7CEC9FB8;
         qword_7CEC9FB8 = buffer;
         buffer->next1 = buffer;
         v9 = ++buffer;
         char count = 127;
         StringStruct2* v11 = qword_7CEC9FB0;
-        while (count-- == 0) {
+        while (count-- > 0) {
             v6 = v11;
-            v9->next2 = v11;
+            v9->next3 = v11;
             v11 = v9;
             v9++;
         }
-        v5 = &v9->next2;
+        v5 = &v9->next3;
         qword_7CEC9FB0 = v9--;
     }
     qword_7CEC9FB0 = v6;
@@ -741,12 +815,12 @@ StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
         a1->next1 = v9;
     }else{
         qword_7CEC9FC0 = v9;
-        v9->next2 = NULL;
+        v9->next3 = NULL;
     }
     dword_7CEC9FC8++;
     UINT64 strlen = sub_7CE4322A(a2);
-    
-    return v9 + strlen;
+    sub_7CE2CBA4(v9, "name", strlen + 1, a2, 1);
+    return v9;
 }
 
 StringStruct2* sub_7CE2D07F(char *a1, char a2)
@@ -788,7 +862,7 @@ StringStruct2* sub_7CE2D07F(char *a1, char a2)
             return v2;
         }
         
-        for ( i = v2->next1; i; i = v2->next2 )
+        for ( i = v2->next2; i; i = v2->next3 )
         {
             v11 = sub_7CE2D034(i);
             if(strcmp(v11, v13) == 0){
