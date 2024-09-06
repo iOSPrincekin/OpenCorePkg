@@ -665,6 +665,10 @@
 		35529AD22461768100CF8169 /* VirtualMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMemory.h; sourceTree = "<group>"; };
 		35529AD32461768100CF8169 /* ProcessorInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessorInfo.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		9B5567012C8ACF2600C3EB43 /* string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = string.h; sourceTree = "<group>"; };
+		9B5567022C8ACF2600C3EB43 /* string.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = string.c; sourceTree = "<group>"; };
+		9B5567032C8AD08300C3EB43 /* stddef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stddef.h; sourceTree = "<group>"; };
+		9B5567042C8AD19C00C3EB43 /* limits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = limits.h; sourceTree = "<group>"; };
 		9B8E798D2C7E8D9D0007E2A5 /* boot.inf */ = {isa = PBXFileReference; lastKnownFileType = text; path = boot.inf; sourceTree = "<group>"; };
 		9B8E798E2C7E8D9D0007E2A5 /* boot.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = boot.c; sourceTree = "<group>"; };
 		EC81B0C5248DA5D4005033B6 /* ControlMsrE2 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ControlMsrE2; sourceTree = "<group>"; };
@@ -1796,8 +1800,12 @@
 		9B8E798C2C7E8D9D0007E2A5 /* boot */ = {
 			isa = PBXGroup;
 			children = (
-				9B8E798D2C7E8D9D0007E2A5 /* boot.inf */,
 				9B8E798E2C7E8D9D0007E2A5 /* boot.c */,
+				9B8E798D2C7E8D9D0007E2A5 /* boot.inf */,
+				9B5567042C8AD19C00C3EB43 /* limits.h */,
+				9B5567032C8AD08300C3EB43 /* stddef.h */,
+				9B5567022C8ACF2600C3EB43 /* string.c */,
+				9B5567012C8ACF2600C3EB43 /* string.h */,
 			);
 			path = boot;
 			sourceTree = "<group>";
@@ -2296,6 +2304,7 @@
 					"$(SRCROOT)/UDK/EfiPkg/Include/X64",
 					"$(SRCROOT)/UDK/EfiPkg/Include/AppleMacEfi",
 					"$(SRCROOT)/UDK/OpenCorePkg/Library/OcAppleImg4Lib/**",
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/,
 				);
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = staticlib;
@@ -2348,6 +2357,7 @@
 					"$(SRCROOT)/UDK/EfiPkg/Include/X64",
 					"$(SRCROOT)/UDK/EfiPkg/Include/AppleMacEfi",
 					"$(SRCROOT)/UDK/OpenCorePkg/Library/OcAppleImg4Lib/**",
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/,
 				);
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = staticlib;

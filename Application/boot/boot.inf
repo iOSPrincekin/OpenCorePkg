@@ -33,6 +33,7 @@
 
 [Sources]
   boot.c
+  string.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec

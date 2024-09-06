@@ -11,7 +11,7 @@
  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
  
  **/
-#include <string.h>
+#include "string.h"
 #include <Library/OcMainLib.h>
 #include <Uefi.h>
 
@@ -726,7 +726,6 @@ StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
         v9 = ++buffer;
         char count = 127;
         StringStruct2* v11 = qword_7CEC9FB0;
-        StringStruct2* lastStringStruct2 = NULL;
         while (count-- == 0) {
             v6 = v11;
             v9->next2 = v11;
@@ -747,12 +746,11 @@ StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
     dword_7CEC9FC8++;
     UINT64 strlen = sub_7CE4322A(a2);
     
-    return v9;
+    return v9 + strlen;
 }
 
 StringStruct2* sub_7CE2D07F(char *a1, char a2)
 {
-    EFI_STATUS  Status = 0;
     StringStruct2* v2 = 0;
     char *v5; // rax
     char *v6; // rdx
