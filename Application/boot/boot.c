@@ -45,9 +45,9 @@ STATIC EFI_RUNTIME_SERVICES *mRuntimeServices;
 
 typedef struct StringStruct1 {
     void* string1;
-    char* string2;
-    char* string3;
-    void* next2;
+    UINT64 size;
+    void* next1;
+    char v1;
     void* next3;
 }StringStruct1;
 
@@ -58,13 +58,6 @@ typedef struct StringStruct2 {
     void* next3;
 }StringStruct2;
 
-typedef struct StringStruct3 {
-    void* string1;
-    UINT64 size;
-    void* next1;
-    char v1;
-    void* next3;
-}StringStruct3;
 
 EFI_STATUS
 EFIAPI
@@ -136,7 +129,7 @@ UINT64* qword_7CECB1F8 = 0;
 
 UINT64* qword_7CECB1F0 = 0;
 
-UINT64* sub_7CE38528(){
+UINT64* sub_7CE38528(void){
     UINT64* result = qword_7CECB1F8;
     UINT64** buffer = NULL;
     UINT64 v1 = 0;
@@ -187,7 +180,7 @@ void* sub_7CE382B1(UINTN bufferSize)
 
 void *qword_7CEA0E30 = NULL;
 
-EFI_STATUS sub_7CE0F68E()
+EFI_STATUS sub_7CE0F68E(void)
 {
     EFI_STATUS  Status;
     /*
@@ -249,7 +242,7 @@ EFI_STATUS sub_7CE0F68E()
 
 UINT32 dword_7CE9F820 = 0xFFFFFFFF;
 
-BOOLEAN sub_7CE090CB(){
+BOOLEAN sub_7CE090CB(void){
     EFI_STATUS  Status;
     UINTN DataSizeArray[4];
     DataSizeArray[0] = 0xAAAAAAAAAAAAAAAAuLL;
@@ -320,9 +313,11 @@ UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
 
-StringStruct3* qword_7CEC9FA0 = NULL;
+UINT64 qword_7CEC83A0 = 0;
 
-StringStruct3* qword_7CEC9FA8 = NULL;
+StringStruct1* qword_7CEC9FA0 = NULL;
+
+StringStruct1* qword_7CEC9FA8 = NULL;
 
 StringStruct2* qword_7CEC9FB0 = NULL;
 
@@ -332,11 +327,17 @@ StringStruct2* qword_7CEC9FC0 = NULL;
 
 UINT32 dword_7CEC9FC8 = 0;
 
+UINT32 dword_7CEC9FCC = 0;
+
+UINT32 dword_7CEC9FD0 = 0;
+
 UINT32* qword_7CECB360 = (UINT32*)4261634048LL;
 
 UINT64* qword_7CECB358 = 0;
 
-UINT32* qword_7CECD078 = 0;
+char* qword_7CECD078 = 0;
+
+char* qword_7CECD080 = 0;
 
 UINT32* qword_7CEC8398 = 0;
 
@@ -345,34 +346,34 @@ UINT8* byte_7CECB370 = 0;
 UINT32 addr_FE03401C = 0xFE03401C;
 
 
-void sub_7CE42E8D()
+void* sub_7CE42E8D(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE42F03()
+void* sub_7CE42F03(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE42F1C()
+void* sub_7CE42F1C(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE42F2F()
+void* sub_7CE42F2F(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE42F41()
+void* sub_7CE42F41(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE42F5E()
+void* sub_7CE42F5E(void)
 {
-    
+    return NULL;
 }
 
 void *off_7CEC8A40[6] =
@@ -385,34 +386,34 @@ void *off_7CEC8A40[6] =
     (void*)sub_7CE42F5E
 };
 
-void sub_7CE43004()
+void* sub_7CE43004(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE43047()
+void* sub_7CE43047(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE4304D()
+void* sub_7CE4304D(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE4305D()
+void* sub_7CE4305D(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE4306A()
+void* sub_7CE4306A(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE43088()
+void* sub_7CE43088(void)
 {
-    
+    return NULL;
 }
 
 void *off_7CEC8A70[6] =
@@ -426,34 +427,34 @@ void *off_7CEC8A70[6] =
 };
 
 
-void sub_7CE43096()
+void* sub_7CE43096(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE4309C()
+void* sub_7CE4309C(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE430A2()
+void* sub_7CE430A2(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE430C3()
+void* sub_7CE430C3(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE430DD()
+void* sub_7CE430DD(void)
 {
-    
+    return NULL;
 }
 
-void sub_7CE43116()
+void* sub_7CE43116(void)
 {
-    
+    return NULL;
 }
 
 void *off_7CEC8AA0[6] =
@@ -521,7 +522,7 @@ const char *debug_tag_strings[] = {
     "UNKNOWN"
 };
 
-EFI_STATUS sub_7CE42D1F(){
+EFI_STATUS sub_7CE42D1F(void){
     
     
     EFI_STATUS Status = 0;
@@ -629,7 +630,7 @@ void sub_7CE3DD1D(int a1){
     DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] %t\n", debug_tag_strings[a1], &LogTime));
 }
 
-EFI_STATUS sub_7CE42E18()
+EFI_STATUS sub_7CE42E18(void)
 {
     EFI_STATUS  Status = 0;
     if ( !qword_7CECB358 )
@@ -638,6 +639,16 @@ EFI_STATUS sub_7CE42E18()
     Status = 1;
     return Status;
 }
+
+void* sub_7CE42E3D(void)
+{
+    void *result = qword_7CECB358;
+    if(qword_7CECB358){
+        return (*(void* (**)(void))(qword_7CECB358 + 8))();
+    }
+    return result;
+}
+
 EFI_STATUS sub_7CE38327(void* buffer)
 {
     EFI_STATUS  Status = 0;
@@ -684,21 +695,21 @@ const char * sub_7CE2D034(StringStruct2* a1)
     v2 = "(null)";
     if (fist_StringStruct1 )
     {
-      //  while ( (unsigned int)sub_7CE43246(*v1, "name") ) strcmp
+        //  while ( (unsigned int)sub_7CE43246(*v1, "name") ) strcmp
         while (strcmp(fist_StringStruct1->string1, "name") != 0)
         {
             fist_StringStruct1 = fist_StringStruct1->next3;
             if ( fist_StringStruct1 == NULL)
                 return v2;
         }
-        return fist_StringStruct1->string3;
+        return fist_StringStruct1->next1;
     }
     return v2;
 }
 // memset
 UINT64 sub_7CE295B3(void* buffer,UINT64 byteSize){
     UINT64 result = 0;
-    memset(buffer, result, byteSize);
+    memset(buffer, result, (unsigned int)byteSize);
     return result;
 }
 
@@ -720,63 +731,79 @@ void sub_7CE3F0B0(
     memcpy(DestinationBuffer, SourceBuffer, Length);
 }
 
-StringStruct2* sub_7CE2CBA4(StringStruct2 *a1, char *a2, UINT64 a3, char* a4, char a5){
+StringStruct1* sub_7CE2CBA4(StringStruct2 *a1, char *a2, UINT64 a3, char* a4, char a5){
     StringStruct1* next0 = a1->next0;
-    StringStruct3* buffer = NULL;
-    StringStruct3* v11 = NULL;
-    StringStruct3* v14 = NULL;
-    StringStruct3* v16 = NULL;
-    StringStruct3* v17 = NULL;
+    StringStruct1* buffer = NULL;
+    StringStruct1* v11 = NULL;
+    StringStruct1* v14 = NULL;
+    StringStruct1* v16 = NULL;
+    StringStruct1* v17 = NULL;
     StringStruct2* v18 = NULL;
-
+    
     if(next0 == NULL){
+    LABEL_5:
         if(qword_7CEC9FA0){
             v11 = qword_7CEC9FA0->next3;
         }
-    }else{
-        buffer = sub_7CE382B1(4096);
-        if(buffer == NULL){
-            return NULL;
-        }
-        sub_7CE295B0(buffer, 4096LL);
-        buffer->next3 = qword_7CEC9FA8;
-        qword_7CEC9FA8 = buffer;
-        buffer->next1 = buffer;
-        v14 = buffer;
-        v14++;
-        char count = 101;
-        v16 = qword_7CEC9FA0;
-        while (count-- > 0) {
-            v11 = v16;
-            v14->next3 = v16;
-            v16 = v14;
+        else{
+            buffer = sub_7CE382B1(4096);
+            if(buffer == NULL){
+                return NULL;
+            }
+            sub_7CE295B0(buffer, 4096LL);
+            buffer->next3 = qword_7CEC9FA8;
+            qword_7CEC9FA8 = buffer;
+            buffer->next1 = buffer;
+            v14 = buffer;
             v14++;
+            char count = 101;
+            v16 = qword_7CEC9FA0;
+            while (count-- > 0) {
+                v11 = v16;
+                v14->next3 = v16;
+                v16 = v14;
+                v14++;
+            }
+            qword_7CEC9FA0 = v16;
         }
-        qword_7CEC9FA0 = v16;
-    }
-    qword_7CEC9FA0 = v11;
-    v16->string1 = a2;
-    v16->size = a3;
-    if(a5 == 0){
-        v16->next1 = a4;
-        v16->v1 = 0;
-    }
-    v17 = sub_7CE382B1(4096);
-    v16->next1 = v17;
-    if ( v17 ){
-        v16->v1 = 1;
-        sub_7CE3F0B0(v17,a4,a3);
-    LABEL_15:
-        if(next0){
-            v18 = a1->next1;
-            v18++;
-        }else{
-            v18 = a1;
+        qword_7CEC9FA0 = v11;
+        v16->string1 = a2;
+        v16->size = a3;
+        if(a5 == 0){
+            v16->next1 = a4;
+            v16->v1 = 0;
+            goto LABEL_15;
         }
-        v18->next0 = v16;
-        v18->next1 = v16;
+        v17 = sub_7CE382B1(a3);
+        v16->next1 = v17;
+        if ( v17 ){
+            v16->v1 = 1;
+            sub_7CE3F0B0(v17,a4,a3);
+        LABEL_15:
+            if(next0){
+                v18 = a1->next1;
+                v18++;
+            }else{
+                v18 = a1;
+            }
+            v18->next0 = v16;
+            v18->next1 = v16;
+            v16->next3 = NULL;
+            ++dword_7CEC9FCC;
+            dword_7CEC9FD0 += (a3 + 3) & 0xFFFFFFFC;
+            return v16;
+        }
+        return NULL;
     }
+    v16 = NULL;
     
+    while (strcmp(next0->string1, a2) != 0)
+    {
+        next0 = next0->next3;
+        if ( next0 == NULL)
+            goto LABEL_5;
+    }
+    return v16;
 }
 
 StringStruct2* sub_7CE2CD29(StringStruct2 *a1, char* a2)
@@ -876,7 +903,7 @@ StringStruct2* sub_7CE2D07F(char *a1, char a2)
     LABEL_17:
         v2 = i;
         if ( !i )
-          return 0LL;
+            return 0LL;
     }
     return i;
 }
@@ -1023,13 +1050,47 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                 case 6:
                     goto LABEL_46;
                     break;
-                case 8:
+                case 8:{
                     if(qword_7CEC8390 == 1){
                         v11[6] = 0xAAAAAAAA;
                         v11[5] = 0xAAAAAAAAAAAAAAAA;
                         int v4 = 1;
-                        sub_7CE2D07F("/efi/debug-log", v4);
+                        StringStruct2* result = sub_7CE2D07F("/efi/debug-log", v4);
+                        if(result){
+                            if(Protocol){
+                                v11[6] = 0;
+                                v11[5] = 0;
+                                APPLE_DEBUG_LOG_EXTRACT_BUFFER ExtractBuffer = Protocol->ExtractBuffer;
+                                Status = ExtractBuffer((UINT32*)&v11[6] + 4,&v11[5],NULL,NULL);
+                                if(Status >= 0){
+                                    void *buffer = sub_7CE382B1(v11[5]);
+                                    if(buffer){
+                                        v11[6] = 0;
+                                        Status = ExtractBuffer((UINT32*)&v11[6] + 4,&v11[5],buffer,NULL);
+                                        sub_7CE2CBA4(result, "efiboot", v11[5], buffer, 1);
+                                        Status = sub_7CE38327(buffer);
+                                    }
+                                }
+                            }else if (qword_7CECD078 < qword_7CECD080){
+                                sub_7CE2CBA4(result, "efiboot", qword_7CECD080 - qword_7CECD078,
+                                             qword_7CECD078,
+                                             1);
+                            }
+                        }
                     }
+                }
+                    break;
+                case 0xBu:
+                {
+                    if ( (qword_7CEC83A0 & 1) != 0 )
+                    {
+                        DEBUG ((DEBUG_INFO, "======== End of efiboot serial output. ========\r\n"));
+                        
+                    }
+                    byte_7CECB331 = 0;
+                    Status = (EFI_STATUS)sub_7CE42E3D();
+                }
+                    break;
                 default:
                     break;
             }
