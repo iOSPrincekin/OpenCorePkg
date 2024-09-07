@@ -107,12 +107,10 @@ EFI_STATUS sub_7CE43C58(
     Status = HobLibConstructorPtr (SystemTable,&hobList);
     
     void *GuidHob = GetNextGuidHob (&unknown_hob_guid, hobList);
-    sub_7CE43F47(GuidHob + 3);
-    
-    
-    
+    if(GuidHob){
+        sub_7CE43F47(GuidHob + 3);
+    }
     return Status;
-    
 }
 
 void* AllocatePool_malloc(UINTN bufferSize)
@@ -178,14 +176,386 @@ void* sub_7CE382B1(UINTN bufferSize)
     return buffer;
 }
 
-void *qword_7CEA0E30 = NULL;
+char *qword_7CEA0E30 = NULL;
+
+UINT64 qword_7CEA0E40 = 0;
+
+UINT64 unk_7CEBE370 = 0x2;
+
+UINT64 unk_7CEBE378 = 0x2;
+
+UINT64 qword_7CEBE380 = 0x1;
+
+UINT64 qword_7CEBE388 = 0x1;
+
+UINT64 qword_7CEBE390 = 0x0;
+
+UINT64 qword_7CEBE398 = 0x0;
+
+UINT64 qword_7CEBE3A0 = 0x1;
+
+UINT64 unk_7CEBE3A8 = 0x0;
+
+UINT64 qword_7CEBE3B0 = 0x100000;
+
+UINT64 qword_7CEBE3B8 = 0x0;
+
+
+typedef struct LOG_CONFIG_INFO{
+    char* name;
+    UINT64 config1;
+    UINT64 config2;
+    UINT64* config3;
+    UINT64* sign;
+}LOG_CONFIG_INFO;
+
+#define log_config_list_count  12
+
+LOG_CONFIG_INFO log_config_list[log_config_list_count] = {
+    {
+        "boot-save-log",
+        0x2,
+        0x0000000100000001,
+        (UINT64*)0xffffffffffffffff,
+        &unk_7CEBE370
+    },
+    {
+        "wake-save-log",
+        0x2,
+        0x0000000100000001,
+        (UINT64*)0x2,
+        &unk_7CEBE378
+    },
+    {
+        "console",
+        0x1,
+        0x0000000100000001,
+        (UINT64*)0x1,
+        &qword_7CEBE380
+    },
+    {
+        "serial",
+        0x1,
+        0x0000000100000001,
+        (UINT64*)0x0,
+        &qword_7CEBE388
+    },
+    {
+        "embed-log-dt",
+        0x0,
+        0x0000000100000001,
+        (UINT64*)0x0,
+        &qword_7CEBE390
+    },
+    {
+        "timestamps",
+        0x0,
+        0x0000000100000001,
+        (UINT64*)0xffffffffffffffff,
+        &qword_7CEBE398
+    },
+    {
+        "log-level",
+        0x1,
+        0x1,
+        (UINT64*)0x0000000000000021,
+        &qword_7CEBE3A0
+    },
+    {
+        "breakpoint",
+        0x0,
+        0x00000001,
+        0x0,
+        &unk_7CEBE3A8
+    },
+    {
+        "kc-read-size",
+        0x100000,
+        0x0000000100000001,
+        (UINT64*)0xffffffffffffffff,
+        &qword_7CEBE3B0
+    },
+    {
+        "log",
+        0x0,
+        0x0000000200000001,
+        0x0,
+        NULL
+    },
+    {
+        "debug",
+        0x1,
+        0x2,
+        0x0,
+        NULL
+    },
+    {
+        "level",
+        0x0,
+        0x0000000200000001,
+        0x0,
+        NULL
+    },
+};
+
+BOOLEAN _bittest64(UINT64 *a, int b)
+{
+    return (*a & (1LL << b)) != 0;
+}
+
+// strlen
+UINT64 sub_7CE4322A(const char* a1)
+{
+    return strlen(a1);
+}
+
+
+UINT64 sub_7CE39556(char* a1, char* a2, UINT64 a3)
+{
+    UINT64 result; // rax
+    UINT64 v4; // r9
+    int v5; // r10d
+    
+    result = 0LL;
+    v4 = 0LL;
+    while ( a3 > 0 )
+    {
+        v5 = *(char *)(a1 + v4);
+        if ( ((*(a1 + v4) ^ *(a2 + v4)) & 0xDF) != 0 )
+            return (v5 & 0xFFFFFFDF) - (*(char *)(a2 + v4) & 0xFFFFFFDF);
+        --a3;
+        ++v4;
+        if ( !v5 )
+            return result;
+    }
+    return result;
+}
+
+UINT64 sub_7CE2E5D4(char *a1, char* a2, UINT64 *a3, char **a4){
+    
+    EFI_STATUS Status = RETURN_NOT_FOUND;
+    char* v4 = a1;
+    char v5 = *a1;
+    UINT64 v7;
+    UINT64 v8;
+    char* v9;
+    char* v10;
+    char v11;
+    UINT64 v12;
+    UINT64 v13;
+    char* v14;
+    UINT64 v15;
+    UINT8 v16;
+    char v17; // al
+    UINT64 v19 = 0; // [rsp+28h] [rbp-58h]
+    UINT64 v22 = 0; // [rsp+40h] [rbp-40h]
+    if(v5){
+        v7 = 0x2000000100002601LL;
+        v8 = 0x100002600LL;
+        do{
+            v9 = v4 + 1;
+            while ( v5 <= 0x22u )
+            {
+                if ( !_bittest64(&v8, v5) )
+                {
+                    if ( v5 == 34LL )
+                    {
+                        v10 = v9;
+                        do
+                            v11 = *v10++;
+                        while ( v11 != 34 && v11 );
+                        v12 = (UINT64)v10 + ~(UINT64)v9;
+                        v5 = *v10;
+                        goto LABEL_18;
+                    }
+                    break;
+                }
+                v5 = *v9++;
+            }
+            v10 = --v9;
+            while ( v5 > 0x3Du || !_bittest64(&v7, v5) )
+                v5 = *++v10;
+            v12 = v10 - v9;
+        LABEL_18:
+            if ( v5 <= 0x20u && (v13 = 0x100002601LL && _bittest64(&v13, v5)) )
+            {
+                v14 = 0LL;
+                v4 = (char *)v10;
+            }
+            else
+            {
+                v16 = *(v10 + 1);
+                if ( v16 == 34 )
+                {
+                    v10 += 2LL;
+                    v4 = (char *)v10;
+                    do
+                        v17 = *v4++;
+                    while ( v17 != 34 && v17 );
+                    v14 = v4 + ~(UINT64)v10;
+                }
+                else
+                {
+                    v4 = (char *)++v10;
+                    while ( v16 > 0x3Du || !_bittest64(&v7, v16) )
+                        v16 = *++v4;
+                    v14 = v4 - (UINT64)v10;
+                }
+            }
+            if ( v12 == sub_7CE4322A(a2) )
+            {
+                v15 = sub_7CE39556(a2, v9, v12);
+                v7 = 0x2000000100002601LL;
+                if ( !v15 )
+                {
+                    *a3 = (UINT64)v10;
+                    *a4 = v14;
+                    v22 = 0LL;
+                }
+            }
+            else
+            {
+                v7 = 0x2000000100002601LL;
+            }
+            v5 = *v4;
+            a2 = (char*)v19;
+        }
+        while ( *v4 );
+    }
+    return v22 | Status;
+}
+
+UINT64 sub_2834C(char *a1, char **a2, UINT64 a3)
+{
+    char *i; // r10
+    char v5; // al
+    char v6; // r11
+    int v7; // esi
+    bool v8; // dl
+    int v9; // eax
+    UINT64 v10; // rax
+    UINT64 v11; // r15
+    char *v12; // r10
+    int v13; // r14d
+    int v14; // esi
+    int v15; // ebx
+    UINT64 v16; // rdi
+    UINT64 v17; // rcx
+    UINT64 result; // rax
+    
+    for ( i = a1 + 1; ; ++i )
+    {
+        v5 = *(i - 1);
+        if ( v5 > 31 )
+            break;
+        if ( (UINT8)(v5 - 9) >= 2u )
+            goto LABEL_12;
+    LABEL_6:
+        ;
+    }
+    switch ( v5 )
+    {
+        case ' ':
+            goto LABEL_6;
+        case '+':
+            v6 = 1;
+            goto LABEL_11;
+        case '-':
+            v6 = 0;
+        LABEL_11:
+            v5 = *i++;
+            goto LABEL_13;
+    }
+LABEL_12:
+    v6 = 1;
+LABEL_13:
+    if ( (a3 & 0xFFFFFFEF) != 0 || v5 != 48 )
+    {
+        v8 = a3 == 0;
+        if ( v5 == 48 )
+            goto LABEL_20;
+        v7 = v5;
+        v9 = 10;
+    }
+    else
+    {
+        if ( ((UINT8)*i | 0x20) == 0x78 )
+        {
+            v7 = i[1];
+            i += 2;
+            a3 = 16;
+            goto LABEL_23;
+        }
+        v8 = a3 == 0;
+    LABEL_20:
+        v9 = 8;
+        v7 = 48;
+    }
+    if ( v8 )
+        a3 = v9;
+LABEL_23:
+    v10 = 0xFFFFFFFFFFFFFFFFuLL / a3;
+    v11 = 0LL;
+    v12 = i - 1;
+    v13 = 0;
+    while ( 2 )
+    {
+        if ( (UINT8)(v7 - 48) <= 9u )
+        {
+            v14 = v7 - 48;
+        }
+        else
+        {
+            if ( (UINT8)((v7 & 0xDF) - 65) > 0x19u )
+                break;
+            v14 = 32 * ((UINT8)(v7 - 65) < 0x1Au) + v7 - 87;
+        }
+        if ( v14 < (int)a3 )
+        {
+            v15 = -1;
+            if ( v11 > v10 || v13 < 0 )
+            {
+            LABEL_34:
+                v16 = v11;
+            }
+            else if ( v11 != v10 || (v16 = 0xFFFFFFFFFFFFFFFFuLL / a3 && 0xFFFFFFFFFFFFFFFFuLL % a3 >= v14) )
+            {
+                v11 = v14 + a3 * v11;
+                v15 = 1;
+                goto LABEL_34;
+            }
+            v7 = *++v12;
+            v11 = v16;
+            v13 = v15;
+            continue;
+        }
+        break;
+    }
+    if ( a2 )
+    {
+        if ( !v13 )
+            v12 = a1;
+        *a2 = v12;
+    }
+    v17 = -(UINT64)v11;
+    if ( v6 )
+        v17 = v11;
+    result = -1LL;
+    if ( v13 >= 0 )
+        return v17;
+    return result;
+}
 
 EFI_STATUS sub_7CE0F68E(void)
 {
     EFI_STATUS  Status;
-    /*
-     UINT64 v1 = 0xAAAAAAAAAAAAAAAAuLL;
-     */
+    
+    UINT64 v8 = 0;
+    
+    UINT64 v9 = 0xAAAAAAAAAAAAAAAAuLL;
+    
+    UINT64 v10 = 0xAAAAAAAAAAAAAAAAuLL;
+    
     EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
     
     UINTN  DataSizeArray[5];
@@ -215,8 +585,21 @@ EFI_STATUS sub_7CE0F68E(void)
     
     if(Status == RETURN_BUFFER_TOO_SMALL){
         if(DataSizeArray[0] <= 0x200){
-            void *buffer = sub_7CE382B1(DataSizeArray[0] + 1);
-            DEBUG ((DEBUG_INFO,"buffer--::0x%x\n", buffer));
+            char *buffer = sub_7CE382B1(DataSizeArray[0] + 1);
+            if(buffer){
+                Status = GetVariable (
+                                      L"bootercfg",
+                                      &gAppleBootVariableGuid,
+                                      NULL,
+                                      DataSizeArray,
+                                      buffer
+                                      );
+                buffer[DataSizeArray[0]] = 0;
+                qword_7CEA0E30 = buffer;
+                qword_7CEA0E40 = DataSizeArray[0];
+            }
+            if(Status >= 0){
+            }
         }
     }
     
@@ -234,9 +617,33 @@ EFI_STATUS sub_7CE0F68E(void)
     }
     
     if(qword_7CEA0E30){
-        
+        for (UINT64 i = 0; i < log_config_list_count; i++) {
+            LOG_CONFIG_INFO log_config_info = log_config_list[i];
+            if(sub_7CE2E5D4(qword_7CEA0E30,log_config_info.name,&v9,(char**)&v10) >= 0){
+                log_config_info.config2 = 0;
+                if(v10){
+                    v8 = sub_2834C((char*)v9, NULL, 16LL);
+                }else{
+                    v8 = 0;
+                }
+                log_config_info.config1 = v8;
+                UINT64 result = *log_config_info.sign;
+                if ( result == 1 )
+                {
+                    result = (UINT64)log_config_info.name;
+                    if ( result > log_config_info.config2 )
+                        result = log_config_info.config2;
+                }
+                else
+                {
+                    if (result)
+                        break;
+                    result = log_config_info.config2 & (UINT64)log_config_info.name;
+                }
+                *log_config_info.config3 = result;
+            }
+        }
     }
-    
     return Status;
 }
 
@@ -717,11 +1124,7 @@ UINT64 sub_7CE295B0(void* buffer,UINT64 size){
     return sub_7CE295B3(buffer,size);
 }
 
-// strlen
-UINT64 sub_7CE4322A(const char* a1)
-{
-    return strlen(a1);
-}
+
 
 void sub_7CE3F0B0(
                   void        *DestinationBuffer,
