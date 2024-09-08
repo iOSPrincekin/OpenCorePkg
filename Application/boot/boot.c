@@ -136,7 +136,7 @@ UINT64* sub_7CE38528(void){
     }else{
         buffer = AllocatePool_malloc(4096);
         if(buffer == NULL){
-            DEBUG ((DEBUG_INFO,"#[EB.M.GT|!] NULL <- EDK.ELAP\n"));
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.GT|!] NULL <- EDK.ELAP\n"));
         }
         UINT64* v3 = qword_7CECB1F8;
         for (int i = 0LL; i != 508; i += 4LL )
@@ -178,6 +178,8 @@ void* sub_7CE382B1(UINTN bufferSize)
 
 char *qword_7CEA0E30 = NULL;
 
+char* qword_7CEA0E38 = NULL;
+
 UINT64 qword_7CEA0E40 = 0;
 
 UINT64 unk_7CEBE370 = 0x2;
@@ -204,8 +206,9 @@ UINT64 qword_7CEBE3B8 = 0x0;
 typedef struct LOG_CONFIG_INFO{
     char* name;
     UINT64 config1;
-    UINT64 config2;
-    UINT64* config3;
+    UINT32 config2;
+    UINT32 config3;
+    UINT64* config4;
     UINT64* sign;
 }LOG_CONFIG_INFO;
 
@@ -215,49 +218,56 @@ LOG_CONFIG_INFO log_config_list[log_config_list_count] = {
     {
         "boot-save-log",
         0x2,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0xffffffffffffffff,
         &unk_7CEBE370
     },
     {
         "wake-save-log",
         0x2,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0x2,
         &unk_7CEBE378
     },
     {
         "console",
         0x1,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0x1,
         &qword_7CEBE380
     },
     {
         "serial",
         0x1,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0x0,
         &qword_7CEBE388
     },
     {
         "embed-log-dt",
         0x0,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0x0,
         &qword_7CEBE390
     },
     {
         "timestamps",
         0x0,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0xffffffffffffffff,
         &qword_7CEBE398
     },
     {
         "log-level",
         0x1,
-        0x1,
+        0x00000001,
+        0x00000000,
         (UINT64*)0x0000000000000021,
         &qword_7CEBE3A0
     },
@@ -265,34 +275,39 @@ LOG_CONFIG_INFO log_config_list[log_config_list_count] = {
         "breakpoint",
         0x0,
         0x00000001,
+        0x00000000,
         0x0,
         &unk_7CEBE3A8
     },
     {
         "kc-read-size",
         0x100000,
-        0x0000000100000001,
+        0x00000001,
+        0x00000001,
         (UINT64*)0xffffffffffffffff,
         &qword_7CEBE3B0
     },
     {
         "log",
         0x0,
-        0x0000000200000001,
+        0x00000001,
+        0x00000002,
         0x0,
         NULL
     },
     {
         "debug",
-        0x1,
-        0x2,
+        0x0,
+        0x00000001,
+        0x00000002,
         0x0,
         NULL
     },
     {
         "level",
         0x0,
-        0x0000000200000001,
+        0x00000001,
+        0x00000002,
         0x0,
         NULL
     },
@@ -596,6 +611,7 @@ EFI_STATUS sub_7CE0F68E(void)
                                       );
                 buffer[DataSizeArray[0]] = 0;
                 qword_7CEA0E30 = buffer;
+                qword_7CEA0E38 = buffer;
                 qword_7CEA0E40 = DataSizeArray[0];
             }
             if(Status >= 0){
@@ -640,7 +656,7 @@ EFI_STATUS sub_7CE0F68E(void)
                         break;
                     result = log_config_info.config2 & (UINT64)log_config_info.name;
                 }
-                *log_config_info.config3 = result;
+                *log_config_info.config4 = result;
             }
         }
     }
@@ -664,22 +680,22 @@ BOOLEAN sub_7CE090CB(void){
         
         Status = GetVariable (
                               L"boot-signature",
-                              &gAppleDebugLogProtocolGuid,
+                              &gAppleBootVariableGuid,
                               NULL,
                               DataSizeArray,
                               NULL
                               );
         
         if(Status != RETURN_BUFFER_TOO_SMALL){
-            DEBUG ((DEBUG_INFO,"#[EB.H.IS|!] %r <- RT.GV %S %g\n", Status, L"boot-signature", &gAppleDebugLogProtocolGuid));
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB.H.IS|!] %r <- RT.GV %S %g\n", Status, L"boot-signature", &gAppleBootVariableGuid));
             dword_7CE9F820 = 0;
         }
         v0 = 0;
         DataSizeArray[0] = 0;
         
         Status = GetVariable (
-                              L"b",
-                              &gAppleDebugLogProtocolGuid,
+                              L"boot-image-key",
+                              &gAppleBootVariableGuid,
                               NULL,
                               DataSizeArray,
                               NULL
@@ -688,17 +704,19 @@ BOOLEAN sub_7CE090CB(void){
         if(Status == RETURN_BUFFER_TOO_SMALL){
             v0 = dword_7CE9F820;
         }else{
-            DEBUG ((DEBUG_INFO,"#[EB.H.IS|!] %r <- RT.GV %S %g\n", Status, L"b", &gAppleDebugLogProtocolGuid));
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB.H.IS|!] %r <- RT.GV %S %g\n", Status, L"boot-image-key", &gAppleBootVariableGuid));
             dword_7CE9F820 = 0;
         }
     }
-    DEBUG ((DEBUG_INFO,"#[EB|H:IS] %d\n", v0));
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|H:IS] %d\n", v0));
     return dword_7CE9F820 == 1;
 }
 
 UINT64 unk_7CE9F370 = 0x00000002;
 
 UINT64 unk_7CE9F378 = 0x00000002;
+
+UINT8 byte_7CEAD978 = 0;
 
 UINT8 byte_7CECB340 = 0;
 
@@ -712,13 +730,16 @@ UINT8 byte_7CECB333 = 0;
 
 UINT8 byte_7CECB341 = 0;
 
+
 UINT64 qword_7CECB348 = 0;
 
-UINT64 qword_7CE9F380 = 0;
+UINT64 qword_7CE9F380 = 1;
 
 UINT64 qword_7CE9F388 = 1;
 
 UINT64 qword_7CEC8390 = 1;
+
+UINT64 qword_7CEC8398 = 0;
 
 UINT64 qword_7CEC83A0 = 0;
 
@@ -745,8 +766,6 @@ UINT64* qword_7CECB358 = 0;
 char* qword_7CECD078 = 0;
 
 char* qword_7CECD080 = 0;
-
-UINT32* qword_7CEC8398 = 0;
 
 UINT8* byte_7CECB370 = 0;
 
@@ -913,20 +932,20 @@ read_value; \
 
 
 // 定义字符串数组，每个元素对应一个字符串
-const char *debug_tag_strings[] = {
-    "INIT",
-    "VERBOSE",
-    "EXIT",
-    "RESET:OK",
-    "RESET:FAIL",
-    "RESET:RECOVERY",
-    "REAN:START",
-    "REAN:END",
-    "DT",
-    "EXITBS:START",
-    "EXITBS:END",
-    "HANDOFF TO XNU",
-    "UNKNOWN"
+const UINT16 *debug_tag_strings[] = {
+    L"INIT",
+    L"VERBOSE",
+    L"EXIT",
+    L"RESET:OK",
+    L"RESET:FAIL",
+    L"RESET:RECOVERY",
+    L"REAN:START",
+    L"REAN:END",
+    L"DT",
+    L"EXITBS:START",
+    L"EXITBS:END",
+    L"HANDOFF TO XNU",
+    L"UNKNOWN"
 };
 
 EFI_STATUS sub_7CE42D1F(void){
@@ -980,61 +999,63 @@ EFI_STATUS sub_7CE42D1F(void){
             Status = 1;
             return Status;
         }
-    }
-    
-    
-    unsigned char read_value = 0;
-    asm volatile ( \
-                  "movb $1, %[addr1]\n" \
-                  "movq $0xFE03401C, %%rcx\n" \
-                  "addq $0x3DC014, %%rcx\n" \
-                  "movb $0x5A, (%%rcx)\n" \
-                  "cmpb $0, %[addr1]\n" \
-                  "movl $0x30,(%%edx)\n" \
-                  "cmovnz %%rcx, %%rdx\n" \
-                  "movl $0x30,%%r8d\n" \
-                  "movb (%%rdx),%%al\n" \
-                  : "=a" (read_value) \
-                  : [addr1]"m" (byte_7CECB370) \
-                  : "%rcx","%rdx","%r8d","memory" \
-                  );
-    
-    if(read_value == V_5A){
+    }else{
+        
+        
         unsigned char read_value = 0;
         asm volatile ( \
-                      "movb $0xA5, (%%rdx)\n" \
+                      "movb $1, %[addr1]\n" \
+                      "movq $0xFE03401C, %%rcx\n" \
+                      "addq $0x3DC014, %%rcx\n" \
+                      "movb $0x5A, (%%rcx)\n" \
                       "cmpb $0, %[addr1]\n" \
-                      "cmovnz %%rcx, %%r8\n" \
-                      "movb (%%r8),%%cl\n" \
-                      "movb %%cl,%%al\n" \
+                      "movl $0x30,(%%edx)\n" \
+                      "cmovnz %%rcx, %%rdx\n" \
+                      "movl $0x30,%%r8d\n" \
+                      "movb (%%rdx),%%al\n" \
                       : "=a" (read_value) \
                       : [addr1]"m" (byte_7CECB370) \
-                      : "%rcx","%rdx","r8","memory" \
+                      : "%rcx","%rdx","%r8d","memory" \
                       );
-        if(read_value == V_A5){
-            qword_7CECB358 = (UINT64*)off_7CEC8AA0;
-            Status = 1;
-            return Status;
+        
+        if(read_value == V_5A){
+            unsigned char read_value = 0;
+            asm volatile ( \
+                          "movb $0xA5, (%%rdx)\n" \
+                          "cmpb $0, %[addr1]\n" \
+                          "cmovnz %%rcx, %%r8\n" \
+                          "movb (%%r8),%%cl\n" \
+                          "movb %%cl,%%al\n" \
+                          : "=a" (read_value) \
+                          : [addr1]"m" (byte_7CECB370) \
+                          : "%rcx","%rdx","r8","memory" \
+                          );
+            if(read_value == V_A5){
+                qword_7CECB358 = (UINT64*)off_7CEC8AA0;
+                Status = 1;
+                return Status;
+            }
         }
+        
     }
-    
     
     return Status;
 }
 
 void sub_7CE3DD1D(int a1){
     if(a1 >= 0xC){
-        DEBUG ((DEBUG_INFO, "#[EB|LOG:UNKNOWN] %d\n", a1));
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB|LOG:UNKNOWN] %d\n", a1));
         return;
     }
     EFI_TIME                LogTime;
     
     EFI_GET_TIME GetTime = mRuntimeServices->GetTime;
     if(a1 > 9 ||  GetTime (&LogTime, NULL) < 0) {
-        DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] _\n", debug_tag_strings[a1]));
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB|LOG:%s] _\n", debug_tag_strings[a1]));
         return;
     }
-    DEBUG ((DEBUG_INFO, "#[EB|LOG:%s] %t\n", debug_tag_strings[a1], &LogTime));
+    const UINT16 * logtag = debug_tag_strings[a1];
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|LOG:%S] %04d-%02d-%02d %02d:%02d:%02d\n", logtag, LogTime.Year, LogTime.Month, LogTime.Day, LogTime.Hour, LogTime.Minute, LogTime.Second));
 }
 
 EFI_STATUS sub_7CE42E18(void)
@@ -1065,14 +1086,14 @@ EFI_STATUS sub_7CE38327(void* buffer)
     if(Status >= 0){
         v3 = (UINT64*)qword_7CECB1E8;
         if(v3 == NULL){
-            DEBUG ((DEBUG_INFO, "#[EB.M.BMF|UK!]\n"));
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.BMF|UK!]\n"));
             return Status;
         }
         if(*qword_7CECB1E8 != buffer){
             while (TRUE) {
                 v3 = (UINT64*)*(v3 + 24);
                 if(v3 == NULL){
-                    DEBUG ((DEBUG_INFO, "#[EB.M.BMF|UK!]\n"));
+                    DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.BMF|UK!]\n"));
                     return Status;
                 }
                 if(*v3 == (UINT64)buffer){
@@ -1318,7 +1339,6 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
     
     APPLE_DEBUG_LOG_PROTOCOL  *Protocol = NULL;
     
-    sub_7CE42D1F();
     switch (a1) {
         case 0:
         {
@@ -1360,14 +1380,17 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
             if(qword_7CEC8390){
                 byte_7CECB332 = 1;
             }
+            goto LABEL_40;
         }
             break;
         case 1:{
             byte_7CECB333 = 1;
+            goto LABEL_40;
         }
             break;
         case 7:{
             byte_7CECB341 = 1;
+            goto LABEL_40;
         }
             break;
         case 9:{
@@ -1421,6 +1444,7 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                 sub_7CE42E18();
                 byte_7CECB331 = 1;
             }
+        LABEL_40:
             sub_7CE3DD1D(a1);
         }
             break;
@@ -1487,7 +1511,7 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
                 {
                     if ( (qword_7CEC83A0 & 1) != 0 )
                     {
-                        DEBUG ((DEBUG_INFO, "======== End of efiboot serial output. ========\r\n"));
+                        DEBUG ((DEBUG_INFO,"AAPL: ======== End of efiboot serial output. ========\r\n"));
                         
                     }
                     byte_7CECB331 = 0;
@@ -1502,6 +1526,98 @@ EFI_STATUS sub_7CE14DC7(unsigned int a1){
     }
     return Status;
 }
+
+
+EFI_STATUS sub_7CE0D9AB(void)
+{
+    EFI_STATUS Status;
+    UINT64 v4; // rbx
+    UINT64 v6; // rax
+    UINT64 v8; // [rsp+28h] [rbp-28h] BYREF
+    UINT8 v9[25]; // [rsp+37h] [rbp-19h] BYREF
+    
+    v9[0] = -86;
+    v4 = qword_7CEBE3B8;
+    v8 = 1LL;
+    
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    
+    
+    Status = GetVariable (
+                          L"booter-strict-xmlparser",
+                          &gAppleBootVariableGuid,
+                          NULL,
+                          &v8,
+                          v9
+                          );
+    
+    
+    if ( Status < 0 )
+    {
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.CFG.DEV|!] %r <- RT.GV %S %g\n", Status, L"booter-strict-xmlparser", &gAppleBootVariableGuid));
+        v6 = qword_7CEBE3B8;
+    }
+    else
+    {
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.CFG.DEV|VAR] %S %g %d\n", "b", &gAppleBootVariableGuid, v9[0]));
+        if ( v9[0] )
+            v6 = qword_7CEBE3B8 | 2;
+        else
+            v6 = qword_7CEBE3B8 & 0xFFFFFFFFFFFFFFFDuLL;
+        qword_7CEBE3B8 = v6;
+    }
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:DEV] r%d 0x%qX 0x%qX\n", 5LL, v4, v6));
+    return Status;
+}
+
+
+EFI_STATUS sub_7CE04D8E(void)
+{
+    EFI_STATUS Status;
+    
+    if ( sub_7CE090CB() )
+    {
+        byte_7CEAD978 = 1;
+        Status = 2;
+    }
+    else
+    {
+        Status = 2 * byte_7CEAD978;
+    }
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|WL:MODE] %d\n", Status));
+    return Status;
+}
+
+void sub_7CE0B869(void)
+{
+    if ( qword_7CEA0E38 )
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:VAR] %S <\"%.*e\">\n", qword_7CEA0E38));
+    if ( qword_7CEA0E30 )
+    {
+        sub_7CE38327(qword_7CEA0E30);
+        qword_7CEA0E30 = 0LL;
+        qword_7CEA0E40 = 0LL;
+    }
+    
+    for(int i = 0; i < log_config_list_count;i++){
+        LOG_CONFIG_INFO log_config =  log_config_list[i];
+        if(log_config.config3 != 2 || log_config.config2 == 0){
+            char sign = '&';
+            if(log_config.config3 == 1){
+                sign = '<';
+            }
+            char* type = "set";
+            if(log_config.config3 == 2){
+                type = "obsolete";
+            }
+            if(log_config.config2 != 0){
+                type = "default";
+            }
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:ARG] %*s 0x%016qX (0x%016qX %c 0x%016qX) %s\n", log_config.name,log_config.config1,log_config.config1,sign,log_config.config4,type));
+        }
+    }
+}
+
 
 EFI_STATUS
 EFIAPI
@@ -1527,10 +1643,17 @@ UefiMain (
     sub_7CE43C58(ImageHandle,SystemTable);
     sub_7CE0F68E();
     sub_7CE14DC7(0);
+    DEBUG ((DEBUG_INFO,"#[EB|VERSION] <\"%s\">\n","bootbase.efi 495.140.2~17 (Official), built 2021-08-30T07:02:12-0"));
+    DEBUG ((DEBUG_INFO,"#[EB|BUILD] <\"%s\">\n","BUILD-INFO[308]:{\"DisplayName\":\"bootbase.efi\",\"DisplayVersion\":\"495.140.2~17\",\"RecordUuid\":\"6B6B10D3-E712-4F5D-9988-B4A9386C79CF\",\"BuildTime\":\"2021-08-30T07:02:12-0700\",\"ProjectName\":\"efiboot\",\"ProductName\":\"bootbase.efi\",\"SourceVersion\":\"495.140.2\",\"BuildVersion\":\"17\",\"BuildConfiguration\":\"Release\",\"BuildType\":\"Official\"}"));
     
     
     
-    DEBUG ((DEBUG_INFO, "This is a test boot.efi!!!\n"));
+    sub_7CE0D9AB();
+    sub_7CE04D8E();
+    if ( (qword_7CEBE3A0 & 1) != 0 ){
+        sub_7CE0B869();
+    }
+    DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
 }
