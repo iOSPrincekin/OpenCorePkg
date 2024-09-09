@@ -19,6 +19,7 @@
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
+#include <Protocol/Cpu.h>
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -33,6 +34,7 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/HobLib.h>
 #include <Guid/HobList.h>
+
 
 STATIC EFI_HANDLE  mImageHandle;
 
@@ -100,8 +102,11 @@ EFI_STATUS sub_7CE43C58(
 {
     EFI_STATUS  Status;
     
+    // qword_B2090
     mSystemTable = SystemTable;
+    // qword_B2098
     mBootServices = SystemTable->BootServices;
+    // qword_B20A0
     mRuntimeServices = SystemTable->RuntimeServices;
     void* hobList = NULL;
     Status = HobLibConstructorPtr (SystemTable,&hobList);
@@ -123,9 +128,10 @@ void* AllocatePool_malloc(UINTN bufferSize)
 
 UINT64** qword_7CECB1E8 = 0;
 
+UINT64* qword_7CECB1F0 = 0;
+
 UINT64* qword_7CECB1F8 = 0;
 
-UINT64* qword_7CECB1F0 = 0;
 
 UINT64* sub_7CE38528(void){
     UINT64* result = qword_7CECB1F8;
@@ -730,6 +736,7 @@ UINT8 byte_7CECB333 = 0;
 
 UINT8 byte_7CECB341 = 0;
 
+UINT8 byte_7CEC9FE0 = 0;
 
 UINT64 qword_7CECB348 = 0;
 
@@ -759,9 +766,21 @@ UINT32 dword_7CEC9FCC = 0;
 
 UINT32 dword_7CEC9FD0 = 0;
 
+EFI_PHYSICAL_ADDRESS qword_7CEC9FE8 = 0;
+
+UINT64 qword_7CEC9FF0 = 0;
+
+EFI_PHYSICAL_ADDRESS qword_7CEC9FF8 = 0;
+
+UINT64 qword_7CECA000 = 0;
+
+UINT64 qword_7CECA008 = 0;
+
 UINT32* qword_7CECB360 = (UINT32*)4261634048LL;
 
 UINT64* qword_7CECB358 = 0;
+
+EFI_CPU_ARCH_PROTOCOL *mCpu = NULL;
 
 char* qword_7CECD078 = 0;
 
@@ -1591,28 +1610,28 @@ EFI_STATUS sub_7CE04D8E(void)
 
 EFI_STATUS
 ConvertToUnicodeText (
-  OUT EFI_STRING  StringDest,
-  IN  CHAR8       *StringSrc,
-  IN  OUT UINTN   *BufferSize
-  )
+                      OUT EFI_STRING  StringDest,
+                      IN  CHAR8       *StringSrc,
+                      IN  OUT UINTN   *BufferSize
+                      )
 {
-  UINTN  StringSize;
-  UINTN  Index;
-
-  ASSERT (StringSrc != NULL && BufferSize != NULL);
-
-  StringSize = AsciiStrSize (StringSrc) * 2;
-  if ((*BufferSize < StringSize) || (StringDest == NULL)) {
-    *BufferSize = StringSize;
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  for (Index = 0; Index < AsciiStrLen (StringSrc); Index++) {
-    StringDest[Index] = (CHAR16)StringSrc[Index];
-  }
-
-  StringDest[Index] = 0;
-  return EFI_SUCCESS;
+    UINTN  StringSize;
+    UINTN  Index;
+    
+    ASSERT (StringSrc != NULL && BufferSize != NULL);
+    
+    StringSize = AsciiStrSize (StringSrc) * 2;
+    if ((*BufferSize < StringSize) || (StringDest == NULL)) {
+        *BufferSize = StringSize;
+        return EFI_BUFFER_TOO_SMALL;
+    }
+    
+    for (Index = 0; Index < AsciiStrLen (StringSrc); Index++) {
+        StringDest[Index] = (CHAR16)StringSrc[Index];
+    }
+    
+    StringDest[Index] = 0;
+    return EFI_SUCCESS;
 }
 
 void sub_7CE0B869(void)
@@ -1650,6 +1669,244 @@ void sub_7CE0B869(void)
     FreePool (StringDest);
 }
 
+UINT64 sub_7CE61911(UINT64 a1, char a2)
+{
+    return a1 >> a2;
+}
+
+EFI_STATUS sub_7CE383BB(EFI_ALLOCATE_TYPE a1, EFI_MEMORY_TYPE a2, UINT64 a3, UINT64 *a4)
+{
+    EFI_STATUS Status; // rdi
+    UINT64 v7; // rbx
+    UINT64 *v8; // rax
+    EFI_ALLOCATE_PAGES AllocatePages = mBootServices->AllocatePages;
+    Status = AllocatePages(a1,a2,a3,a4);
+    if ( Status >= 0 )
+    {
+        v7 = *a4;
+        v8 = sub_7CE38528();
+        *v8 = 0LL;
+        v8[2] = v7;
+        v8[1] = a3;
+        v8[3] = (UINT64)qword_7CECB1E8;
+        qword_7CECB1E8 = (UINT64**)v8;
+    }
+    return Status;
+}
+
+UINT64 sub_7CE6191F(UINT64 a1,UINT64 a2,UINT64 *a3)
+{
+    if ( a3 )
+        *a3 = a1 % a2;
+    return a1 / a2;
+}
+
+UINT64 sub_7CE03413(EFI_PHYSICAL_ADDRESS a1, UINT64 a2)
+{
+    EFI_STATUS Status; // rdi
+    UINT64 v4 = 0; // rsi
+    UINT64* v5; // rax
+    UINT64 v6; // rdx
+    UINT64 v7; // rcx
+    UINT64 *v8; // rbx
+    
+    EFI_FREE_PAGES FreePages = mBootServices->FreePages;
+    Status = FreePages(a1,a2);
+    if ( Status < 0 )
+        return Status;
+    v5 = (UINT64*)qword_7CECB1E8;
+    if ( !qword_7CECB1E8 )
+    {
+    LABEL_11:
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.BFP|UK!] %d\n", a2));
+        return v4;
+    }
+    if ( *(UINT64 *)(qword_7CECB1E8 + 16) != a1 )
+    {
+        v7 = (UINT64)qword_7CECB1E8;
+        while ( 1 )
+        {
+            v5 = (UINT64*)(*(UINT64**)(v7 + 24));
+            if ( !v5 )
+                goto LABEL_11;
+            v6 = v7;
+            v7 = *(UINT64 *)(v7 + 24);
+            if ( *(UINT64 *)(v5 + 16) == a1 )
+                goto LABEL_8;
+        }
+    }
+    v6 = 0LL;
+LABEL_8:
+    v8 = (UINT64*)&qword_7CECB1E8;
+    if ( v6 )
+        v8 = (UINT64 *)(v6 + 24);
+    *v8 = *(UINT64 *)(v5 + 24);
+    *(UINT64 *)(v5 + 24) = (UINT64)qword_7CECB1F8;
+    qword_7CECB1F8 = v5;
+    return v4;
+}
+
+UINT64 sub_7CE2D3FA(void)
+{
+    EFI_PHYSICAL_ADDRESS v13; // rsi
+    UINT64 v14; // rcx
+    UINT64 result; // rax
+    UINT64 v16; // eax
+    
+    v13 = qword_7CEC9FE8;
+    v14 = qword_7CEC9FF0;
+    result = 0LL;
+    qword_7CEC9FE8 = 0LL;
+    qword_7CEC9FF0 = 0LL;
+    qword_7CEC9FF8 = 0LL;
+    if ( v13 )
+    {
+        if ( v14 )
+        {
+            v16 = sub_7CE61911(v14, 12);
+            return sub_7CE03413(v13, v16);
+        }
+    }
+    return result;
+}
+
+UINT64 sub_7CE2D17B(UINT64 a1, UINT64 a2)
+{
+    char v2; // r15
+    UINT64 v4; // rdi
+    EFI_ALLOCATE_TYPE v5; // r14d
+    char v6 = 0; // si
+    EFI_STATUS Status;
+    UINT64 v8; // rdi
+    UINT64 v9; // rax
+    UINT64 v10 = 0; // r8
+    EFI_CPU_ARCH_PROTOCOL *v11; // rcx
+    EFI_PHYSICAL_ADDRESS v12; // rax
+    UINT64 v13; // rdx
+    EFI_PHYSICAL_ADDRESS v14; // rcx
+    UINT64 v15[2]; // [rsp+30h] [rbp-50h] BYREF
+    UINT64 v16; // [rsp+40h] [rbp-40h] BYREF
+    UINT64 v17[7]; // [rsp+48h] [rbp-38h] BYREF
+    
+    v15[1] = 0x829F5C9941FE80A8uLL;
+    v15[0] = 0x4BBBAB2A7C436110LL;
+    v16 = 0LL;
+    v17[0] = 0LL;
+    v2 = byte_7CEC9FE0;
+    if ( a1 )
+    {
+        v4 = a1;
+        v5 = 2;
+        v6 = 1;
+    }
+    else
+    {
+        v4 = 0xFFFFFFFFLL;
+        a2 = 4096LL;
+        v5 = 1;
+        if ( sub_7CE090CB() )
+        {
+            v6 = 0;
+        }
+        else
+        {
+            EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+            
+            
+            Status = GetVariable (
+                                  L"efiboot-perf-record",
+                                  &gAppleBootVariableGuid,
+                                  NULL,
+                                  &v16,
+                                  NULL
+                                  );
+            
+            if(Status != RETURN_BUFFER_TOO_SMALL){
+                return Status;
+            }
+            
+            EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+            
+            
+            Status = SetVariable (
+                                  L"efiboot-perf-record",
+                                  &gAppleBootVariableGuid,
+                                  7,
+                                  0,
+                                  NULL
+                                  );
+            
+        }
+    }
+    v17[0] = v4;
+    byte_7CEC9FE0 = v6;
+    v8 = (unsigned int)sub_7CE61911(a2, 12LL);
+    v9 = sub_7CE383BB(v5, 9LL, v8, v17);
+    if ( v9 < 0 )
+    {
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.DBG.IDTP|!] %r <- EB.M.BAP %qd\n", v9, v8));
+        Status = 0LL;
+        qword_7CEC9FE8 = 0LL;
+        qword_7CEC9FF0 = 0LL;
+        return Status;
+    }
+    
+    if ( !qword_7CEC9FE8 || !qword_7CEC9FF8 || (v10 = *(unsigned int *)(qword_7CEC9FF8 + 12) && a2 < v10))
+    {
+        qword_7CEC9FE8 = (EFI_PHYSICAL_ADDRESS)v17;
+        qword_7CEC9FF0 = a2;
+        v11 = mCpu;
+        if ( mCpu )
+        {
+            EFI_CPU_GET_TIMER_VALUE GetTimerValue = v11->GetTimerValue;
+            
+        LABEL_12:
+            Status = GetTimerValue(v11,0LL,&qword_7CECA000,&qword_7CECA008);
+            if ( Status < 0 )
+                return Status;
+            qword_7CECA008 = sub_7CE6191F(1000000000000LL, qword_7CECA008, 0LL);
+            goto LABEL_22;
+        }
+        
+        EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+        
+        Status = LocateProtocol (&gEfiCpuArchProtocolGuid,
+                                 NULL,
+                                 (VOID *)&mCpu
+                                 );
+        
+        if ( Status < 0 )
+        {
+            mCpu = 0LL;
+        }
+        else
+        {
+            v11 = mCpu;
+            if ( mCpu )
+                goto LABEL_12;
+        }
+    LABEL_22:
+        v12 = qword_7CEC9FE8;
+        qword_7CEC9FF8 = qword_7CEC9FE8;
+        *(UINT64 *)qword_7CEC9FE8 = 0x6F6F746C65666962LL;
+        *(UINT64 *)(v12 + 8) = 0LL;
+        v13 = qword_7CECA008;
+        *(UINT64 *)(v12 + 16) = qword_7CECA008;
+        Status = sub_7CE6191F(qword_7CECA000, v13, 0LL);
+        v14 = qword_7CEC9FF8;
+        *(UINT64 *)(qword_7CEC9FF8 + 24) = Status;
+        *(UINT32 *)(v14 + 12) += 64;
+        return Status;
+    }
+    sub_7CE3F0B0(&v17, (const void *)qword_7CEC9FE8, v10);
+    if ( (v2 & 1) == 0 )
+        sub_7CE2D3FA();
+    Status = v17[0];
+    qword_7CEC9FE8 = (EFI_PHYSICAL_ADDRESS)v17;
+    qword_7CEC9FF0 = a2;
+    qword_7CEC9FF8 = (EFI_PHYSICAL_ADDRESS)v17;
+    return Status;
+}
 
 EFI_STATUS
 EFIAPI
@@ -1685,6 +1942,7 @@ UefiMain (
     if ( (qword_7CEBE3A0 & 1) != 0 ){
         sub_7CE0B869();
     }
+    sub_7CE2D17B(0,0);
     DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
