@@ -1559,14 +1559,14 @@ EFI_STATUS sub_7CE0D9AB(void)
     }
     else
     {
-        DEBUG ((DEBUG_INFO,"AAPL: #[EB.CFG.DEV|VAR] %S %g %d\n", "b", &gAppleBootVariableGuid, v9[0]));
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.CFG.DEV|VAR] %S %g %d\n", L"booter-strict-xmlparser", &gAppleBootVariableGuid, v9[0]));
         if ( v9[0] )
             v6 = qword_7CEBE3B8 | 2;
         else
             v6 = qword_7CEBE3B8 & 0xFFFFFFFFFFFFFFFDuLL;
         qword_7CEBE3B8 = v6;
     }
-    DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:DEV] r%d 0x%qX 0x%qX\n", 5LL, v4, v6));
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:DEV] r%d 0x%X 0x%X\n", 5LL, v4, v6));
     return Status;
 }
 
@@ -1588,6 +1588,33 @@ EFI_STATUS sub_7CE04D8E(void)
     return Status;
 }
 
+
+EFI_STATUS
+ConvertToUnicodeText (
+  OUT EFI_STRING  StringDest,
+  IN  CHAR8       *StringSrc,
+  IN  OUT UINTN   *BufferSize
+  )
+{
+  UINTN  StringSize;
+  UINTN  Index;
+
+  ASSERT (StringSrc != NULL && BufferSize != NULL);
+
+  StringSize = AsciiStrSize (StringSrc) * 2;
+  if ((*BufferSize < StringSize) || (StringDest == NULL)) {
+    *BufferSize = StringSize;
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  for (Index = 0; Index < AsciiStrLen (StringSrc); Index++) {
+    StringDest[Index] = (CHAR16)StringSrc[Index];
+  }
+
+  StringDest[Index] = 0;
+  return EFI_SUCCESS;
+}
+
 void sub_7CE0B869(void)
 {
     if ( qword_7CEA0E38 )
@@ -1599,6 +1626,8 @@ void sub_7CE0B869(void)
         qword_7CEA0E40 = 0LL;
     }
     
+    UINTN StringBufferSize = sizeof (CHAR16) * 20;
+    EFI_STRING  StringDest = AllocateZeroPool (StringBufferSize);
     for(int i = 0; i < log_config_list_count;i++){
         LOG_CONFIG_INFO log_config =  log_config_list[i];
         if(log_config.config3 != 2 || log_config.config2 == 0){
@@ -1606,16 +1635,19 @@ void sub_7CE0B869(void)
             if(log_config.config3 == 1){
                 sign = '<';
             }
-            char* type = "set";
+            CHAR16* type = L"set";
             if(log_config.config3 == 2){
-                type = "obsolete";
+                type = L"obsolete";
             }
             if(log_config.config2 != 0){
-                type = "default";
+                type = L"default";
             }
-            DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:ARG] %*s 0x%016qX (0x%016qX %c 0x%016qX) %s\n", log_config.name,log_config.config1,log_config.config1,sign,log_config.config4,type));
+            ConvertToUnicodeText(StringDest,log_config.name,&StringBufferSize);
+            
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB|CFG:ARG] %S 0x%016X (0x%016X %c 0x%016X) %S\n", StringDest,log_config.config1,log_config.config1,sign,log_config.config4,type));
         }
     }
+    FreePool (StringDest);
 }
 
 
@@ -1643,8 +1675,8 @@ UefiMain (
     sub_7CE43C58(ImageHandle,SystemTable);
     sub_7CE0F68E();
     sub_7CE14DC7(0);
-    DEBUG ((DEBUG_INFO,"#[EB|VERSION] <\"%s\">\n","bootbase.efi 495.140.2~17 (Official), built 2021-08-30T07:02:12-0"));
-    DEBUG ((DEBUG_INFO,"#[EB|BUILD] <\"%s\">\n","BUILD-INFO[308]:{\"DisplayName\":\"bootbase.efi\",\"DisplayVersion\":\"495.140.2~17\",\"RecordUuid\":\"6B6B10D3-E712-4F5D-9988-B4A9386C79CF\",\"BuildTime\":\"2021-08-30T07:02:12-0700\",\"ProjectName\":\"efiboot\",\"ProductName\":\"bootbase.efi\",\"SourceVersion\":\"495.140.2\",\"BuildVersion\":\"17\",\"BuildConfiguration\":\"Release\",\"BuildType\":\"Official\"}"));
+    DEBUG ((DEBUG_INFO,"#[EB|VERSION] <\"%s\">\n",L"bootbase.efi 495.140.2~17 (Official), built 2021-08-30T07:02:12-0"));
+    DEBUG ((DEBUG_INFO,"#[EB|BUILD] <\"%S\">\n",L"BUILD-INFO[308]:{\"DisplayName\":\"bootbase.efi\",\"DisplayVersion\":\"495.140.2~17\",\"RecordUuid\":\"6B6B10D3-E712-4F5D-9988-B4A9386C79CF\",\"BuildTime\":\"2021-08-30T07:02:12-0700\",\"ProjectName\":\"efiboot\",\"ProductName\":\"bootbase.efi\",\"SourceVersion\":\"495.140.2\",\"BuildVersion\":\"17\",\"BuildConfiguration\":\"Release\",\"BuildType\":\"Official\"}"));
     
     
     
