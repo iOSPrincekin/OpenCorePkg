@@ -46,6 +46,7 @@
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
   gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
+  gEfiConsoleControlProtocolGuid
 
 [LibraryClasses]
   UefiApplicationEntryPoint

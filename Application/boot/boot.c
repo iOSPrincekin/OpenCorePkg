@@ -20,6 +20,8 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/Cpu.h>
+#include <Protocol/AppleRtcRam.h>
+#include <Protocol/ConsoleControl.h>
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -34,6 +36,7 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/HobLib.h>
 #include <Guid/HobList.h>
+#include <Guid/OcVariable.h>
 
 
 STATIC EFI_HANDLE  mImageHandle;
@@ -89,6 +92,7 @@ void *GuidHob_24 = NULL;
 EFI_GUID  unknown_hob_guid = {
     0xef4ae2dd, 0xb736, 0x40e3, {0x80, 0x61, 0xa7, 0x46, 0x33, 0x34, 0x7f, 0x23 }
 };
+
 
 void sub_7CE43F47(void *GuidHob)
 {
@@ -208,6 +212,7 @@ UINT64 qword_7CEBE3B0 = 0x100000;
 
 UINT64 qword_7CEBE3B8 = 0x0;
 
+UINT64 qword_7CEAE210 = 0;
 
 typedef struct LOG_CONFIG_INFO{
     char* name;
@@ -718,6 +723,11 @@ BOOLEAN sub_7CE090CB(void){
     return dword_7CE9F820 == 1;
 }
 
+
+EFI_CONSOLE_CONTROL_SCREEN_MODE dword_7CEAD158 = 0;
+
+EFI_CONSOLE_CONTROL_SCREEN_MODE dword_7CEAD15C = 0;
+
 UINT64 unk_7CE9F370 = 0x00000002;
 
 UINT64 unk_7CE9F378 = 0x00000002;
@@ -738,6 +748,16 @@ UINT8 byte_7CECB341 = 0;
 
 UINT8 byte_7CEC9FE0 = 0;
 
+UINT8 byte_7CEAB1D8 = 0;
+
+UINT8 byte_7CEAB1D9 = 0;
+
+UINT8 byte_7CEAB1DA = 0;
+
+UINT8 byte_7CEAB1DB = 0;
+
+UINT8 byte_7CEAE320 = 0;
+
 UINT64 qword_7CECB348 = 0;
 
 UINT64 qword_7CE9F380 = 1;
@@ -749,6 +769,8 @@ UINT64 qword_7CEC8390 = 1;
 UINT64 qword_7CEC8398 = 0;
 
 UINT64 qword_7CEC83A0 = 0;
+
+EFI_CONSOLE_CONTROL_PROTOCOL* qword_7CEAFF40 = NULL;
 
 StringStruct1* qword_7CEC9FA0 = NULL;
 
@@ -1908,6 +1930,352 @@ UINT64 sub_7CE2D17B(UINT64 a1, UINT64 a2)
     return Status;
 }
 
+#define _AUPBND 1
+#define _ADNBND 1
+#define _Bnd(X, bnd) (sizeof(X) + ((bnd) & ~(bnd)))
+
+typedef char *va_list;
+#define va_arg(ap, T) \
+(*(T *)(((ap) += _Bnd(T, _AUPBND)) - _Bnd(T, _ADNBND)))
+#define va_end(ap) (void)0
+#define va_start(ap, A) \
+(void)((ap) = (char *)&(A) + _Bnd(A, _AUPBND))
+
+#define va_copy(d, s)        __builtin_va_copy(d, s)
+
+
+UINT64 sub_7CE0E1BA(UINT64 a1, int a2, char *a3, UINT8 ***a4)
+{
+    UINT64 v4; // esi
+    UINT64 v6[4]; // [rsp+20h] [rbp-20h] BYREF
+    
+    v4 = a1;
+    v6[0] = a1;
+    v6[1] = a1 + a2 - 1;
+    
+#if 0
+    sub_7CE0D1BC(a3, (void (__fastcall *)(UINT64, UINT64))sub_7CE0E194, (UINT64)v6, a4);
+    *(_BYTE *)v6[0] = 0;
+#endif
+    return (unsigned int)(v6[0] - v4);
+}
+
+UINT64 sub_7CDF84A8(int a1, UINT64 a2, UINT64 a3)
+{
+    UINT64 v6 = 0; // rsi
+    UINT64 v7; // r15
+    int v8; // eax
+    int v9; // edx
+    int v10; // edx
+    UINT64 v11; // rax
+    UINT64 v12; // rcx
+    UINT64 v13; // rdi
+    UINT64 v14; // rbx
+    UINT64 result = 0; // rax
+    UINT64 v16; // r12
+    UINT64 v17; // rax
+    UINT64 v18; // r12
+    unsigned int v19; // eax
+    UINT64 v20; // rdx
+    UINT64 v21; // rcx
+    UINT64 v22[8]; // [rsp+20h] [rbp-40h] BYREF
+    
+    asm volatile ( \
+                  "lfence\n" \
+                  "rdtsc\n" \
+                  "lfence\n" \
+                  : \
+                  : \
+                  : \
+                  ); \
+    if ( qword_7CECA008 )
+        v7 = sub_7CE6191F(v6, qword_7CECA008, 0LL);
+    else
+        v7 = -1LL;
+#if 0
+    v8 = sub_7CE0E1BA(byte_7CE95010, 256LL, a2, a3);
+    if ( byte_7CE95010[v8 - 1] == 10 )
+        byte_7CE95010[--v8] = 0;
+    v9 = v8 + 15;
+    if ( v8 + 8 >= 0 )
+        v9 = v8 + 8;
+    v10 = v8 + (v9 & 0xFFFFFFF8);
+    v11 = qword_7CE94FF8;
+    v12 = *(unsigned int *)(qword_7CE94FF8 + 12);
+    v13 = v10;
+    v14 = qword_7CE94FF0;
+    if ( v12 + v10 + 24 <= (UINT64)qword_7CE94FF0 )
+    {
+        v20 = qword_7CE94FE8;
+    LABEL_14:
+        *(_DWORD *)(v20 + v12) = a1;
+        *(_DWORD *)(v20 + v12 + 4) = v13;
+        *(_QWORD *)(v20 + v12 + 8) = v7;
+        *(_QWORD *)(v20 + v12 + 16) = v6;
+        v21 = (unsigned int)(*(_DWORD *)(v11 + 12) + 24);
+        *(_DWORD *)(v11 + 12) = v21;
+        sub_7CE0A0B0(v20 + v21, byte_7CE95010, v13);
+        result = qword_7CE94FF8;
+        *(_DWORD *)(qword_7CE94FF8 + 12) += v13;
+        ++*(_DWORD *)(result + 8);
+        return result;
+    }
+    result = 0xAAAAAAAAAAAAAAAAuLL;
+    v22[0] = 0xAAAAAAAAAAAAAAAAuLL;
+    if ( !byte_7CE94FE0 && qword_7CE98098 )
+    {
+        v22[0] = 0xFFFFFFFFLL;
+        qword_7CE94FF0 = sub_7CE2C8F6(qword_7CE94FF0, 1LL);
+        v16 = (unsigned int)sub_7CE2C911(qword_7CE94FF0, 12);
+        v17 = sub_7CE033BB(1LL, 9LL, v16, v22);
+        if ( v17 < 0 )
+            return sub_7CE08C97(1LL, "#[EB.DBG.TTPI|!] %r <- EB.M.BAP %qd\n", v17, v16);
+        sub_7CE0A0B0(v22[0], qword_7CE94FE8, *(unsigned int *)(qword_7CE94FF8 + 12));
+        v18 = qword_7CE94FE8;
+        v19 = sub_7CE2C911(v14, 12);
+        sub_7CE03413(v18, v19);
+        v11 = v22[0];
+        qword_7CE94FE8 = v22[0];
+        qword_7CE94FF8 = v22[0];
+        v12 = *(unsigned int *)(v22[0] + 12);
+        v20 = v22[0];
+        goto LABEL_14;
+    }
+#endif
+    return result;
+}
+
+EFI_STATUS sub_7CDF8453(char* fmt, ...)
+{
+    EFI_STATUS Status = RETURN_SUCCESS;
+    UINT64 v2[3]; // [rsp+20h] [rbp-20h] BYREF
+    va_list va; // [rsp+58h] [rbp+18h] BYREF
+    
+    va_start(va, fmt);
+    memset(v2, 170, sizeof(v2));
+    if ( qword_7CEC9FE8 )
+    {
+#if 0
+        va_copy((va_list)v2, va);
+        return sub_7CDF84A8(1LL, fmt,v2);
+#endif
+    }
+    return Status;
+}
+
+#if 0
+void sub_7CE1EDE6()
+{
+    EFI_STATUS Status;
+    
+    UINT64 v0; // rax
+    UINT64 v1; // rax
+    
+    if ( !qword_7CEAE210 && (byte_7CEAE320 & 1) == 0 )
+    {
+        EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+        Status = LocateProtocol(&gAppleRtcRamProtocolGuid,0,qword_7CEAE210);
+        v0 = (*(UINT64 (__fastcall **)(void *, _QWORD, UINT64 *))(qword_7CEB0098 + 320))(
+                                                                                         &unk_7CEABBA0,
+                                                                                         0LL,
+                                                                                         &qword_7CEAE210);
+        if ( v0 < 0 )
+        {
+            sub_7CE20C97(1LL, "#[EB.RTC.CP|!] %r <- BS.LocP %g\n", v0, &unk_7CEABBA0);
+            byte_7CEAE320 = 1;
+        }
+        else
+        {
+            v1 = (*(UINT64 (__fastcall **)(UINT64, UINT64, UINT64 (__fastcall *)(), _QWORD, UINT64 *))(qword_7CEB0098 + 80))(
+                                                                                                                             513LL,
+                                                                                                                             8LL,
+                                                                                                                             sub_7CE1F067,
+                                                                                                                             0LL,
+                                                                                                                             &qword_7CEB0060);
+            if ( v1 < 0 )
+                sub_7CE20C97(1LL, "#[EB.RTC.CP|!] %r <- BS.CrE 0x%08X\n", v1, 513LL);
+        }
+    }
+}
+
+#endif
+
+#if 0
+UINT64 sub_7CE1EEDF(UINT64 a1, UINT8 a2, UINT8 a3)
+{
+    UINT64 result; // rax
+    UINT64 v4; // rdi
+    UINT64 v5; // r14
+    unsigned int v6; // ebx
+    UINT64 v7; // rsi
+    char v8; // al
+    UINT8 v9; // cl
+    unsigned int v10; // esi
+    int v11; // edi
+    unsigned int v12; // ecx
+    
+    result = 0x8000000000000002uLL;
+    if ( a1 )
+    {
+        if ( a3 >= 0xEu )
+        {
+            v4 = a3;
+            v5 = a2;
+            v6 = a3 + a2;
+            if ( v6 <= 0xFF )
+            {
+                if ( a2 )
+                {
+                    v7 = a1;
+                    sub_7CE1EDE6();
+                    if ( qword_7CEAE210 )
+                        return (*(UINT64 (__fastcall **)(UINT64, UINT64, UINT64, UINT64))(qword_7CEAE210 + 16))(
+                                                                                                                qword_7CEAE210,
+                                                                                                                v7,
+                                                                                                                v5,
+                                                                                                                v4);
+                    sub_7CE1EE9E();
+                    v8 = 1;
+                    while ( 2 )
+                    {
+                        ++v7;
+                        while ( 1 )
+                        {
+                            v9 = *(_BYTE *)(v7 - 1);
+                            if ( v9 != byte_7CEAE220[v4] )
+                                break;
+                            ++v4;
+                            ++v7;
+                            if ( v4 >= v6 )
+                            {
+                                if ( (v8 & 1) != 0 )
+                                    return 0LL;
+                                goto LABEL_18;
+                            }
+                        }
+                        if ( (v4 & 0x80u) != 0LL )
+                        {
+                            __outbyte(0x72u, v4);
+                            __outbyte(0x73u, v9);
+                        }
+                        else
+                        {
+                            __outbyte(0x70u, v4);
+                            __outbyte(0x71u, v9);
+                        }
+                        byte_7CEAE220[v4++] = *(_BYTE *)(v7 - 1);
+                        v8 = 0;
+                        if ( v4 < v6 )
+                            continue;
+                        break;
+                    }
+                LABEL_18:
+                    if ( (unsigned __int16)word_7CEAE25E != (unsigned __int16)sub_7CE0C53F(0LL, &unk_7CEAE22E, 48LL) )
+                    {
+                        __outbyte(0x70u, 0x3Eu);
+                        __outbyte(0x71u, word_7CEAE25E);
+                        __outbyte(0x70u, 0x3Fu);
+                        __outbyte(0x71u, HIBYTE(word_7CEAE25E));
+                    }
+                    v10 = (UINT8)word_7CEAE278;
+                    v11 = HIBYTE(word_7CEAE278);
+                    word_7CEAE278 = 0;
+                    v12 = sub_7CE0C53F(0LL, &unk_7CEAE22E, 242LL);
+                    if ( (v11 | (v10 << 8)) != (unsigned __int16)v12 )
+                    {
+                        v10 = v12 >> 8;
+                        __outbyte(0x70u, 0x58u);
+                        __outbyte(0x71u, BYTE1(v12));
+                        __outbyte(0x70u, 0x59u);
+                        __outbyte(0x71u, v12);
+                        LOBYTE(v11) = v12;
+                    }
+                    LOBYTE(word_7CEAE278) = v10;
+                    HIBYTE(word_7CEAE278) = v11;
+                }
+                return 0LL;
+            }
+        }
+    }
+    return result;
+}
+#endif
+
+UINT64 sub_7CE03E29(char a1, UINT64 a2, int a3)
+{
+    UINT8 v3; // cl
+    UINT64 v4; // rsi
+    EFI_STATUS Status = 0; // rax
+    int v6; // edx
+    int v7; // r8d
+    int v8; // r9d
+    int v9; // [rsp+10Ch] [rbp-30h]
+    int v10; // [rsp+114h] [rbp-28h]
+    int v11; // [rsp+11Ch] [rbp-20h]
+    int v12; // [rsp+124h] [rbp-18h]
+    
+    v3 = byte_7CEAB1D9 | a1;
+    byte_7CEAB1D9 = v3;
+    if ( a2 )
+        byte_7CEAB1DB = a2;
+    if ( a3 )
+        byte_7CEAB1DA = a3;
+    else
+        a3 = byte_7CEAB1DA;
+    v4 = (UINT8)byte_7CEAD978;
+    DEBUG ((DEBUG_INFO,"AAPL: #[EB|WL] %d %d 0x%02X 0x%02X % 3d 0x%02X\n",
+            (UINT8)byte_7CEAD978,
+            2 * (unsigned int)(UINT8)byte_7CEAD978,
+            (UINT8)byte_7CEAB1D8,
+            v3,
+            a3,
+            byte_7CEAB1DB));
+    if ( v4 == 1 )
+    {
+#if 0
+        v6 |= 4;
+        v7 |= -80;
+        EFI_STATUS = sub_7CE1EEDF((unsigned int)&byte_7CEAB1D8, v6, v7, v8, v9, v10, v11, v12);
+        if ( result < 0 )
+            return sub_7CE20C97((UINT64)&unk_00000001, "#[EB.WL.WL|!] %r <- EB.WL.WLF\n", result);
+#endif
+    }
+    return Status;
+}
+
+
+UINT64 sub_7CE14C17(void)
+{
+    EFI_STATUS Status = RETURN_SUCCESS;
+    EFI_CONSOLE_CONTROL_SCREEN_MODE v1; // [rsp+2Ch] [rbp-4h] BYREF
+    
+    v1 = -1431655766;
+    /*
+     * frame #0: 0x000000007d69c5e0 OpenCore.dll`VirtualFsLocateProtocol(Protocol=0xaaaaaaaa00000000, Registration=0xaaaaaaaa00000000, Interface=0xaaaaaaaaaaaaaaaa) at VirtualFs.c:84
+     
+     */
+    EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+    Status = LocateProtocol(&gEfiConsoleControlProtocolGuid, 0LL, (void **)&qword_7CEAFF40);
+    if ( Status >= 0 )
+    {
+        /*
+         
+         * frame #0: 0x000000007d66da10 OpenCore.dll`ConsoleControlGetMode(This=0xaaaaaaaa00000000, Mode=0xaaaaaaaa00000000, GopUgaExists="", StdInLocked="") at TextOutputBuiltin.c:999
+         
+         */
+        
+        EFI_CONSOLE_CONTROL_PROTOCOL_GET_MODE GetMode = qword_7CEAFF40->GetMode;
+        Status = GetMode(qword_7CEAFF40, &v1, 0LL, 0LL);
+        if ( Status >= 0 )
+        {
+            dword_7CEAD158 = v1;
+            dword_7CEAD15C = v1;
+            return RETURN_SUCCESS;
+        }
+    }
+    return Status;
+}
+
 EFI_STATUS
 EFIAPI
 UefiMain (
@@ -1927,6 +2295,7 @@ UefiMain (
      int a4 = 0;
      */
     
+    UINT64 v3 = 0;
     mImageHandle  = ImageHandle;
     mSystemTable = SystemTable;
     sub_7CE43C58(ImageHandle,SystemTable);
@@ -1943,6 +2312,10 @@ UefiMain (
         sub_7CE0B869();
     }
     sub_7CE2D17B(0,0);
+    sub_7CDF8453("Start");
+    v3 |= 0x1;
+    sub_7CE03E29(v3,0,0);
+    sub_7CE14C17();
     DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
