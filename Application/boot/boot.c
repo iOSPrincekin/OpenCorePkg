@@ -2417,6 +2417,7 @@ EFI_STATUS sub_7C729A0F(void)
       DEBUG ((DEBUG_INFO,"AAPL: #[EB|BRD:NV] %e\n", &unk_7C7CC980));
     return Status;
   }
+#if 0
     Status = RETURN_NOT_FOUND;
   if ( *(_QWORD *)(qword_7C7D0090 + 104) )
   {
@@ -2479,7 +2480,8 @@ LABEL_23:
       }
     }
   }
-  return v0;
+#endif
+  return Status;
 }
 
 
@@ -2530,7 +2532,7 @@ UefiMain (
     if ( (qword_7C7CFDE8 & 2) != 0 || qword_7CEBE380 >= 3 )
         sub_7C733501(2LL);
     sub_7C726FAD();
-    
+    sub_7C729A0F();
     DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
