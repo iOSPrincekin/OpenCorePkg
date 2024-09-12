@@ -47,7 +47,12 @@
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
   gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
   gEfiConsoleControlProtocolGuid
+  
 
+[Guids]
+  gAppleOSLoadedNamedEventGuid
+  
+  
 [LibraryClasses]
   UefiApplicationEntryPoint
   UefiLib

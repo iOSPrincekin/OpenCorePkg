@@ -22,6 +22,8 @@
 #include <Protocol/Cpu.h>
 #include <Protocol/AppleRtcRam.h>
 #include <Protocol/ConsoleControl.h>
+#include <Protocol/OSInfo.h>
+
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -37,6 +39,9 @@
 #include <Library/HobLib.h>
 #include <Guid/HobList.h>
 #include <Guid/OcVariable.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/AppleOSLoaded.h>
+
 
 #pragma mark ============================== macro define begin ================================
 
@@ -74,6 +79,15 @@ typedef struct StringStruct2 {
     void* next2;
     void* next3;
 }StringStruct2;
+
+typedef struct LOG_CONFIG_INFO{
+    char* name;
+    UINT64 config1;
+    UINT32 config2;
+    UINT32 config3;
+    UINT64* config4;
+    UINT64* sign;
+}LOG_CONFIG_INFO;
 
 
 #pragma mark ==================================== data struct define end ================================
@@ -114,6 +128,21 @@ UINT8 byte_AD1DA = 0;
 
 UINT8 byte_AD1DB = 0;
 
+#define off_AD250_count 10
+
+const char* off_AD250[off_AD250_count] = {
+    "Mac-35C1E88140C3E6CF",
+    "Mac-7DF21CB3ED6977E5",
+    "Mac-3CBD00234E554E41",
+    "Mac-2BD1B31983FE1663",
+    "Mac-031B6874CF7F642A",
+    "Mac-77EB7D7DAF985301",
+    "Mac-27ADBB7B4CEE8E61",
+    "Mac-189A3D4F975D5FFC",
+    "Mac-742912EFDBEE19B3",
+    "Mac-C08A6BB70A942AC2"
+};
+
 UINT64 unk_AD370 = 0x2;
 
 UINT64 unk_AD378 = 0x2;
@@ -135,6 +164,10 @@ UINT64 qword_AD3B0 = 0x100000;
 UINT64 qword_AD3B8 = 0x0;
 
 UINT32 dword_AD820 = 0xFFFFFFFF;
+
+UINT64 qword_ADC40 = 0x430BA6D48ECE08D8;
+
+UINT64 qword_ADC48 = 0x4A88E718F32DB0A7;
 
 UINT64 qword_ADFE8 = 0;
 
@@ -210,6 +243,8 @@ UINT32* qword_B0360 = (UINT32*)4261634048LL;
 
 UINT64 qword_B1DE8 = 0;
 
+UINT64 qword_B1F28 = 0;
+
 EFI_CONSOLE_CONTROL_PROTOCOL* qword_B1F40 = NULL;
 
 char* qword_B2078 = 0;
@@ -217,126 +252,6 @@ char* qword_B2078 = 0;
 char* qword_B2080 = 0;
 
 UINT32 addr_FE03401C = 0xFE03401C;
-
-
-#pragma mark ============================== variable data end ================================
-
-#pragma mark ============================== functions begin ================================
-
-EFI_STATUS
-EFIAPI
-HobLibConstructorPtr (
-                      IN EFI_SYSTEM_TABLE  *SystemTable,
-                      VOID** mHobListPtr
-                      )
-{
-    UINTN  Index;
-    
-    for (Index = 0; Index < SystemTable->NumberOfTableEntries; Index++) {
-        if (CompareGuid (&gEfiHobListGuid, &(SystemTable->ConfigurationTable[Index].VendorGuid))) {
-            *mHobListPtr = SystemTable->ConfigurationTable[Index].VendorTable;
-            return EFI_SUCCESS;
-        }
-    }
-    
-    return EFI_NOT_FOUND;
-}
-
-void sub_28F47(void *GuidHob)
-{
-    GuidHob_24 = GuidHob;
-}
-
-EFI_STATUS sub_28C58(
-                        IN EFI_HANDLE        ImageHandle,
-                        IN EFI_SYSTEM_TABLE  *SystemTable
-                        )
-{
-    EFI_STATUS  Status;
-    
-    // qword_B2090
-    mSystemTable = SystemTable;
-    // qword_B2098
-    mBootServices = SystemTable->BootServices;
-    // qword_B20A0
-    mRuntimeServices = SystemTable->RuntimeServices;
-    void* hobList = NULL;
-    Status = HobLibConstructorPtr (SystemTable,&hobList);
-    
-    void *GuidHob = GetNextGuidHob (&unknown_hob_guid, hobList);
-    if(GuidHob){
-        sub_28F47(GuidHob + 3);
-    }
-    return Status;
-}
-
-void* AllocatePool_malloc(UINTN bufferSize)
-{
-    void* bufferPtr = NULL; // [rsp+20h] [rbp-10h] BYREF
-    EFI_ALLOCATE_POOL AllocatePool = mBootServices->AllocatePool;
-    AllocatePool(4LL, bufferSize, &bufferPtr);
-    return bufferPtr;
-}
-
-
-
-UINT64* sub_7CE38528(void){
-    UINT64* result = qword_B01F8;
-    UINT64** buffer = NULL;
-    UINT64 v1 = 0;
-    if(qword_B01F8){
-        v1 = *(UINT64 *)(qword_B01F8 + 24);
-    }else{
-        buffer = AllocatePool_malloc(4096);
-        if(buffer == NULL){
-            DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.GT|!] NULL <- EDK.ELAP\n"));
-        }
-        UINT64* v3 = qword_B01F8;
-        for (int i = 0LL; i != 508; i += 4LL )
-        {
-            UINT64* v1 = v3;
-            v3 = (UINT64*)&buffer[i];
-            buffer[i + 3] = v1;
-        }
-        result = (UINT64*)buffer + 504;
-        qword_B01F8 = result;
-        buffer[508] = (UINT64*)buffer;
-        buffer[510] = 0;
-        buffer[509] = 0;
-        buffer[511] = qword_B01F0;
-        qword_B01F0 = (UINT64*)buffer + 508;
-    }
-    qword_B01F8 = (UINT64*)v1;
-    result[3] = 0;
-    return result;
-}
-
-void* sub_1D2B1(UINTN bufferSize)
-{
-    void* buffer = NULL;
-    buffer = NULL;
-    /*
-     UINTN *v1; // rax
-     */
-    buffer = AllocatePool_malloc(bufferSize);
-    UINT64* v2 = sub_7CE38528();
-    
-    v2[0] = (UINT64)buffer;
-    v2[2] = 0LL;
-    v2[1] = 0LL;
-    v2[3] = (UINT64)qword_B01E8;
-    qword_B01E8 = (UINT64**)v2;
-    return buffer;
-}
-
-typedef struct LOG_CONFIG_INFO{
-    char* name;
-    UINT64 config1;
-    UINT32 config2;
-    UINT32 config3;
-    UINT64* config4;
-    UINT64* sign;
-}LOG_CONFIG_INFO;
 
 #define log_config_list_count  12
 
@@ -438,6 +353,116 @@ LOG_CONFIG_INFO log_config_list[log_config_list_count] = {
         NULL
     },
 };
+
+#pragma mark ============================== variable data end ================================
+
+#pragma mark ============================== functions begin ================================
+
+EFI_STATUS
+EFIAPI
+HobLibConstructorPtr (
+                      IN EFI_SYSTEM_TABLE  *SystemTable,
+                      VOID** mHobListPtr
+                      )
+{
+    UINTN  Index;
+    
+    for (Index = 0; Index < SystemTable->NumberOfTableEntries; Index++) {
+        if (CompareGuid (&gEfiHobListGuid, &(SystemTable->ConfigurationTable[Index].VendorGuid))) {
+            *mHobListPtr = SystemTable->ConfigurationTable[Index].VendorTable;
+            return EFI_SUCCESS;
+        }
+    }
+    
+    return EFI_NOT_FOUND;
+}
+
+void sub_28F47(void *GuidHob)
+{
+    GuidHob_24 = GuidHob;
+}
+
+EFI_STATUS sub_28C58(
+                     IN EFI_HANDLE        ImageHandle,
+                     IN EFI_SYSTEM_TABLE  *SystemTable
+                     )
+{
+    EFI_STATUS  Status;
+    
+    // qword_B2090
+    mSystemTable = SystemTable;
+    // qword_B2098
+    mBootServices = SystemTable->BootServices;
+    // qword_B20A0
+    mRuntimeServices = SystemTable->RuntimeServices;
+    void* hobList = NULL;
+    Status = HobLibConstructorPtr (SystemTable,&hobList);
+    
+    void *GuidHob = GetNextGuidHob (&unknown_hob_guid, hobList);
+    if(GuidHob){
+        sub_28F47(GuidHob + 3);
+    }
+    return Status;
+}
+
+void* AllocatePool_malloc(UINTN bufferSize)
+{
+    void* bufferPtr = NULL; // [rsp+20h] [rbp-10h] BYREF
+    EFI_ALLOCATE_POOL AllocatePool = mBootServices->AllocatePool;
+    AllocatePool(4LL, bufferSize, &bufferPtr);
+    return bufferPtr;
+}
+
+
+
+UINT64* sub_7CE38528(void){
+    UINT64* result = qword_B01F8;
+    UINT64** buffer = NULL;
+    UINT64 v1 = 0;
+    if(qword_B01F8){
+        v1 = *(UINT64 *)(qword_B01F8 + 24);
+    }else{
+        buffer = AllocatePool_malloc(4096);
+        if(buffer == NULL){
+            DEBUG ((DEBUG_INFO,"AAPL: #[EB.M.GT|!] NULL <- EDK.ELAP\n"));
+        }
+        UINT64* v3 = qword_B01F8;
+        for (int i = 0LL; i != 508; i += 4LL )
+        {
+            UINT64* v1 = v3;
+            v3 = (UINT64*)&buffer[i];
+            buffer[i + 3] = v1;
+        }
+        result = (UINT64*)buffer + 504;
+        qword_B01F8 = result;
+        buffer[508] = (UINT64*)buffer;
+        buffer[510] = 0;
+        buffer[509] = 0;
+        buffer[511] = qword_B01F0;
+        qword_B01F0 = (UINT64*)buffer + 508;
+    }
+    qword_B01F8 = (UINT64*)v1;
+    result[3] = 0;
+    return result;
+}
+
+void* sub_1D2B1(UINTN bufferSize)
+{
+    void* buffer = NULL;
+    buffer = NULL;
+    /*
+     UINTN *v1; // rax
+     */
+    buffer = AllocatePool_malloc(bufferSize);
+    UINT64* v2 = sub_7CE38528();
+    
+    v2[0] = (UINT64)buffer;
+    v2[2] = 0LL;
+    v2[1] = 0LL;
+    v2[3] = (UINT64)qword_B01E8;
+    qword_B01E8 = (UINT64**)v2;
+    return buffer;
+}
 
 BOOLEAN _bittest64(UINT64 *a, int b)
 {
@@ -1213,10 +1238,10 @@ UINT64 sub_E5B0(void* buffer,UINT64 size){
 
 
 void sub_240B0(
-                  void        *DestinationBuffer,
-                  const void  *SourceBuffer,
-                  size_t      Length
-                  ){
+               void        *DestinationBuffer,
+               const void  *SourceBuffer,
+               size_t      Length
+               ){
     memcpy(DestinationBuffer, SourceBuffer, Length);
 }
 
@@ -1565,8 +1590,8 @@ EFI_STATUS sub_22DC7(unsigned int a1){
                                 }
                             }else if (qword_B2078 < qword_B2080){
                                 sub_11BA4(result, "efiboot", qword_B2080 - qword_B2078,
-                                             qword_B2078,
-                                             1);
+                                          qword_B2078,
+                                          1);
                             }
                         }
                     }
@@ -2399,97 +2424,120 @@ void sub_8FAD(void)
 EFI_STATUS sub_BA0F(void)
 {
     EFI_STATUS Status = RETURN_SUCCESS;
-
-  UINT64 v2; // rdi
+    
+    UINT64 v2; // rdi
     UINT64 v3; // rsi
-  UINT64 v4; // rdi
-  char *v5; // rcx
+    UINT64 v4; // rdi
+    char *v5; // rcx
     UINT64 v6; // rax
     UINT64 v7; // rbx
-  UINT64 v8; // rdx
-  char *v9; // rcx
-  UINT64 v10; // rax
-  UINT64 v11[5]; // [rsp+28h] [rbp-28h] BYREF
-
-  v11[0] = 64LL;
+    UINT64 v8; // rdx
+    char *v9; // rcx
+    UINT64 v10; // rax
+    UINT64 v11[5]; // [rsp+28h] [rbp-28h] BYREF
+    
+    v11[0] = 64LL;
     
     EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
     Status = GetVariable(
-                L"H",
-                &gAppleVendorVariableGuid,
-                0LL,
-                v11,
+                         L"H",
+                         &gAppleVendorVariableGuid,
+                         0LL,
+                         v11,
                          &unk_AE980);
-  if ( Status >= 0 )
-  {
-      DEBUG ((DEBUG_INFO,"AAPL: #[EB|BRD:NV] %e\n", &unk_AE980));
-    return Status;
-  }
+    if ( Status >= 0 )
+    {
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB|BRD:NV] %e\n", &unk_AE980));
+        return Status;
+    }
 #if 0
     Status = RETURN_NOT_FOUND;
-  if ( *(_QWORD *)(qword_B2090 + 104) )
-  {
-    v2 = *(_QWORD *)(qword_B2090 + 112);
-    v3 = 0LL;
-    while ( !sub_46304(v2, (UINT64)&unk_ADCC0) )
+    if ( *(_QWORD *)(qword_B2090 + 104) )
     {
-      ++v3;
-      v2 += 24LL;
-      if ( *(_QWORD *)(qword_B2090 + 104) <= v3 )
-        return v0;
-    }
-    v4 = *(_QWORD *)(v2 + 16);
-    if ( !sub_4632A(v4, "_SM_", 4LL) )
-    {
-      v5 = (char *)*(unsigned int *)(v4 + 24);
-      v6 = (unsigned int)v5 + *(unsigned __int16 *)(v4 + 22);
-      if ( (UINT64)v5 < v6 && (UINT64)(v5 + 4) <= v6 )
-      {
-        v7 = *(unsigned int *)(v4 + 24);
-        while ( 1 )
+        v2 = *(_QWORD *)(qword_B2090 + 112);
+        v3 = 0LL;
+        while ( !sub_46304(v2, (UINT64)&unk_ADCC0) )
         {
-          if ( *v5 == 2 )
-          {
-            if ( (UINT64)(v5 + 17) > v6 )
-              return v0;
-            if ( *(char *)(v7 + 5) )
-              break;
-          }
-          v8 = *(unsigned __int8 *)(v7 + 1);
-          v7 = (UINT64)&v5[v8];
-          if ( (UINT64)&v5[v8] < v6 )
-          {
-            v9 = &v5[v8 + 1];
-            while ( 1 )
-            {
-              v7 = (UINT64)v9;
-              if ( !*(v9 - 1) && (UINT64)v9 < v6 && !*v9 )
-                break;
-              ++v9;
-              if ( v7 >= v6 )
-                goto LABEL_23;
-            }
-            v7 = (UINT64)(v9 + 1);
-          }
-LABEL_23:
-          if ( v7 < v6 )
-          {
-            v5 = (char *)v7;
-            if ( v7 + 4 <= v6 )
-              continue;
-          }
-          return v0;
+            ++v3;
+            v2 += 24LL;
+            if ( *(_QWORD *)(qword_B2090 + 104) <= v3 )
+                return v0;
         }
-        v10 = sub_BBB2(&v5[*(unsigned __int8 *)(v7 + 1)]);
-        sub_282BC(&unk_AE980, v10, 64LL);
-        byte_AE9BF = 0;
-        sub_22C97(1LL, "#[EB|BRD:SMBIOS] %e\n", &unk_AE980);
-        return 0LL;
-      }
+        v4 = *(_QWORD *)(v2 + 16);
+        if ( !sub_4632A(v4, "_SM_", 4LL) )
+        {
+            v5 = (char *)*(unsigned int *)(v4 + 24);
+            v6 = (unsigned int)v5 + *(unsigned __int16 *)(v4 + 22);
+            if ( (UINT64)v5 < v6 && (UINT64)(v5 + 4) <= v6 )
+            {
+                v7 = *(unsigned int *)(v4 + 24);
+                while ( 1 )
+                {
+                    if ( *v5 == 2 )
+                    {
+                        if ( (UINT64)(v5 + 17) > v6 )
+                            return v0;
+                        if ( *(char *)(v7 + 5) )
+                            break;
+                    }
+                    v8 = *(unsigned __int8 *)(v7 + 1);
+                    v7 = (UINT64)&v5[v8];
+                    if ( (UINT64)&v5[v8] < v6 )
+                    {
+                        v9 = &v5[v8 + 1];
+                        while ( 1 )
+                        {
+                            v7 = (UINT64)v9;
+                            if ( !*(v9 - 1) && (UINT64)v9 < v6 && !*v9 )
+                                break;
+                            ++v9;
+                            if ( v7 >= v6 )
+                                goto LABEL_23;
+                        }
+                        v7 = (UINT64)(v9 + 1);
+                    }
+                LABEL_23:
+                    if ( v7 < v6 )
+                    {
+                        v5 = (char *)v7;
+                        if ( v7 + 4 <= v6 )
+                            continue;
+                    }
+                    return v0;
+                }
+                v10 = sub_BBB2(&v5[*(unsigned __int8 *)(v7 + 1)]);
+                sub_282BC(&unk_AE980, v10, 64LL);
+                byte_AE9BF = 0;
+                sub_22C97(1LL, "#[EB|BRD:SMBIOS] %e\n", &unk_AE980);
+                return 0LL;
+            }
+        }
     }
-  }
 #endif
-  return Status;
+    return Status;
+}
+
+const char *sub_E237(void)
+{
+    const char *result; // rax
+    
+    long rax = 1;
+    unsigned int rcx;
+    
+    asm volatile(
+                 "movq %1, %%rax\n\t"   // Move the value 1 to RAX register
+                 "cpuid\n\t"            // CPUID instruction
+                 : "=c" (rcx)           // Output constraint for RCX
+                 : "r" (rax)            // Input constraint for RAX
+                 : "rax", "rbx", "rdx"  // List of clobbered registers
+                 );
+    
+    result = "VMM";
+    if (rcx >= 0) {
+        return (const char *)&unk_AE980;
+    } else {
+        return result;
+    }
 }
 
 #pragma mark ========================================= functions end ==================================
@@ -2514,6 +2562,15 @@ UefiMain (
      */
     
     UINT64 v3 = 0;
+    UINT64 v6 = 0;
+    const char* v7 = 0;
+    
+    UINT64 v8; // rcx
+    UINT64 v9; // r8
+    
+    UINT64 v44[16]; // [rsp+30h] [rbp-190h] BYREF
+    UINT32 v45[18]; // [rsp+B0h] [rbp-110h] BYREF
+    EFI_OS_INFO_PROTOCOL* v59 = NULL;
     mImageHandle  = ImageHandle;
     mSystemTable = SystemTable;
     sub_28C58(ImageHandle,SystemTable);
@@ -2541,7 +2598,86 @@ UefiMain (
     if ( (qword_B1DE8 & 2) != 0 || qword_AD380 >= 3 )
         sub_15501(2LL);
     sub_8FAD();
-    sub_BA0F();
+    Status = sub_BA0F();
+    
+    EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+    
+    if ( Status < 0 )
+    {
+        DEBUG ((DEBUG_INFO,"AAPL: #[EB.B.MN|!] %r <- EB.BST.IPI\n", Status));
+    }
+    else
+    {
+        v7 = sub_E237();
+        
+        for (int i = 0; i < off_AD250_count; i++) {
+            if(strcmp(v7, off_AD250[i]) == 0){
+                break;
+            }
+            if(i == off_AD250_count){
+                goto LABEL_22;
+            }
+        }
+        
+        EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+        
+        v45[0] = 0;
+        v44[0] = 4LL;
+        
+        Status = GetVariable (
+                              L"e",
+                              &gEfiGlobalVariableGuid,
+                              NULL,
+                              v44,
+                              v45);
+        
+        
+        if ( Status < 0 )
+        {
+            v8 = qword_B1F28;
+            if ( qword_B1F28 )
+            {
+                v9 = 0LL;
+            }
+            else
+            {
+                
+                
+                Status = LocateProtocol ((EFI_GUID *)&qword_ADC40,
+                                         0LL,
+                                         (void**)&qword_B1F28);
+                
+                
+                v8 = qword_B1F28;
+            }
+            if ( v8 && v9 >= 0 )
+                (*(void (**)(void))(v8 + 24))();
+            else
+                DEBUG ((DEBUG_INFO,"AAPL: #[EB.B.IEP|!] %r <- BS.LocP %g\n", v9, &qword_ADC40));
+        }
+    }
+LABEL_22:
+    
+    
+    
+    Status = LocateProtocol (&gAppleOSLoadedNamedEventGuid,0LL, (void**)&v59);
+    
+    if ( Status >= 0 )
+    {
+        if ( v59->Revision )
+        {
+            sub_12453("Start OSName");
+            (*(void (**)(const char *))(v59->OSName))("macOS 11.0");
+            sub_12453("End OSName");
+            if ( v59->Revision >= 2u )
+            {
+                sub_12453("Start OSVendor");
+                (*(void ( **)(const char *))(v59->OSVendor))("Apple Inc.");
+                sub_12453("End OSVendor");
+            }
+        }
+    }
+    
     DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
