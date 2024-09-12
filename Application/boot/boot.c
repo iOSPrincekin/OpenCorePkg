@@ -38,7 +38,7 @@
 #include <Guid/HobList.h>
 #include <Guid/OcVariable.h>
 
-#pragma ============================== macro define begin ================================
+#pragma mark ============================== macro define begin ================================
 
 #define _AUPBND 1
 #define _ADNBND 1
@@ -53,12 +53,12 @@ typedef char *va_list;
 
 #define va_copy(d, s)        __builtin_va_copy(d, s)
 
-#pragma ======================================= macro define end ================================
+#pragma mark ======================================= macro define end ================================
 
 
 
 
-#pragma =============================== data struct define begin ================================
+#pragma mark =============================== data struct define begin ================================
 
 typedef struct StringStruct1 {
     void* string1;
@@ -76,13 +76,13 @@ typedef struct StringStruct2 {
 }StringStruct2;
 
 
-#pragma ==================================== data struct define end ================================
+#pragma mark ==================================== data struct define end ================================
 
 
 
 
 
-#pragma ========================================variable data begin ================================
+#pragma mark ========================================variable data begin ================================
 
 
 STATIC EFI_HANDLE  mImageHandle;
@@ -219,9 +219,9 @@ char* qword_B2080 = 0;
 UINT32 addr_FE03401C = 0xFE03401C;
 
 
-#pragma ============================== variable data end ================================
+#pragma mark ============================== variable data end ================================
 
-#pragma ============================== functions begin ================================
+#pragma mark ============================== functions begin ================================
 
 EFI_STATUS
 EFIAPI
@@ -2492,7 +2492,7 @@ LABEL_23:
   return Status;
 }
 
-#pragma ========================================= functions end ==================================
+#pragma mark ========================================= functions end ==================================
 
 EFI_STATUS
 EFIAPI
