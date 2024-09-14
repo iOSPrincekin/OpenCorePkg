@@ -665,6 +665,7 @@
 		35529AD22461768100CF8169 /* VirtualMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMemory.h; sourceTree = "<group>"; };
 		35529AD32461768100CF8169 /* ProcessorInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessorInfo.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		9B2D1F0B2C94DB970090B1E1 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		9B5567012C8ACF2600C3EB43 /* string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = string.h; sourceTree = "<group>"; };
 		9B5567022C8ACF2600C3EB43 /* string.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = string.c; sourceTree = "<group>"; };
 		9B5567032C8AD08300C3EB43 /* stddef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stddef.h; sourceTree = "<group>"; };
@@ -1802,6 +1803,7 @@
 			children = (
 				9B8E798E2C7E8D9D0007E2A5 /* boot.c */,
 				9B8E798D2C7E8D9D0007E2A5 /* boot.inf */,
+				9B2D1F0B2C94DB970090B1E1 /* defs.h */,
 				9B5567042C8AD19C00C3EB43 /* limits.h */,
 				9B5567032C8AD08300C3EB43 /* stddef.h */,
 				9B5567022C8ACF2600C3EB43 /* string.c */,
