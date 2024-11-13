@@ -27,6 +27,7 @@
 #include <Protocol/BlockIoCrypto.h>
 #include <Protocol/DiskIo.h>
 #include <Protocol/AppleSmcIo.h>
+#include <Protocol/AppleSecureBoot.h>
 
 
 #include <Library/UefiLib.h>
@@ -283,6 +284,12 @@ char *qword_AEE30 = NULL;
 char* qword_AEE38 = NULL;
 
 UINT64 qword_AEE40 = 0;
+
+UINT8 byte_AEF88 = 0;
+
+UINT64 qword_AEF90 = 0;
+
+UINT8 byte_AEF98 = 0;
 
 StringStruct1* qword_AEFA0 = NULL;
 
@@ -4352,6 +4359,32 @@ bool sub_4833()
   return byte_AD160 != 0;
 }
 
+UINT64 sub_11AC8()
+{
+  unsigned int v0; // esi
+  UINT64 v1; // rcx
+
+  v1 = qword_AEF90;
+  if ( !qword_AEF90 )
+  {
+    v0 = 0;
+      EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+
+    if ( LocateProtocol(&gAppleSecureBootProtocolGuid, 0LL, &qword_AEF90) < 0 )
+      return v0;
+    v1 = qword_AEF90;
+  }
+  (*(void (**)(UINT64, char *))(v1 + 16))(v1, &byte_AEF98);
+  LOBYTE(v0) = byte_AEF98;
+  if ( byte_AEF98 )
+  {
+    if ( byte_AEF98 == -126 )
+      byte_AEF88 = 1;
+    LOBYTE(v0) = 1;
+  }
+  return v0;
+}
+
 
 #pragma mark ========================================= functions end ==================================
 
@@ -4637,11 +4670,11 @@ LABEL_42:
     else
     {
         if ( !(UINT8)sub_11AC8() )
-            goto LABEL_52;
+            ;//   goto LABEL_52;
         v25 = 0x1000000LL;
         DEBUG ((DEBUG_INFO,"#[EB.B.MN|BM:+TB]\n"));
     }
-    qword_B1DE8 |= v21;
+    qword_B1DE8 |= v25;
     DEBUG ((DEBUG_INFO,"AAPL: This is a test boot.efi!!!\n"));
     
     return Status;
