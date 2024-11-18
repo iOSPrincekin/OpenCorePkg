@@ -45,12 +45,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct {
   UINT16      Version;
   UINT16      HeaderSize;
-  UINT32      RecordSize;
-  EFI_GUID    DataRecordGuid;
-  EFI_GUID    ProducerName;
-  UINT64      DataRecordClass;
-  EFI_TIME    LogTime;
-  UINT64      LogMonotonicCount;
+  UINT32      RecordSize;   // 8
+  EFI_GUID    DataRecordGuid;  // 24
+  EFI_GUID    ProducerName;   // 40
+  UINT64      DataRecordClass;  // 48
+  EFI_TIME    LogTime;    // 64
+  UINT64      LogMonotonicCount;  // 72
 } EFI_DATA_RECORD_HEADER;
 
 //
