@@ -31,7 +31,7 @@
 #include <Protocol/UserInterfaceTheme.h>
 #include <Protocol/UgaDraw.h>
 #include <Protocol/AppleFramebufferInfo.h>
-
+#include <Protocol/AppleImageConversion.h>
 
 
 #include <Library/UefiLib.h>
@@ -205,6 +205,30 @@ Word_E49A_Struct word_E49A = {
     {0xCF,0}
 };
 
+void sub_44281(void);
+
+__int64 sub_4424F(int a1, int a2, int a3, int a4);
+
+void sub_447BC(void);
+
+void sub_44808(void);
+
+void sub_448E2(void);
+
+void sub_4421D(void);
+
+void sub_44A5B(void);
+
+
+void* funcs_4421A[7] = {
+    sub_44281,
+    sub_4424F,
+    sub_447BC,
+    sub_44808,
+    sub_448E2,
+    sub_4421D,
+    sub_44A5B
+};
 
 UINT64* qword_4C5F8 = 0;
 
@@ -217,6 +241,8 @@ UINT64 qword_AA550 = 0;
 UINT64* qword_AA9D0 = NULL;
 
 UINT64* qword_AAA10 = NULL;
+
+UINT64* qword_AAA60 = NULL;
 
 UINT64* qword_AAA98 = NULL;
 
@@ -247,6 +273,8 @@ UINT8 byte_AD221 = 0;
 UINT32 dword_AD244 = 0;
 
 char off_AC720[0x18] = {0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0x3c,0,0,0,0,0,0,0};
+
+UINT64 off_AD210 = 0;
 
 #define off_AD250_count 10
 
@@ -332,6 +360,7 @@ UINT64 qword_ADFE8 = 0;
 //GraphConfig
 EFI_GUID unk_AE8DC = {0x03622D6D,0x362A,0x4E47,{0x97,0x10,0xC2,0x38,0xB2,0x37,0x55,0xC1}};
 
+UINT32 dword_AD958 = 0;
 
 void* qword_AE970 = 0;
 
@@ -340,6 +369,8 @@ UINT8 byte_AE978 = 0;
 char unk_AE980[0x3e] = {0};
 
 char *qword_AE9C0 = NULL;
+
+UINT64 qword_AEA20 = 0;
 
 char *qword_AEE30 = NULL;
 
@@ -385,6 +416,12 @@ UINT32 dword_AF110 = 0;
 
 UINT32 dword_AF114 = 0;
 
+UINT64 qword_AF118 = 0;
+
+UINT64 qword_AF120 = 0;
+
+UINT64 qword_AF128 = 0;
+
 UINT32 dword_AF130 = 0;
 
 UINT32 dword_AF134 = 0;
@@ -404,11 +441,17 @@ EFI_CONSOLE_CONTROL_SCREEN_MODE dword_AF158 = 0;
 
 EFI_CONSOLE_CONTROL_SCREEN_MODE dword_AF15C = 0;
 
+UINT64 qword_AF160 = 0;
+
+UINT64 qword_AF168 = 0;
+
 UINT32 dword_AF170 = 0;
 
 UINT64 qword_AF178 = 0;
 
 UINT64 qword_AF180 = 0;
+
+char* byte_AF1B0 = NULL;
 
 UINT64** qword_B01E8 = 0;
 
@@ -458,6 +501,8 @@ UINT32* qword_B0360 = (UINT32*)4261634048LL;
 
 UINT8 byte_B0370 = 0;
 
+UINT32 dword_B1D7C = 0;
+
 UINT8 byte_B1DC9 = 0;
 
 EFI_HANDLE qword_B1DD0 = NULL;
@@ -476,13 +521,15 @@ UINT64 qword_B1E00 = 0;
 
 UINT64 qword_B1E08 = 0;
 
-void* qword_B1E38 = 0;
+char byte_B1E10 = 0;
 
 void* qword_B1E18 = NULL;
 
 void* qword_B1E20 = 0;
 
 EFI_FILE_PROTOCOL* qword_B1E28 = NULL;
+
+void* qword_B1E38 = 0;
 
 UINT32 dword_B1E48 = 0;
 
@@ -503,6 +550,8 @@ VOID* qword_B1F28 = NULL;
 UINT8 byte_B1F30 = 0;
 
 UINT8 byte_B1F31 = 0;
+
+UINT64 qword_B1F38 = 0;
 
 EFI_DISK_IO_PROTOCOL* qword_B1F50 = NULL;
 
@@ -5791,15 +5840,16 @@ UINT64 sub_9014(void)
     if ( (UINT32)_RAX >= 0x80000001 )
     {
         _RAX = 1LL;
-        __asm { cpuid }
+        asm volatile ("cpuid");
+        
         if ( (_RCX & 0x10D01000) == 0x10D01000 )
         {
             _RAX = 7LL;
-            __asm { cpuid }
+            asm volatile ("cpuid");
             if ( (_RBX & 0x128) == 0x128 )
             {
                 _RAX = 2147483649LL;
-                __asm { cpuid }
+                asm volatile ("cpuid");
                 if ( (_RCX & 0x20) != 0 )
                     return 0LL;
             }
@@ -10777,6 +10827,3998 @@ char  sub_16556(UINT64 a1, _DWORD *a2)
     return v3;
 }
 
+UINT64 _byteswap_uint64 (UINT64 Operand);
+
+UINT64 sub_28800(UINT64 a1, UINT64 a2, UINT64 *a3, UINT64 a4)
+{
+    UINT64 *v6; // rdx
+    UINT64 result; // rax
+    UINT64 v8; // r12
+    bool v9; // cf
+    UINT64 v10; // rsi
+    UINT64 v11; // rcx
+    UINT64 v12; // r9
+    UINT64 v13; // r8
+    UINT64 v14; // r9
+    UINT64 v15; // r10
+    UINT64 v16; // r8
+    UINT64 v17; // r10
+    UINT64 v18; // r8
+    UINT64 v19; // r9
+    bool v20; // cc
+    char v21; // r9
+    UINT64 v22; // r10
+    UINT64 v23; // r10
+    UINT64 v24; // r8
+    UINT64 v25; // r10
+    UINT64 v26; // r8
+    UINT64 v27; // r8
+    UINT64 v28; // r11
+    UINT64 v29; // r8
+    UINT64 v30; // r11
+    
+    v6 = a3;
+    result = 0LL;
+    v8 = 0LL;
+    v9 = a2 < 8;
+    v10 = a2 - 8;
+    if ( v9 )
+        return 0LL;
+    v11 = (UINT64)a3 + a4 - 8;
+    if ( (UINT64)a3 > v11 )
+        return 0LL;
+    v12 = *(UINT8 *)a3;
+    v13 = *a3;
+    switch ( *(_BYTE *)v6 )
+    {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 8:
+        case 9:
+        case 0xA:
+        case 0xB:
+        case 0xC:
+        case 0xD:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+        case 0x14:
+        case 0x15:
+        case 0x18:
+        case 0x19:
+        case 0x1A:
+        case 0x1B:
+        case 0x1C:
+        case 0x1D:
+        case 0x20:
+        case 0x21:
+        case 0x22:
+        case 0x23:
+        case 0x24:
+        case 0x25:
+        case 0x28:
+        case 0x29:
+        case 0x2A:
+        case 0x2B:
+        case 0x2C:
+        case 0x2D:
+        case 0x30:
+        case 0x31:
+        case 0x32:
+        case 0x33:
+        case 0x34:
+        case 0x35:
+        case 0x38:
+        case 0x39:
+        case 0x3A:
+        case 0x3B:
+        case 0x3C:
+        case 0x3D:
+        case 0x40:
+        case 0x41:
+        case 0x42:
+        case 0x43:
+        case 0x44:
+        case 0x45:
+        case 0x48:
+        case 0x49:
+        case 0x4A:
+        case 0x4B:
+        case 0x4C:
+        case 0x4D:
+        case 0x50:
+        case 0x51:
+        case 0x52:
+        case 0x53:
+        case 0x54:
+        case 0x55:
+        case 0x58:
+        case 0x59:
+        case 0x5A:
+        case 0x5B:
+        case 0x5C:
+        case 0x5D:
+        case 0x60:
+        case 0x61:
+        case 0x62:
+        case 0x63:
+        case 0x64:
+        case 0x65:
+        case 0x68:
+        case 0x69:
+        case 0x6A:
+        case 0x6B:
+        case 0x6C:
+        case 0x6D:
+        case 0x80:
+        case 0x81:
+        case 0x82:
+        case 0x83:
+        case 0x84:
+        case 0x85:
+        case 0x88:
+        case 0x89:
+        case 0x8A:
+        case 0x8B:
+        case 0x8C:
+        case 0x8D:
+        case 0x90:
+        case 0x91:
+        case 0x92:
+        case 0x93:
+        case 0x94:
+        case 0x95:
+        case 0x98:
+        case 0x99:
+        case 0x9A:
+        case 0x9B:
+        case 0x9C:
+        case 0x9D:
+        case 0xC0:
+        case 0xC1:
+        case 0xC2:
+        case 0xC3:
+        case 0xC4:
+        case 0xC5:
+        case 0xC8:
+        case 0xC9:
+        case 0xCA:
+        case 0xCB:
+        case 0xCC:
+        case 0xCD:
+        LABEL_6:
+            v14 = v12 >> 6;
+            v6 = (UINT64 *)((char *)v6 + v14 + 2);
+            if ( (UINT64)v6 > v11 )
+                return 0LL;
+            v15 = _byteswap_uint64(v13);
+            v8 = (32 * v15) >> 53;
+            v16 = v13 >> 16;
+            v17 = ((4 * v15) >> 61) + 3;
+            goto LABEL_8;
+        case 6:
+            return result;
+        case 7:
+        case 0xF:
+        case 0x17:
+        case 0x1F:
+        case 0x27:
+        case 0x2F:
+        case 0x37:
+        case 0x3F:
+        case 0x47:
+        case 0x4F:
+        case 0x57:
+        case 0x5F:
+        case 0x67:
+        case 0x6F:
+        case 0x87:
+        case 0x8F:
+        case 0x97:
+        case 0x9F:
+        case 0xC7:
+        case 0xCF:
+        LABEL_23:
+            v14 = v12 >> 6;
+            v6 = (UINT64 *)((char *)v6 + v14 + 3);
+            if ( (UINT64)v6 > v11 )
+                return 0LL;
+            v23 = v13 & 0x38;
+            v24 = v13 >> 8;
+            v8 = (UINT16)v24;
+            v16 = v24 >> 16;
+            v17 = (v23 >> 3) + 3;
+            goto LABEL_8;
+        case 0xE:
+        case 0x16:
+        LABEL_4:
+            while ( 2 )
+            {
+                v6 = (UINT64 *)((char *)v6 + 1);
+                if ( (UINT64)v6 > v11 )
+                    return 0LL;
+                v12 = *(UINT8 *)v6;
+                v13 = *v6;
+                switch ( *(_BYTE *)v6 )
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 8:
+                    case 9:
+                    case 0xA:
+                    case 0xB:
+                    case 0xC:
+                    case 0xD:
+                    case 0x10:
+                    case 0x11:
+                    case 0x12:
+                    case 0x13:
+                    case 0x14:
+                    case 0x15:
+                    case 0x18:
+                    case 0x19:
+                    case 0x1A:
+                    case 0x1B:
+                    case 0x1C:
+                    case 0x1D:
+                    case 0x20:
+                    case 0x21:
+                    case 0x22:
+                    case 0x23:
+                    case 0x24:
+                    case 0x25:
+                    case 0x28:
+                    case 0x29:
+                    case 0x2A:
+                    case 0x2B:
+                    case 0x2C:
+                    case 0x2D:
+                    case 0x30:
+                    case 0x31:
+                    case 0x32:
+                    case 0x33:
+                    case 0x34:
+                    case 0x35:
+                    case 0x38:
+                    case 0x39:
+                    case 0x3A:
+                    case 0x3B:
+                    case 0x3C:
+                    case 0x3D:
+                    case 0x40:
+                    case 0x41:
+                    case 0x42:
+                    case 0x43:
+                    case 0x44:
+                    case 0x45:
+                    case 0x48:
+                    case 0x49:
+                    case 0x4A:
+                    case 0x4B:
+                    case 0x4C:
+                    case 0x4D:
+                    case 0x50:
+                    case 0x51:
+                    case 0x52:
+                    case 0x53:
+                    case 0x54:
+                    case 0x55:
+                    case 0x58:
+                    case 0x59:
+                    case 0x5A:
+                    case 0x5B:
+                    case 0x5C:
+                    case 0x5D:
+                    case 0x60:
+                    case 0x61:
+                    case 0x62:
+                    case 0x63:
+                    case 0x64:
+                    case 0x65:
+                    case 0x68:
+                    case 0x69:
+                    case 0x6A:
+                    case 0x6B:
+                    case 0x6C:
+                    case 0x6D:
+                    case 0x80:
+                    case 0x81:
+                    case 0x82:
+                    case 0x83:
+                    case 0x84:
+                    case 0x85:
+                    case 0x88:
+                    case 0x89:
+                    case 0x8A:
+                    case 0x8B:
+                    case 0x8C:
+                    case 0x8D:
+                    case 0x90:
+                    case 0x91:
+                    case 0x92:
+                    case 0x93:
+                    case 0x94:
+                    case 0x95:
+                    case 0x98:
+                    case 0x99:
+                    case 0x9A:
+                    case 0x9B:
+                    case 0x9C:
+                    case 0x9D:
+                    case 0xC0:
+                    case 0xC1:
+                    case 0xC2:
+                    case 0xC3:
+                    case 0xC4:
+                    case 0xC5:
+                    case 0xC8:
+                    case 0xC9:
+                    case 0xCA:
+                    case 0xCB:
+                    case 0xCC:
+                    case 0xCD:
+                        goto LABEL_6;
+                    case 6:
+                        return result;
+                    case 7:
+                    case 0xF:
+                    case 0x17:
+                    case 0x1F:
+                    case 0x27:
+                    case 0x2F:
+                    case 0x37:
+                    case 0x3F:
+                    case 0x47:
+                    case 0x4F:
+                    case 0x57:
+                    case 0x5F:
+                    case 0x67:
+                    case 0x6F:
+                    case 0x87:
+                    case 0x8F:
+                    case 0x97:
+                    case 0x9F:
+                    case 0xC7:
+                    case 0xCF:
+                        goto LABEL_23;
+                    case 0xE:
+                    case 0x16:
+                        continue;
+                    case 0x1E:
+                    case 0x26:
+                    case 0x2E:
+                    case 0x36:
+                    case 0x3E:
+                    case 0x70:
+                    case 0x71:
+                    case 0x72:
+                    case 0x73:
+                    case 0x74:
+                    case 0x75:
+                    case 0x76:
+                    case 0x77:
+                    case 0x78:
+                    case 0x79:
+                    case 0x7A:
+                    case 0x7B:
+                    case 0x7C:
+                    case 0x7D:
+                    case 0x7E:
+                    case 0x7F:
+                    case 0xD0:
+                    case 0xD1:
+                    case 0xD2:
+                    case 0xD3:
+                    case 0xD4:
+                    case 0xD5:
+                    case 0xD6:
+                    case 0xD7:
+                    case 0xD8:
+                    case 0xD9:
+                    case 0xDA:
+                    case 0xDB:
+                    case 0xDC:
+                    case 0xDD:
+                    case 0xDE:
+                    case 0xDF:
+                        return 0LL;
+                    case 0x46:
+                    case 0x4E:
+                    case 0x56:
+                    case 0x5E:
+                    case 0x66:
+                    case 0x6E:
+                    case 0x86:
+                    case 0x8E:
+                    case 0x96:
+                    case 0x9E:
+                    case 0xC6:
+                    case 0xCE:
+                        goto LABEL_21;
+                    case 0xA0:
+                    case 0xA1:
+                    case 0xA2:
+                    case 0xA3:
+                    case 0xA4:
+                    case 0xA5:
+                    case 0xA6:
+                    case 0xA7:
+                    case 0xA8:
+                    case 0xA9:
+                    case 0xAA:
+                    case 0xAB:
+                    case 0xAC:
+                    case 0xAD:
+                    case 0xAE:
+                    case 0xAF:
+                    case 0xB0:
+                    case 0xB1:
+                    case 0xB2:
+                    case 0xB3:
+                    case 0xB4:
+                    case 0xB5:
+                    case 0xB6:
+                    case 0xB7:
+                    case 0xB8:
+                    case 0xB9:
+                    case 0xBA:
+                    case 0xBB:
+                    case 0xBC:
+                    case 0xBD:
+                    case 0xBE:
+                    case 0xBF:
+                        goto LABEL_25;
+                    case 0xE0:
+                        goto LABEL_35;
+                    case 0xE1:
+                    case 0xE2:
+                    case 0xE3:
+                    case 0xE4:
+                    case 0xE5:
+                    case 0xE6:
+                    case 0xE7:
+                    case 0xE8:
+                    case 0xE9:
+                    case 0xEA:
+                    case 0xEB:
+                    case 0xEC:
+                    case 0xED:
+                    case 0xEE:
+                    case 0xEF:
+                        goto LABEL_34;
+                    case 0xF0:
+                        goto LABEL_29;
+                    case 0xF1:
+                    case 0xF2:
+                    case 0xF3:
+                    case 0xF4:
+                    case 0xF5:
+                    case 0xF6:
+                    case 0xF7:
+                    case 0xF8:
+                    case 0xF9:
+                    case 0xFA:
+                    case 0xFB:
+                    case 0xFC:
+                    case 0xFD:
+                    case 0xFE:
+                    case 0xFF:
+                        goto LABEL_27;
+                }
+            }
+            return result;
+        case 0x1E:
+        case 0x26:
+        case 0x2E:
+        case 0x36:
+        case 0x3E:
+        case 0x70:
+        case 0x71:
+        case 0x72:
+        case 0x73:
+        case 0x74:
+        case 0x75:
+        case 0x76:
+        case 0x77:
+        case 0x78:
+        case 0x79:
+        case 0x7A:
+        case 0x7B:
+        case 0x7C:
+        case 0x7D:
+        case 0x7E:
+        case 0x7F:
+        case 0xD0:
+        case 0xD1:
+        case 0xD2:
+        case 0xD3:
+        case 0xD4:
+        case 0xD5:
+        case 0xD6:
+        case 0xD7:
+        case 0xD8:
+        case 0xD9:
+        case 0xDA:
+        case 0xDB:
+        case 0xDC:
+        case 0xDD:
+        case 0xDE:
+        case 0xDF:
+            return 0LL;
+        case 0x46:
+        case 0x4E:
+        case 0x56:
+        case 0x5E:
+        case 0x66:
+        case 0x6E:
+        case 0x86:
+        case 0x8E:
+        case 0x96:
+        case 0x9E:
+        case 0xC6:
+        case 0xCE:
+        LABEL_21:
+            v14 = v12 >> 6;
+            v6 = (UINT64 *)((char *)v6 + v14 + 1);
+            if ( (UINT64)v6 > v11 )
+                return 0LL;
+            v22 = v13 & 0x38;
+            v16 = v13 >> 8;
+            v17 = (v22 >> 3) + 3;
+            goto LABEL_8;
+        case 0xA0:
+        case 0xA1:
+        case 0xA2:
+        case 0xA3:
+        case 0xA4:
+        case 0xA5:
+        case 0xA6:
+        case 0xA7:
+        case 0xA8:
+        case 0xA9:
+        case 0xAA:
+        case 0xAB:
+        case 0xAC:
+        case 0xAD:
+        case 0xAE:
+        case 0xAF:
+        case 0xB0:
+        case 0xB1:
+        case 0xB2:
+        case 0xB3:
+        case 0xB4:
+        case 0xB5:
+        case 0xB6:
+        case 0xB7:
+        case 0xB8:
+        case 0xB9:
+        case 0xBA:
+        case 0xBB:
+        case 0xBC:
+        case 0xBD:
+        case 0xBE:
+        case 0xBF:
+        LABEL_25:
+            while ( 2 )
+            {
+                while ( 2 )
+                {
+                    v14 = (v12 >> 3) & 3;
+                    v6 = (UINT64 *)((char *)v6 + v14 + 3);
+                    if ( (UINT64)v6 > v11 )
+                        return 0LL;
+                    v25 = v13 & 0x307;
+                    v26 = v13 >> 10;
+                    v17 = ((4LL * (UINT8)v25) | (v25 >> 8)) + 3;
+                    v8 = v26 & 0x3FFF;
+                    v16 = v26 >> 14;
+                LABEL_8:
+                    if ( v17 + result + v14 >= v10 )
+                    {
+                        for ( ; v14; --v14 )
+                        {
+                            *(_BYTE *)(a1 + result++) = v16;
+                            if ( v10 + 8 == result )
+                                return result;
+                            v16 >>= 8;
+                        }
+                        v18 = result - v8;
+                        if ( result < v8 )
+                            return 0LL;
+                    }
+                    else
+                    {
+                        *(_QWORD *)(a1 + result) = v16;
+                        result += v14;
+                        v18 = result - v8;
+                        if ( result < v8 )
+                            return 0LL;
+                        if ( v8 >= 8 )
+                        {
+                            do
+                            {
+                            LABEL_11:
+                                v19 = *(_QWORD *)(a1 + v18);
+                                v18 += 8LL;
+                                *(_QWORD *)(a1 + result) = v19;
+                                result += 8LL;
+                                v20 = v17 <= 8;
+                                v17 -= 8LL;
+                            }
+                            while ( !v20 );
+                            result += v17;
+                            v12 = *(UINT8 *)v6;
+                            v13 = *v6;
+                            switch ( *(_BYTE *)v6 )
+                            {
+                                case 0:
+                                case 1:
+                                case 2:
+                                case 3:
+                                case 4:
+                                case 5:
+                                case 8:
+                                case 9:
+                                case 0xA:
+                                case 0xB:
+                                case 0xC:
+                                case 0xD:
+                                case 0x10:
+                                case 0x11:
+                                case 0x12:
+                                case 0x13:
+                                case 0x14:
+                                case 0x15:
+                                case 0x18:
+                                case 0x19:
+                                case 0x1A:
+                                case 0x1B:
+                                case 0x1C:
+                                case 0x1D:
+                                case 0x20:
+                                case 0x21:
+                                case 0x22:
+                                case 0x23:
+                                case 0x24:
+                                case 0x25:
+                                case 0x28:
+                                case 0x29:
+                                case 0x2A:
+                                case 0x2B:
+                                case 0x2C:
+                                case 0x2D:
+                                case 0x30:
+                                case 0x31:
+                                case 0x32:
+                                case 0x33:
+                                case 0x34:
+                                case 0x35:
+                                case 0x38:
+                                case 0x39:
+                                case 0x3A:
+                                case 0x3B:
+                                case 0x3C:
+                                case 0x3D:
+                                case 0x40:
+                                case 0x41:
+                                case 0x42:
+                                case 0x43:
+                                case 0x44:
+                                case 0x45:
+                                case 0x48:
+                                case 0x49:
+                                case 0x4A:
+                                case 0x4B:
+                                case 0x4C:
+                                case 0x4D:
+                                case 0x50:
+                                case 0x51:
+                                case 0x52:
+                                case 0x53:
+                                case 0x54:
+                                case 0x55:
+                                case 0x58:
+                                case 0x59:
+                                case 0x5A:
+                                case 0x5B:
+                                case 0x5C:
+                                case 0x5D:
+                                case 0x60:
+                                case 0x61:
+                                case 0x62:
+                                case 0x63:
+                                case 0x64:
+                                case 0x65:
+                                case 0x68:
+                                case 0x69:
+                                case 0x6A:
+                                case 0x6B:
+                                case 0x6C:
+                                case 0x6D:
+                                case 0x80:
+                                case 0x81:
+                                case 0x82:
+                                case 0x83:
+                                case 0x84:
+                                case 0x85:
+                                case 0x88:
+                                case 0x89:
+                                case 0x8A:
+                                case 0x8B:
+                                case 0x8C:
+                                case 0x8D:
+                                case 0x90:
+                                case 0x91:
+                                case 0x92:
+                                case 0x93:
+                                case 0x94:
+                                case 0x95:
+                                case 0x98:
+                                case 0x99:
+                                case 0x9A:
+                                case 0x9B:
+                                case 0x9C:
+                                case 0x9D:
+                                case 0xC0:
+                                case 0xC1:
+                                case 0xC2:
+                                case 0xC3:
+                                case 0xC4:
+                                case 0xC5:
+                                case 0xC8:
+                                case 0xC9:
+                                case 0xCA:
+                                case 0xCB:
+                                case 0xCC:
+                                case 0xCD:
+                                    goto LABEL_6;
+                                case 6:
+                                    return result;
+                                case 7:
+                                case 0xF:
+                                case 0x17:
+                                case 0x1F:
+                                case 0x27:
+                                case 0x2F:
+                                case 0x37:
+                                case 0x3F:
+                                case 0x47:
+                                case 0x4F:
+                                case 0x57:
+                                case 0x5F:
+                                case 0x67:
+                                case 0x6F:
+                                case 0x87:
+                                case 0x8F:
+                                case 0x97:
+                                case 0x9F:
+                                case 0xC7:
+                                case 0xCF:
+                                    goto LABEL_23;
+                                case 0xE:
+                                case 0x16:
+                                    goto LABEL_4;
+                                case 0x1E:
+                                case 0x26:
+                                case 0x2E:
+                                case 0x36:
+                                case 0x3E:
+                                case 0x70:
+                                case 0x71:
+                                case 0x72:
+                                case 0x73:
+                                case 0x74:
+                                case 0x75:
+                                case 0x76:
+                                case 0x77:
+                                case 0x78:
+                                case 0x79:
+                                case 0x7A:
+                                case 0x7B:
+                                case 0x7C:
+                                case 0x7D:
+                                case 0x7E:
+                                case 0x7F:
+                                case 0xD0:
+                                case 0xD1:
+                                case 0xD2:
+                                case 0xD3:
+                                case 0xD4:
+                                case 0xD5:
+                                case 0xD6:
+                                case 0xD7:
+                                case 0xD8:
+                                case 0xD9:
+                                case 0xDA:
+                                case 0xDB:
+                                case 0xDC:
+                                case 0xDD:
+                                case 0xDE:
+                                case 0xDF:
+                                    return 0LL;
+                                case 0x46:
+                                case 0x4E:
+                                case 0x56:
+                                case 0x5E:
+                                case 0x66:
+                                case 0x6E:
+                                case 0x86:
+                                case 0x8E:
+                                case 0x96:
+                                case 0x9E:
+                                case 0xC6:
+                                case 0xCE:
+                                    goto LABEL_21;
+                                case 0xA0:
+                                case 0xA1:
+                                case 0xA2:
+                                case 0xA3:
+                                case 0xA4:
+                                case 0xA5:
+                                case 0xA6:
+                                case 0xA7:
+                                case 0xA8:
+                                case 0xA9:
+                                case 0xAA:
+                                case 0xAB:
+                                case 0xAC:
+                                case 0xAD:
+                                case 0xAE:
+                                case 0xAF:
+                                case 0xB0:
+                                case 0xB1:
+                                case 0xB2:
+                                case 0xB3:
+                                case 0xB4:
+                                case 0xB5:
+                                case 0xB6:
+                                case 0xB7:
+                                case 0xB8:
+                                case 0xB9:
+                                case 0xBA:
+                                case 0xBB:
+                                case 0xBC:
+                                case 0xBD:
+                                case 0xBE:
+                                case 0xBF:
+                                    continue;
+                                case 0xE0:
+                                    goto LABEL_35;
+                                case 0xE1:
+                                case 0xE2:
+                                case 0xE3:
+                                case 0xE4:
+                                case 0xE5:
+                                case 0xE6:
+                                case 0xE7:
+                                case 0xE8:
+                                case 0xE9:
+                                case 0xEA:
+                                case 0xEB:
+                                case 0xEC:
+                                case 0xED:
+                                case 0xEE:
+                                case 0xEF:
+                                    goto LABEL_34;
+                                case 0xF0:
+                                    goto LABEL_29;
+                                case 0xF1:
+                                case 0xF2:
+                                case 0xF3:
+                                case 0xF4:
+                                case 0xF5:
+                                case 0xF6:
+                                case 0xF7:
+                                case 0xF8:
+                                case 0xF9:
+                                case 0xFA:
+                                case 0xFB:
+                                case 0xFC:
+                                case 0xFD:
+                                case 0xFE:
+                                case 0xFF:
+                                    goto LABEL_27;
+                            }
+                            return result;
+                        }
+                    }
+                    break;
+                }
+            LABEL_17:
+                if ( !v8 )
+                    return 0LL;
+                do
+                {
+                    v21 = *(_BYTE *)(a1 + v18++);
+                    *(_BYTE *)(a1 + result++) = v21;
+                    if ( v10 + 8 == result )
+                        return result;
+                    --v17;
+                }
+                while ( v17 );
+                v12 = *(UINT8 *)v6;
+                v13 = *v6;
+                switch ( *(_BYTE *)v6 )
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 8:
+                    case 9:
+                    case 0xA:
+                    case 0xB:
+                    case 0xC:
+                    case 0xD:
+                    case 0x10:
+                    case 0x11:
+                    case 0x12:
+                    case 0x13:
+                    case 0x14:
+                    case 0x15:
+                    case 0x18:
+                    case 0x19:
+                    case 0x1A:
+                    case 0x1B:
+                    case 0x1C:
+                    case 0x1D:
+                    case 0x20:
+                    case 0x21:
+                    case 0x22:
+                    case 0x23:
+                    case 0x24:
+                    case 0x25:
+                    case 0x28:
+                    case 0x29:
+                    case 0x2A:
+                    case 0x2B:
+                    case 0x2C:
+                    case 0x2D:
+                    case 0x30:
+                    case 0x31:
+                    case 0x32:
+                    case 0x33:
+                    case 0x34:
+                    case 0x35:
+                    case 0x38:
+                    case 0x39:
+                    case 0x3A:
+                    case 0x3B:
+                    case 0x3C:
+                    case 0x3D:
+                    case 0x40:
+                    case 0x41:
+                    case 0x42:
+                    case 0x43:
+                    case 0x44:
+                    case 0x45:
+                    case 0x48:
+                    case 0x49:
+                    case 0x4A:
+                    case 0x4B:
+                    case 0x4C:
+                    case 0x4D:
+                    case 0x50:
+                    case 0x51:
+                    case 0x52:
+                    case 0x53:
+                    case 0x54:
+                    case 0x55:
+                    case 0x58:
+                    case 0x59:
+                    case 0x5A:
+                    case 0x5B:
+                    case 0x5C:
+                    case 0x5D:
+                    case 0x60:
+                    case 0x61:
+                    case 0x62:
+                    case 0x63:
+                    case 0x64:
+                    case 0x65:
+                    case 0x68:
+                    case 0x69:
+                    case 0x6A:
+                    case 0x6B:
+                    case 0x6C:
+                    case 0x6D:
+                    case 0x80:
+                    case 0x81:
+                    case 0x82:
+                    case 0x83:
+                    case 0x84:
+                    case 0x85:
+                    case 0x88:
+                    case 0x89:
+                    case 0x8A:
+                    case 0x8B:
+                    case 0x8C:
+                    case 0x8D:
+                    case 0x90:
+                    case 0x91:
+                    case 0x92:
+                    case 0x93:
+                    case 0x94:
+                    case 0x95:
+                    case 0x98:
+                    case 0x99:
+                    case 0x9A:
+                    case 0x9B:
+                    case 0x9C:
+                    case 0x9D:
+                    case 0xC0:
+                    case 0xC1:
+                    case 0xC2:
+                    case 0xC3:
+                    case 0xC4:
+                    case 0xC5:
+                    case 0xC8:
+                    case 0xC9:
+                    case 0xCA:
+                    case 0xCB:
+                    case 0xCC:
+                    case 0xCD:
+                        goto LABEL_6;
+                    case 6:
+                        return result;
+                    case 7:
+                    case 0xF:
+                    case 0x17:
+                    case 0x1F:
+                    case 0x27:
+                    case 0x2F:
+                    case 0x37:
+                    case 0x3F:
+                    case 0x47:
+                    case 0x4F:
+                    case 0x57:
+                    case 0x5F:
+                    case 0x67:
+                    case 0x6F:
+                    case 0x87:
+                    case 0x8F:
+                    case 0x97:
+                    case 0x9F:
+                    case 0xC7:
+                    case 0xCF:
+                        goto LABEL_23;
+                    case 0xE:
+                    case 0x16:
+                        goto LABEL_4;
+                    case 0x1E:
+                    case 0x26:
+                    case 0x2E:
+                    case 0x36:
+                    case 0x3E:
+                    case 0x70:
+                    case 0x71:
+                    case 0x72:
+                    case 0x73:
+                    case 0x74:
+                    case 0x75:
+                    case 0x76:
+                    case 0x77:
+                    case 0x78:
+                    case 0x79:
+                    case 0x7A:
+                    case 0x7B:
+                    case 0x7C:
+                    case 0x7D:
+                    case 0x7E:
+                    case 0x7F:
+                    case 0xD0:
+                    case 0xD1:
+                    case 0xD2:
+                    case 0xD3:
+                    case 0xD4:
+                    case 0xD5:
+                    case 0xD6:
+                    case 0xD7:
+                    case 0xD8:
+                    case 0xD9:
+                    case 0xDA:
+                    case 0xDB:
+                    case 0xDC:
+                    case 0xDD:
+                    case 0xDE:
+                    case 0xDF:
+                        return 0LL;
+                    case 0x46:
+                    case 0x4E:
+                    case 0x56:
+                    case 0x5E:
+                    case 0x66:
+                    case 0x6E:
+                    case 0x86:
+                    case 0x8E:
+                    case 0x96:
+                    case 0x9E:
+                    case 0xC6:
+                    case 0xCE:
+                        goto LABEL_21;
+                    case 0xA0:
+                    case 0xA1:
+                    case 0xA2:
+                    case 0xA3:
+                    case 0xA4:
+                    case 0xA5:
+                    case 0xA6:
+                    case 0xA7:
+                    case 0xA8:
+                    case 0xA9:
+                    case 0xAA:
+                    case 0xAB:
+                    case 0xAC:
+                    case 0xAD:
+                    case 0xAE:
+                    case 0xAF:
+                    case 0xB0:
+                    case 0xB1:
+                    case 0xB2:
+                    case 0xB3:
+                    case 0xB4:
+                    case 0xB5:
+                    case 0xB6:
+                    case 0xB7:
+                    case 0xB8:
+                    case 0xB9:
+                    case 0xBA:
+                    case 0xBB:
+                    case 0xBC:
+                    case 0xBD:
+                    case 0xBE:
+                    case 0xBF:
+                        continue;
+                    case 0xE0:
+                        goto LABEL_35;
+                    case 0xE1:
+                    case 0xE2:
+                    case 0xE3:
+                    case 0xE4:
+                    case 0xE5:
+                    case 0xE6:
+                    case 0xE7:
+                    case 0xE8:
+                    case 0xE9:
+                    case 0xEA:
+                    case 0xEB:
+                    case 0xEC:
+                    case 0xED:
+                    case 0xEE:
+                    case 0xEF:
+                        goto LABEL_34;
+                    case 0xF0:
+                        goto LABEL_29;
+                    case 0xF1:
+                    case 0xF2:
+                    case 0xF3:
+                    case 0xF4:
+                    case 0xF5:
+                    case 0xF6:
+                    case 0xF7:
+                    case 0xF8:
+                    case 0xF9:
+                    case 0xFA:
+                    case 0xFB:
+                    case 0xFC:
+                    case 0xFD:
+                    case 0xFE:
+                    case 0xFF:
+                        goto LABEL_27;
+                }
+            }
+            return result;
+        case 0xE0:
+        LABEL_35:
+            v27 = BYTE1(v13) + 16LL;
+            v6 = (UINT64 *)((char *)v6 + v27 + 2);
+            goto LABEL_36;
+        case 0xE1:
+        case 0xE2:
+        case 0xE3:
+        case 0xE4:
+        case 0xE5:
+        case 0xE6:
+        case 0xE7:
+        case 0xE8:
+        case 0xE9:
+        case 0xEA:
+        case 0xEB:
+        case 0xEC:
+        case 0xED:
+        case 0xEE:
+        case 0xEF:
+        LABEL_34:
+            while ( 2 )
+            {
+                v27 = v13 & 0xF;
+                v6 = (UINT64 *)((char *)v6 + v27 + 1);
+            LABEL_36:
+                if ( (UINT64)v6 > v11 )
+                    return 0LL;
+                v28 = result + v27;
+                v29 = -v27;
+                if ( v28 > v10 )
+                {
+                    do
+                    {
+                        *(_BYTE *)(a1 + result++) = *((_BYTE *)v6 + v29);
+                        if ( v10 + 8 == result )
+                            return result;
+                        ++v29;
+                    }
+                    while ( v29 );
+                    v12 = *(UINT8 *)v6;
+                    v13 = *v6;
+                    switch ( *(_BYTE *)v6 )
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 8:
+                        case 9:
+                        case 0xA:
+                        case 0xB:
+                        case 0xC:
+                        case 0xD:
+                        case 0x10:
+                        case 0x11:
+                        case 0x12:
+                        case 0x13:
+                        case 0x14:
+                        case 0x15:
+                        case 0x18:
+                        case 0x19:
+                        case 0x1A:
+                        case 0x1B:
+                        case 0x1C:
+                        case 0x1D:
+                        case 0x20:
+                        case 0x21:
+                        case 0x22:
+                        case 0x23:
+                        case 0x24:
+                        case 0x25:
+                        case 0x28:
+                        case 0x29:
+                        case 0x2A:
+                        case 0x2B:
+                        case 0x2C:
+                        case 0x2D:
+                        case 0x30:
+                        case 0x31:
+                        case 0x32:
+                        case 0x33:
+                        case 0x34:
+                        case 0x35:
+                        case 0x38:
+                        case 0x39:
+                        case 0x3A:
+                        case 0x3B:
+                        case 0x3C:
+                        case 0x3D:
+                        case 0x40:
+                        case 0x41:
+                        case 0x42:
+                        case 0x43:
+                        case 0x44:
+                        case 0x45:
+                        case 0x48:
+                        case 0x49:
+                        case 0x4A:
+                        case 0x4B:
+                        case 0x4C:
+                        case 0x4D:
+                        case 0x50:
+                        case 0x51:
+                        case 0x52:
+                        case 0x53:
+                        case 0x54:
+                        case 0x55:
+                        case 0x58:
+                        case 0x59:
+                        case 0x5A:
+                        case 0x5B:
+                        case 0x5C:
+                        case 0x5D:
+                        case 0x60:
+                        case 0x61:
+                        case 0x62:
+                        case 0x63:
+                        case 0x64:
+                        case 0x65:
+                        case 0x68:
+                        case 0x69:
+                        case 0x6A:
+                        case 0x6B:
+                        case 0x6C:
+                        case 0x6D:
+                        case 0x80:
+                        case 0x81:
+                        case 0x82:
+                        case 0x83:
+                        case 0x84:
+                        case 0x85:
+                        case 0x88:
+                        case 0x89:
+                        case 0x8A:
+                        case 0x8B:
+                        case 0x8C:
+                        case 0x8D:
+                        case 0x90:
+                        case 0x91:
+                        case 0x92:
+                        case 0x93:
+                        case 0x94:
+                        case 0x95:
+                        case 0x98:
+                        case 0x99:
+                        case 0x9A:
+                        case 0x9B:
+                        case 0x9C:
+                        case 0x9D:
+                        case 0xC0:
+                        case 0xC1:
+                        case 0xC2:
+                        case 0xC3:
+                        case 0xC4:
+                        case 0xC5:
+                        case 0xC8:
+                        case 0xC9:
+                        case 0xCA:
+                        case 0xCB:
+                        case 0xCC:
+                        case 0xCD:
+                            goto LABEL_6;
+                        case 6:
+                            return result;
+                        case 7:
+                        case 0xF:
+                        case 0x17:
+                        case 0x1F:
+                        case 0x27:
+                        case 0x2F:
+                        case 0x37:
+                        case 0x3F:
+                        case 0x47:
+                        case 0x4F:
+                        case 0x57:
+                        case 0x5F:
+                        case 0x67:
+                        case 0x6F:
+                        case 0x87:
+                        case 0x8F:
+                        case 0x97:
+                        case 0x9F:
+                        case 0xC7:
+                        case 0xCF:
+                            goto LABEL_23;
+                        case 0xE:
+                        case 0x16:
+                            goto LABEL_4;
+                        case 0x1E:
+                        case 0x26:
+                        case 0x2E:
+                        case 0x36:
+                        case 0x3E:
+                        case 0x70:
+                        case 0x71:
+                        case 0x72:
+                        case 0x73:
+                        case 0x74:
+                        case 0x75:
+                        case 0x76:
+                        case 0x77:
+                        case 0x78:
+                        case 0x79:
+                        case 0x7A:
+                        case 0x7B:
+                        case 0x7C:
+                        case 0x7D:
+                        case 0x7E:
+                        case 0x7F:
+                        case 0xD0:
+                        case 0xD1:
+                        case 0xD2:
+                        case 0xD3:
+                        case 0xD4:
+                        case 0xD5:
+                        case 0xD6:
+                        case 0xD7:
+                        case 0xD8:
+                        case 0xD9:
+                        case 0xDA:
+                        case 0xDB:
+                        case 0xDC:
+                        case 0xDD:
+                        case 0xDE:
+                        case 0xDF:
+                            return 0LL;
+                        case 0x46:
+                        case 0x4E:
+                        case 0x56:
+                        case 0x5E:
+                        case 0x66:
+                        case 0x6E:
+                        case 0x86:
+                        case 0x8E:
+                        case 0x96:
+                        case 0x9E:
+                        case 0xC6:
+                        case 0xCE:
+                            goto LABEL_21;
+                        case 0xA0:
+                        case 0xA1:
+                        case 0xA2:
+                        case 0xA3:
+                        case 0xA4:
+                        case 0xA5:
+                        case 0xA6:
+                        case 0xA7:
+                        case 0xA8:
+                        case 0xA9:
+                        case 0xAA:
+                        case 0xAB:
+                        case 0xAC:
+                        case 0xAD:
+                        case 0xAE:
+                        case 0xAF:
+                        case 0xB0:
+                        case 0xB1:
+                        case 0xB2:
+                        case 0xB3:
+                        case 0xB4:
+                        case 0xB5:
+                        case 0xB6:
+                        case 0xB7:
+                        case 0xB8:
+                        case 0xB9:
+                        case 0xBA:
+                        case 0xBB:
+                        case 0xBC:
+                        case 0xBD:
+                        case 0xBE:
+                        case 0xBF:
+                            goto LABEL_25;
+                        case 0xE0:
+                            goto LABEL_35;
+                        case 0xE1:
+                        case 0xE2:
+                        case 0xE3:
+                        case 0xE4:
+                        case 0xE5:
+                        case 0xE6:
+                        case 0xE7:
+                        case 0xE8:
+                        case 0xE9:
+                        case 0xEA:
+                        case 0xEB:
+                        case 0xEC:
+                        case 0xED:
+                        case 0xEE:
+                        case 0xEF:
+                            continue;
+                        case 0xF0:
+                            goto LABEL_29;
+                        case 0xF1:
+                        case 0xF2:
+                        case 0xF3:
+                        case 0xF4:
+                        case 0xF5:
+                        case 0xF6:
+                        case 0xF7:
+                        case 0xF8:
+                        case 0xF9:
+                        case 0xFA:
+                        case 0xFB:
+                        case 0xFC:
+                        case 0xFD:
+                        case 0xFE:
+                        case 0xFF:
+                            goto LABEL_27;
+                    }
+                }
+                else
+                {
+                    v30 = a1 + v28;
+                    do
+                    {
+                        *(_QWORD *)(v30 + v29) = *(UINT64 *)((char *)v6 + v29);
+                        v9 = __CFADD__(v29, 8LL);
+                        v29 += 8LL;
+                    }
+                    while ( !v9 );
+                    result = v30 - a1;
+                    v12 = *(UINT8 *)v6;
+                    v13 = *v6;
+                    switch ( *(_BYTE *)v6 )
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 8:
+                        case 9:
+                        case 0xA:
+                        case 0xB:
+                        case 0xC:
+                        case 0xD:
+                        case 0x10:
+                        case 0x11:
+                        case 0x12:
+                        case 0x13:
+                        case 0x14:
+                        case 0x15:
+                        case 0x18:
+                        case 0x19:
+                        case 0x1A:
+                        case 0x1B:
+                        case 0x1C:
+                        case 0x1D:
+                        case 0x20:
+                        case 0x21:
+                        case 0x22:
+                        case 0x23:
+                        case 0x24:
+                        case 0x25:
+                        case 0x28:
+                        case 0x29:
+                        case 0x2A:
+                        case 0x2B:
+                        case 0x2C:
+                        case 0x2D:
+                        case 0x30:
+                        case 0x31:
+                        case 0x32:
+                        case 0x33:
+                        case 0x34:
+                        case 0x35:
+                        case 0x38:
+                        case 0x39:
+                        case 0x3A:
+                        case 0x3B:
+                        case 0x3C:
+                        case 0x3D:
+                        case 0x40:
+                        case 0x41:
+                        case 0x42:
+                        case 0x43:
+                        case 0x44:
+                        case 0x45:
+                        case 0x48:
+                        case 0x49:
+                        case 0x4A:
+                        case 0x4B:
+                        case 0x4C:
+                        case 0x4D:
+                        case 0x50:
+                        case 0x51:
+                        case 0x52:
+                        case 0x53:
+                        case 0x54:
+                        case 0x55:
+                        case 0x58:
+                        case 0x59:
+                        case 0x5A:
+                        case 0x5B:
+                        case 0x5C:
+                        case 0x5D:
+                        case 0x60:
+                        case 0x61:
+                        case 0x62:
+                        case 0x63:
+                        case 0x64:
+                        case 0x65:
+                        case 0x68:
+                        case 0x69:
+                        case 0x6A:
+                        case 0x6B:
+                        case 0x6C:
+                        case 0x6D:
+                        case 0x80:
+                        case 0x81:
+                        case 0x82:
+                        case 0x83:
+                        case 0x84:
+                        case 0x85:
+                        case 0x88:
+                        case 0x89:
+                        case 0x8A:
+                        case 0x8B:
+                        case 0x8C:
+                        case 0x8D:
+                        case 0x90:
+                        case 0x91:
+                        case 0x92:
+                        case 0x93:
+                        case 0x94:
+                        case 0x95:
+                        case 0x98:
+                        case 0x99:
+                        case 0x9A:
+                        case 0x9B:
+                        case 0x9C:
+                        case 0x9D:
+                        case 0xC0:
+                        case 0xC1:
+                        case 0xC2:
+                        case 0xC3:
+                        case 0xC4:
+                        case 0xC5:
+                        case 0xC8:
+                        case 0xC9:
+                        case 0xCA:
+                        case 0xCB:
+                        case 0xCC:
+                        case 0xCD:
+                            goto LABEL_6;
+                        case 6:
+                            return result;
+                        case 7:
+                        case 0xF:
+                        case 0x17:
+                        case 0x1F:
+                        case 0x27:
+                        case 0x2F:
+                        case 0x37:
+                        case 0x3F:
+                        case 0x47:
+                        case 0x4F:
+                        case 0x57:
+                        case 0x5F:
+                        case 0x67:
+                        case 0x6F:
+                        case 0x87:
+                        case 0x8F:
+                        case 0x97:
+                        case 0x9F:
+                        case 0xC7:
+                        case 0xCF:
+                            goto LABEL_23;
+                        case 0xE:
+                        case 0x16:
+                            goto LABEL_4;
+                        case 0x1E:
+                        case 0x26:
+                        case 0x2E:
+                        case 0x36:
+                        case 0x3E:
+                        case 0x70:
+                        case 0x71:
+                        case 0x72:
+                        case 0x73:
+                        case 0x74:
+                        case 0x75:
+                        case 0x76:
+                        case 0x77:
+                        case 0x78:
+                        case 0x79:
+                        case 0x7A:
+                        case 0x7B:
+                        case 0x7C:
+                        case 0x7D:
+                        case 0x7E:
+                        case 0x7F:
+                        case 0xD0:
+                        case 0xD1:
+                        case 0xD2:
+                        case 0xD3:
+                        case 0xD4:
+                        case 0xD5:
+                        case 0xD6:
+                        case 0xD7:
+                        case 0xD8:
+                        case 0xD9:
+                        case 0xDA:
+                        case 0xDB:
+                        case 0xDC:
+                        case 0xDD:
+                        case 0xDE:
+                        case 0xDF:
+                            return 0LL;
+                        case 0x46:
+                        case 0x4E:
+                        case 0x56:
+                        case 0x5E:
+                        case 0x66:
+                        case 0x6E:
+                        case 0x86:
+                        case 0x8E:
+                        case 0x96:
+                        case 0x9E:
+                        case 0xC6:
+                        case 0xCE:
+                            goto LABEL_21;
+                        case 0xA0:
+                        case 0xA1:
+                        case 0xA2:
+                        case 0xA3:
+                        case 0xA4:
+                        case 0xA5:
+                        case 0xA6:
+                        case 0xA7:
+                        case 0xA8:
+                        case 0xA9:
+                        case 0xAA:
+                        case 0xAB:
+                        case 0xAC:
+                        case 0xAD:
+                        case 0xAE:
+                        case 0xAF:
+                        case 0xB0:
+                        case 0xB1:
+                        case 0xB2:
+                        case 0xB3:
+                        case 0xB4:
+                        case 0xB5:
+                        case 0xB6:
+                        case 0xB7:
+                        case 0xB8:
+                        case 0xB9:
+                        case 0xBA:
+                        case 0xBB:
+                        case 0xBC:
+                        case 0xBD:
+                        case 0xBE:
+                        case 0xBF:
+                            goto LABEL_25;
+                        case 0xE0:
+                            goto LABEL_35;
+                        case 0xE1:
+                        case 0xE2:
+                        case 0xE3:
+                        case 0xE4:
+                        case 0xE5:
+                        case 0xE6:
+                        case 0xE7:
+                        case 0xE8:
+                        case 0xE9:
+                        case 0xEA:
+                        case 0xEB:
+                        case 0xEC:
+                        case 0xED:
+                        case 0xEE:
+                        case 0xEF:
+                            continue;
+                        case 0xF0:
+                            goto LABEL_29;
+                        case 0xF1:
+                        case 0xF2:
+                        case 0xF3:
+                        case 0xF4:
+                        case 0xF5:
+                        case 0xF6:
+                        case 0xF7:
+                        case 0xF8:
+                        case 0xF9:
+                        case 0xFA:
+                        case 0xFB:
+                        case 0xFC:
+                        case 0xFD:
+                        case 0xFE:
+                        case 0xFF:
+                            goto LABEL_27;
+                    }
+                }
+            }
+        case 0xF0:
+        LABEL_29:
+            v6 = (UINT64 *)((char *)v6 + 2);
+            if ( (UINT64)v6 > v11 )
+                return 0LL;
+            v17 = BYTE1(v13) + 16LL;
+            goto LABEL_31;
+        case 0xF1:
+        case 0xF2:
+        case 0xF3:
+        case 0xF4:
+        case 0xF5:
+        case 0xF6:
+        case 0xF7:
+        case 0xF8:
+        case 0xF9:
+        case 0xFA:
+        case 0xFB:
+        case 0xFC:
+        case 0xFD:
+        case 0xFE:
+        case 0xFF:
+        LABEL_27:
+            v6 = (UINT64 *)((char *)v6 + 1);
+            if ( (UINT64)v6 > v11 )
+                return 0LL;
+            v17 = v13 & 0xF;
+        LABEL_31:
+            v18 = result - v8;
+            if ( result + v17 >= v10 || v8 < 8 )
+                goto LABEL_17;
+            goto LABEL_11;
+    }
+    return result;
+}
+
+_BYTE* sub_1BA91(_BYTE *a1, char *a2, int a3)
+{
+    UINT64 i; // rax
+    UINT64 v4; // r8
+    UINT64 v5; // r15
+    UINT64 v6; // r11
+    _BYTE *v7; // rax
+    UINT64 v8; // r11
+    UINT64 v9; // rdi
+    UINT64 v10; // rsi
+    char v11; // bl
+    char v12; // bl
+    
+    for ( i = 0LL; i != 4078; ++i )
+        byte_AF1B0[i] = 32;
+    v4 = (UINT64)&a2[a3];
+    v5 = 4078LL;
+    v6 = 0LL;
+    v7 = a1;
+    while ( 1 )
+    {
+        while ( 1 )
+        {
+            if ( (v6 & 0x200) != 0 )
+            {
+                v6 >>= 1;
+            }
+            else
+            {
+                if ( (UINT64)a2 >= v4 )
+                    return (_BYTE *)(v7 - a1);
+                v8 = (UINT8)*a2++;
+                v6 = v8 | 0xFF00;
+            }
+            if ( (v6 & 1) == 0 )
+                break;
+            if ( (UINT64)a2 >= v4 )
+                return (_BYTE *)(v7 - a1);
+            v12 = *a2++;
+            *v7++ = v12;
+            byte_AF1B0[v5] = v12;
+            v5 = ((_WORD)v5 + 1) & 0xFFF;
+        }
+        if ( (UINT64)a2 >= v4 || (UINT64)(a2 + 1) >= v4 )
+            break;
+        v9 = (UINT8)*a2 | (UINT64)((16 * (UINT8)a2[1]) & 0xF00);
+        v10 = (a2[1] & 0xF) + 3LL;
+        do
+        {
+            v11 = byte_AF1B0[v9 & 0xFFF];
+            *v7++ = v11;
+            byte_AF1B0[v5] = v11;
+            v5 = ((int)v5 + 1) & 0xFFFLL;
+            ++v9;
+            --v10;
+        }
+        while ( v10 );
+        a2 += 2;
+    }
+    return (_BYTE *)(v7 - a1);
+}
+
+UINT64 sub_6955(UINT64 a1, UINT64 *a2, _QWORD *a3, _QWORD *a4)
+{
+    UINT64 v4; // rsi
+    UINT64 v8; // r14
+    void* v9; // r12
+    char v10; // al
+    UINT64 v11; // rax
+    UINT64 v12; // r13
+    char v13; // al
+    UINT64 v14; // rax
+    unsigned int v15; // r8d
+    UINT64 v16; // rcx
+    UINT64 v17; // rdx
+    UINT64 v18; // rbx
+    UINT64 v19; // rsi
+    char v20; // bl
+    _QWORD *v23; // [rsp+30h] [rbp-40h]
+    
+    v4 = 0x8000000000000002uLL;
+    if ( !a1 || !a2 )
+        return v4;
+    v8 = *(UINT16 *)(a1 + 16) * (UINT64)*(UINT16 *)(a1 + 18);
+    v9 = sub_1D2B1((UINTN)v8);
+    v10 = *(_BYTE *)(a1 + 20);
+    if ( v10 )
+    {
+        if ( v10 != 1 )
+            goto LABEL_13;
+        v11 = sub_28800(v9, v8, *(_QWORD *)(a1 + 24), *(unsigned int *)(a1 + 32));
+    }
+    else
+    {
+        v11 = sub_1BA91(v9, *(_QWORD *)(a1 + 24), *(unsigned int *)(a1 + 32));
+    }
+    if ( v11 && v11 == v8 )
+    {
+        v23 = a4;
+        if ( *(_QWORD *)(a1 + 40) )
+        {
+            v12 = sub_1D2B1(v8);
+            v13 = *(_BYTE *)(a1 + 20);
+            if ( v13 )
+            {
+                if ( v13 != 1 )
+                    goto LABEL_26;
+                v14 = sub_28800(v12, v8, *(_QWORD *)(a1 + 40), *(unsigned int *)(a1 + 48));
+            }
+            else
+            {
+                v14 = sub_1BA91(v12, *(_QWORD *)(a1 + 40), *(unsigned int *)(a1 + 48));
+            }
+            if ( !v14 || v14 != v8 )
+                goto LABEL_26;
+        }
+        else
+        {
+            v12 = 0LL;
+        }
+        *a2 = sub_1D2B1(4 * v8);
+        if ( !v8 )
+        {
+        LABEL_25:
+            *a3 = *(UINT16 *)(a1 + 16);
+            *v23 = *(UINT16 *)(a1 + 18);
+            v4 = 0LL;
+            goto LABEL_27;
+        }
+        v15 = *(_DWORD *)(a1 + 64);
+        v16 = 0LL;
+        while ( 1 )
+        {
+            v17 = *(UINT8 *)(v9 + v16);
+            if ( v15 <= (unsigned int)v17 )
+                break;
+            v18 = *(_QWORD *)(a1 + 56);
+            v19 = *a2;
+            *(_BYTE *)(v19 + 4 * v16 + 2) = *(_BYTE *)(v18 + 3 * v17);
+            *(_BYTE *)(v19 + 4 * v16 + 1) = *(_BYTE *)(v18 + 3 * v17 + 1);
+            *(_BYTE *)(v19 + 4 * v16) = *(_BYTE *)(v18 + 3 * v17 + 2);
+            if ( v12 )
+                v20 = *(_BYTE *)(v12 + v16);
+            else
+                v20 = -1;
+            *(_BYTE *)(v19 + 4 * v16++ + 3) = v20;
+            if ( v8 == v16 )
+                goto LABEL_25;
+        }
+    LABEL_26:
+        v4 = 0x8000000000000001uLL;
+    LABEL_27:
+        if ( v12 )
+            sub_1D327(v12);
+        goto LABEL_29;
+    }
+LABEL_13:
+    v4 = 0x8000000000000001uLL;
+LABEL_29:
+    if ( v9 )
+        sub_1D327(v9);
+    return v4;
+}
+
+UINT64 sub_6B00(char *a1, UINT64 a2, UINT64 a3, UINT64 a4)
+{
+    
+    UINT64* v4 = (UINT64*)off_AD210;
+    if ( !off_AD210 )
+        return 0x800000000000000EuLL;
+    while ( (unsigned int)sub_28246(a1, (char*)v4[1]) )
+    {
+        v4 = (UINT64*)*v4;
+        if ( !v4 )
+            return 0x800000000000000EuLL;
+    }
+    return sub_6955(v4, a2, a3, a4);
+}
+
+void sub_16D7E(UINT64 a1, UINT64 a2)
+{
+    UINT64 i; // rax
+    UINT16 v3; // r8
+    
+    if ( a1 && a2 )
+    {
+        for ( i = 0LL; i != a2; ++i )
+        {
+            v3 = *(UINT8 *)(a1 + 4 * i + 3);
+            *(_BYTE *)(a1 + 4 * i + 2) = (UINT16)(v3 * *(UINT8 *)(a1 + 4 * i + 2)
+                                                  + (v3 ^ 0xFF) * BYTE2(dword_AD818)) >> 8;
+            *(_BYTE *)(a1 + 4 * i + 1) = (UINT16)(v3 * *(UINT8 *)(a1 + 4 * i + 1)
+                                                  + (v3 ^ 0xFF) * BYTE1(dword_AD818)) >> 8;
+            *(_BYTE *)(a1 + 4 * i) = (UINT16)(v3 * *(UINT8 *)(a1 + 4 * i)
+                                              + (v3 ^ 0xFF) * (UINT8)dword_AD818) >> 8;
+            *(_BYTE *)(a1 + 4 * i + 3) = -1;
+        }
+    }
+}
+
+UINT64 sub_15CE7(UINT64 a1, UINT64 a2, UINT64 a3, UINT64 a4, UINT64 a5)
+{
+    UINT64 result; // rax
+    
+    result = qword_B1F20;
+    if ( qword_B1F20 )
+        return (*(UINT64 (**)(UINT64, UINT64, UINT64, _QWORD, _QWORD, UINT64, UINT64, UINT64, UINT64, _QWORD))(result + 16))(
+                                                                                                                             result,
+                                                                                                                             a5,
+                                                                                                                             2LL,
+                                                                                                                             0LL,
+                                                                                                                             0LL,
+                                                                                                                             a1,
+                                                                                                                             a2,
+                                                                                                                             a3,
+                                                                                                                             a4,
+                                                                                                                             0LL);
+    result = qword_B1F18;
+    if ( qword_B1F18 )
+        return (*(UINT64 (**)(UINT64, UINT64, UINT64, _QWORD, _QWORD, UINT64, UINT64, UINT64, UINT64, _QWORD))(result + 16))(
+                                                                                                                             result,
+                                                                                                                             a5,
+                                                                                                                             2LL,
+                                                                                                                             0LL,
+                                                                                                                             0LL,
+                                                                                                                             a1,
+                                                                                                                             a2,
+                                                                                                                             a3,
+                                                                                                                             a4,
+                                                                                                                             0LL);
+    return result;
+}
+
+UINT64 sub_1702B(void)
+{
+    UINT64 v0; // r10
+    
+    v0 = 0LL;
+    if ( (UINT64)(qword_AF168 + 1) <= 0x11 )
+        v0 = qword_AF168 + 1;
+    qword_AF168 = v0;
+    return sub_15CE7(
+                     ((UINT64)(unsigned int)dword_AF110 - qword_AF118) >> 1,
+                     qword_AF128 + (((UINT64)(unsigned int)dword_AF114 - qword_AF120) >> 1),
+                     qword_AF118,
+                     qword_AF120,
+                     qword_AF160 + 4 * v0 * qword_AF118 * qword_AF120);
+}
+
+UINT64 sub_16EC5(void)
+{
+    UINT8 v0; // cf
+    const char *v1; // rdx
+    const char *v2; // rcx
+    UINT64 v3; // rax
+    UINT64 result; // rax
+    
+    v0 = _bittest64((UINT64 *)&qword_B1DE8, 0x12u);
+    v1 = "NetBootBlack";
+    if ( !v0 )
+        v1 = "NetBoot";
+    v2 = "NetBootBlack2X";
+    if ( !v0 )
+        v2 = "NetBoot2X";
+    v3 = 400LL;
+    if ( !byte_B1F30 )
+    {
+        v3 = 200LL;
+        v2 = v1;
+    }
+    qword_AF128 = v3;
+    EFI_CREATE_EVENT CreateEvent = mBootServices->CreateEvent;
+    EFI_SET_TIMER SetTimer = mBootServices->SetTimer;
+    EFI_CLOSE_EVENT CloseEvent = mBootServices->CloseEvent;
+    result = sub_6B00((char*)v2, (UINT64)&qword_AF160, (UINT64)&qword_AF118, (UINT64)&qword_AF120);
+    if ( result >= 0 )
+    {
+        sub_16D7E(qword_AF160, qword_AF118 * qword_AF120);
+        qword_AF120 /= 0x12uLL;
+        qword_AF168 = 0LL;
+        sub_15CE7(
+                  ((UINT64)(unsigned int)dword_AF110 - qword_AF118) >> 1,
+                  qword_AF128 + (((UINT64)(unsigned int)dword_AF114 - qword_AF120) >> 1),
+                  qword_AF118,
+                  qword_AF120,
+                  qword_AF160);
+        result = CreateEvent(
+                             2147484160LL,
+                             16LL,
+                             sub_1702B,
+                             0LL,
+                             &qword_B1F38);
+        if ( result >= 0 )
+        {
+            result = SetTimer(qword_B1F38, 1LL, 1000000LL);
+            if ( result < 0 )
+            {
+                result = CloseEvent(qword_B1F38);
+                qword_B1F38 = 0LL;
+            }
+        }
+    }
+    return result;
+}
+
+UINT64 sub_468F6(UINT64 a1, char a2)
+{
+    return a1 << a2;
+}
+
+UINT64 sub_46904(UINT64 a1, UINT64 a2)
+{
+    return a2 * a1;
+}
+
+UINT64 sub_322F7(signed int a1, int a2)
+{
+    UINT64 v2; // rax
+    int v3; // edi
+    UINT64 v4; // rsi
+    UINT64 v5; // rax
+    UINT64 v6; // rax
+    
+    if ( !a2 )
+        return 0xFFFFFFFFLL;
+    v2 = (unsigned int)-a1;
+    if ( -a1 < 1 )
+        v2 = (unsigned int)a1;
+    v3 = 1 - 2 * (a1 >= 0);
+    v4 = (unsigned int)-a2;
+    if ( -a2 < 1 )
+        v4 = (unsigned int)a2;
+    if ( a2 >= 0 )
+        v3 = 2 * (a1 >= 0) - 1;
+    v5 = sub_468F6(v2, 16LL);
+    v6 = sub_4691F(v5, v4, 0LL);
+    return sub_46904(v6, v3);
+}
+
+UINT64 sub_32363(int a1, int a2)
+{
+    return sub_322F7((unsigned int)(a1 << 16), (unsigned int)(a2 << 16));
+}
+
+UINT64 sub_32253(int a1)
+{
+    return (unsigned int)(a1 << 16);
+}
+
+__int64 sub_3228C(signed int a1, int a2);
+
+__int64 sub_3227F(signed int a1, int a2)
+{
+    return sub_3228C(a1, a2 << 16);
+}
+
+__int64 sub_3228C(signed int a1, int a2)
+{
+    __int64 v2; // r8
+    int v3; // esi
+    __int64 v4; // rax
+    __int64 v5; // rax
+    __int64 v6; // rax
+    
+    v2 = (unsigned int)-a1;
+    if ( -a1 < 1 )
+        v2 = (unsigned int)a1;
+    v3 = 1 - 2 * (a1 >= 0);
+    v4 = (unsigned int)-a2;
+    if ( -a2 < 1 )
+        v4 = (unsigned int)a2;
+    if ( a2 >= 0 )
+        v3 = 2 * (a1 >= 0) - 1;
+    v5 = sub_46904(v2, v4);
+    v6 = sub_46911(v5, 16LL);
+    return sub_46904(v6, v3);
+}
+
+__int64 sub_322EA(signed int a1, int a2)
+{
+    return sub_322F7(a1, a2 << 16);
+}
+
+__int64 sub_3225E(int a1)
+{
+    if ( a1 < 0 )
+        return (unsigned int)-sub_3225E((unsigned int)-a1);
+    else
+        return HIWORD(a1);
+}
+
+__int64 sub_152A7(__int64 a1, __int64 a2, __int64 a3, __int64 a4)
+{
+    __int64 result; // rax
+    
+    result = qword_B1F20;
+    if ( qword_B1F20 )
+        return (*(__int64 (**)(__int64, int *, _QWORD, _QWORD, _QWORD, __int64, __int64, __int64, __int64, _QWORD))(result + 16))(
+                                                                                                                                  result,
+                                                                                                                                  &dword_AD818,
+                                                                                                                                  0LL,
+                                                                                                                                  0LL,
+                                                                                                                                  0LL,
+                                                                                                                                  a1,
+                                                                                                                                  a2,
+                                                                                                                                  a3,
+                                                                                                                                  a4,
+                                                                                                                                  0LL);
+    result = qword_B1F18;
+    if ( qword_B1F18 )
+        return (*(__int64 (**)(__int64, int *, _QWORD, _QWORD, _QWORD, __int64, __int64, __int64, __int64, _QWORD))(result + 16))(
+                                                                                                                                  result,
+                                                                                                                                  &dword_AD818,
+                                                                                                                                  0LL,
+                                                                                                                                  0LL,
+                                                                                                                                  0LL,
+                                                                                                                                  a1,
+                                                                                                                                  a2,
+                                                                                                                                  a3,
+                                                                                                                                  a4,
+                                                                                                                                  0LL);
+    return result;
+}
+
+__int64 sub_389A1(int a1)
+{
+    int v1; // esi
+    int v2; // eax
+    
+    v1 = a1 >> 31;
+    v2 = sub_3225E(a1);
+    return sub_32253(v2 + v1);
+}
+
+__int64 sub_44B8E(int *a1)
+{
+    __int64 v2; // rcx
+    void (*v3)(__int64); // rdx
+    __int64 v4; // rdi
+    __int64 v5; // rbx
+    __int64 result; // rax
+    
+    if ( a1 )
+    {
+        v2 = *((_QWORD *)a1 + 1);
+        if ( v2 )
+        {
+            v3 = *(void (**)(__int64))(qword_B2098 + 72);
+            if ( *a1 > 0 )
+            {
+                v4 = 8LL;
+                v5 = 0LL;
+                do
+                {
+                    v3(*(_QWORD *)(v2 + v4));
+                    ++v5;
+                    v3 = *(void (**)(__int64))(qword_B2098 + 72);
+                    v2 = *((_QWORD *)a1 + 1);
+                    v4 += 16LL;
+                }
+                while ( v5 < *a1 );
+            }
+            v3(v2);
+        }
+        return (*(__int64 (**)(int *))(qword_B2098 + 72))(a1);
+    }
+    return result;
+}
+
+unsigned __int64 sub_44C06(int a1, int a2, __int64 a3, int **a4)
+{
+    int v6; // r12d
+    unsigned __int64 v7; // r15
+    int v8; // r14d
+    int *v9; // rax
+    int *v10; // rbx
+    __int64 v11; // rax
+    __int64 v12; // rcx
+    __int64 v13; // rbx
+    int v14; // eax
+    unsigned int v15; // eax
+    __int64 v16; // rdi
+    int v17; // eax
+    int v18; // ecx
+    int v19; // eax
+    __int64 v20; // rdx
+    unsigned int v21; // r14d
+    int v22; // eax
+    int v23; // r13d
+    __int64 v24; // rdx
+    int v25; // eax
+    int v26; // esi
+    int v27; // eax
+    __int64 v28; // rdi
+    __int64 v29; // rax
+    bool v30; // zf
+    unsigned __int64 v31; // rax
+    int *v32; // rbx
+    int v33; // r12d
+    int v34; // r15d
+    int *v35; // r14
+    int v36; // edi
+    int v37; // eax
+    int v38; // ecx
+    int v39; // esi
+    int v40; // eax
+    __int64 (*v41)(_QWORD); // rbx
+    unsigned int v42; // eax
+    signed int v43; // eax
+    int v44; // eax
+    __int64 v45; // rcx
+    __int64 v46; // rdx
+    __int64 v47; // rcx
+    __int64 v48; // rsi
+    int v49; // eax
+    int v51; // [rsp+28h] [rbp-98h]
+    int **v52; // [rsp+38h] [rbp-88h]
+    __int64 v53; // [rsp+40h] [rbp-80h]
+    __int64 v55; // [rsp+58h] [rbp-68h]
+    __int64 v56; // [rsp+60h] [rbp-60h]
+    int v57; // [rsp+68h] [rbp-58h]
+    int v58; // [rsp+6Ch] [rbp-54h]
+    int v59; // [rsp+70h] [rbp-50h]
+    int v60; // [rsp+74h] [rbp-4Ch]
+    int *v61; // [rsp+78h] [rbp-48h]
+    int v62; // [rsp+84h] [rbp-3Ch]
+    
+    v6 = a1;
+    v7 = 0x8000000000000009uLL;
+    v8 = sub_32363(a2, a1);
+    v9 = (int *)sub_28E94(16LL);
+    if ( v9 )
+    {
+        v10 = v9;
+        *v9 = a2;
+        v11 = sub_28E94(16LL * a2);
+        *((_QWORD *)v10 + 1) = v11;
+        if ( v11 )
+        {
+            v52 = a4;
+            if ( a2 <= 0 )
+            {
+            LABEL_33:
+                *v52 = v10;
+                return 0LL;
+            }
+            v61 = v10;
+            v53 = (unsigned int)a2;
+            v12 = 0LL;
+            v13 = v11;
+            v59 = v6;
+            v60 = v8;
+            while ( 2 )
+            {
+                v56 = v12;
+                v14 = sub_32253(v12);
+                v15 = sub_322F7(v14 + 0x8000, v8);
+                v16 = v15;
+                v17 = v15 - *(_DWORD *)a3;
+                v18 = v17 - 8;
+                if ( v17 < 8 )
+                    v18 = 0;
+                v62 = v18;
+                v19 = sub_32253(v6);
+                v20 = v16;
+                v51 = v16;
+                v21 = v16 + *(_DWORD *)a3 + 8;
+                if ( v19 - 8 < (int)v21 )
+                    v21 = sub_32253(v6) - 8;
+                v22 = sub_389A1((unsigned int)v62);
+                v23 = sub_3225E(v22);
+                v25 = sub_389A1(v21);
+                v26 = sub_3225E(v25);
+                v27 = v26 - v23 + 1;
+                if ( v26 - v23 == -1 )
+                {
+                    v31 = 0x8000000000000002uLL;
+                }
+                else
+                {
+                    v28 = 16 * v56;
+                    *(_DWORD *)(v13 + 16 * v56 + 4) = v27;
+                    v29 = sub_28E94(8LL * v27);
+                    *(_QWORD *)(v13 + 16 * v56 + 8) = v29;
+                    v30 = v29 == 0;
+                    v31 = 0LL;
+                    if ( v30 )
+                        v31 = 0x8000000000000009uLL;
+                    if ( !(_DWORD)v31 )
+                    {
+                        v31 = 0x8000000000000015uLL;
+                        if ( v26 >= v23 )
+                        {
+                            v57 = v21;
+                            v55 = v13 + v28 + 4;
+                            v32 = (int *)(v28 + v13);
+                            v33 = 0;
+                            v58 = v26 + 1;
+                            do
+                            {
+                                v34 = v62;
+                                if ( v62 <= (int)sub_32253(v23) )
+                                    v34 = sub_32253(v23);
+                                v35 = v32;
+                                v36 = v23 + 1;
+                                v37 = sub_32253(v23 + 1);
+                                v38 = v57;
+                                if ( v57 >= v37 )
+                                    v38 = sub_32253(v36);
+                                v39 = v38 - v34;
+                                v40 = sub_322EA(v34 + v38, 2);
+                                v41 = *(__int64 (**)(_QWORD))(a3 + 8);
+                                v42 = sub_3228C(*(_DWORD *)(a3 + 4), v40 - v51);
+                                v43 = v41(v42);
+                                v44 = sub_3228C(v43, v39);
+                                v32 = v35;
+                                if ( v44 )
+                                {
+                                    v45 = *v35;
+                                    if ( (int)v45 >= *(_DWORD *)v55 )
+                                    {
+                                        v31 = 0x8000000000000009uLL;
+                                        goto LABEL_32;
+                                    }
+                                    v46 = *(_QWORD *)(v55 + 4);
+                                    *(_DWORD *)(v46 + 8 * v45) = v23;
+                                    *(_DWORD *)(v46 + 8 * v45 + 4) = v44;
+                                    *v35 = v45 + 1;
+                                }
+                                v33 += v44;
+                                ++v23;
+                            }
+                            while ( v58 != v36 );
+                            v31 = 0x8000000000000015uLL;
+                            if ( !v33 )
+                                break;
+                            if ( v33 != 0x10000 && *v35 > 0 )
+                            {
+                                v47 = *(_QWORD *)(v55 + 4);
+                                v48 = 0LL;
+                                do
+                                {
+                                    v49 = sub_322F7(*(_DWORD *)(v47 + 8 * v48 + 4), v33);
+                                    v47 = *(_QWORD *)(v55 + 4);
+                                    *(_DWORD *)(v47 + 8 * v48++ + 4) = v49;
+                                }
+                                while ( v48 < *v35 );
+                            }
+                            v12 = v56 + 1;
+                            v10 = v61;
+                            v6 = v59;
+                            v8 = v60;
+                            if ( v56 + 1 != v53 )
+                            {
+                                v13 = *((_QWORD *)v61 + 1);
+                                continue;
+                            }
+                            goto LABEL_33;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        else
+        {
+            v61 = v10;
+            v31 = 0x8000000000000009uLL;
+        }
+    LABEL_32:
+        v7 = v31;
+        sub_44B8E(v61);
+    }
+    return v7;
+}
+
+__int64 sub_44386(__int64 a1, __int64 a2, unsigned __int64 a3, __int64 a4, __int64 a5, signed int a6)
+{
+    unsigned int v7; // r13d
+    unsigned __int64 v8; // rsi
+    unsigned __int64 v9; // rbx
+    int v10; // edi
+    int v11; // edi
+    __int64 v12; // rsi
+    __int64 v13; // rax
+    __int64 v14; // rsi
+    __int64 v15; // r13
+    __int64 v16; // rax
+    __int64 v17; // r13
+    __int64 v18; // rdi
+    int v19; // eax
+    __int64 v20; // rcx
+    __int64 v21; // rbx
+    __int64 v22; // rax
+    __int64 v23; // r15
+    __int64 v24; // rdi
+    int v25; // ebx
+    __int64 i; // r13
+    int v27; // r14d
+    signed int v28; // ecx
+    signed int v29; // eax
+    __int64 j; // rbx
+    signed int v31; // edi
+    int v32; // ecx
+    int v33; // eax
+    _DWORD v35[2]; // [rsp+28h] [rbp-F8h] BYREF
+    __int64 v36; // [rsp+30h] [rbp-F0h]
+    _DWORD v37[2]; // [rsp+38h] [rbp-E8h] BYREF
+    __int64 v38; // [rsp+40h] [rbp-E0h]
+    __int64 v39; // [rsp+48h] [rbp-D8h]
+    int *v40; // [rsp+50h] [rbp-D0h]
+    _QWORD *v41; // [rsp+58h] [rbp-C8h]
+    __int64 v42; // [rsp+60h] [rbp-C0h]
+    __int64 v43; // [rsp+68h] [rbp-B8h]
+    __int64 *v44; // [rsp+70h] [rbp-B0h]
+    unsigned __int64 v45; // [rsp+78h] [rbp-A8h]
+    __int64 v46; // [rsp+80h] [rbp-A0h]
+    __int64 v47; // [rsp+88h] [rbp-98h]
+    __int64 v48; // [rsp+90h] [rbp-90h]
+    _DWORD *v49; // [rsp+98h] [rbp-88h]
+    __int64 v50; // [rsp+A0h] [rbp-80h]
+    unsigned __int64 v51; // [rsp+A8h] [rbp-78h]
+    int v52; // [rsp+B4h] [rbp-6Ch]
+    __int64 v53; // [rsp+B8h] [rbp-68h] BYREF
+    __int64 v54; // [rsp+C0h] [rbp-60h] BYREF
+    __int64 v55; // [rsp+C8h] [rbp-58h]
+    __int64 v56; // [rsp+D0h] [rbp-50h]
+    __int64 v57; // [rsp+D8h] [rbp-48h]
+    unsigned __int64 v58; // [rsp+E0h] [rbp-40h]
+    
+    v7 = a3;
+    v57 = a2;
+    v50 = a1;
+    v53 = 0LL;
+    v54 = 0LL;
+    v8 = HIDWORD(a3);
+    v9 = HIDWORD(a4);
+    v10 = sub_32363(SHIDWORD(a4), SHIDWORD(a3));
+    if ( v10 > 0x10000 )
+        v10 = 0x10000;
+    v35[0] = sub_322F7(a6, v10);
+    v35[1] = v10;
+    v36 = a5;
+    v11 = sub_32363(a4, v7);
+    if ( v11 > 0x10000 )
+        v11 = 0x10000;
+    v37[0] = sub_322F7(a6, v11);
+    v37[1] = v11;
+    v38 = a5;
+    v45 = v8;
+    v51 = v9;
+    v12 = sub_44C06((unsigned int)v8, (unsigned int)v9, v35, &v53);
+    if ( !(_DWORD)v12 )
+        v12 = sub_44C06(v7, (unsigned int)a4, v37, &v54);
+    if ( !(_DWORD)v12 )
+    {
+        v58 = v12;
+        v13 = sub_28E94(16LL);
+        if ( v13 )
+        {
+            v14 = v13;
+            if ( (int)a4 > 0 )
+            {
+                v48 = (unsigned int)a4;
+                v47 = 4 * (a4 >> 32);
+                v58 = 0LL;
+                v56 = 0LL;
+                v15 = v57;
+                while ( 1 )
+                {
+                    v16 = *(_QWORD *)(v54 + 8);
+                    if ( !v16 )
+                        break;
+                    if ( !v50 )
+                        break;
+                    if ( !v15 )
+                        break;
+                    v46 = v53;
+                    if ( !v53 )
+                        break;
+                    v57 = v15;
+                    if ( (int)v51 > 0 )
+                    {
+                        v49 = (_DWORD *)(v16 + 16 * v56);
+                        v44 = (__int64 *)(v49 + 2);
+                        v17 = v57;
+                        v55 = 0LL;
+                        do
+                        {
+                            v18 = *(_QWORD *)(v46 + 8);
+                            (*(void (**)(__int64, __int64, _QWORD))(qword_B2098 + 360))(v14, 16LL, 0LL);
+                            v19 = *v49;
+                            if ( (int)*v49 > 0 )
+                            {
+                                v40 = (int *)(v18 + 16 * v55);
+                                v41 = v40 + 2;
+                                LODWORD(v20) = *v40;
+                                v21 = 0LL;
+                                v43 = v17;
+                                do
+                                {
+                                    if ( (int)v20 > 0 )
+                                    {
+                                        v22 = *v44;
+                                        v52 = *(_DWORD *)(*v44 + 8 * v21 + 4);
+                                        v42 = v21;
+                                        v39 = v50 + 4 * *(int *)(v22 + 8 * v21) * (__int64)(int)v45;
+                                        v23 = 0LL;
+                                        do
+                                        {
+                                            v24 = v39 + 4LL * *(int *)(*v41 + 8 * v23);
+                                            v25 = sub_3228C(*(_DWORD *)(*v41 + 8 * v23 + 4), v52);
+                                            for ( i = 0LL; i != 4; ++i )
+                                            {
+                                                v27 = sub_32363(*(unsigned __int8 *)(v24 + i), 255);
+                                                v28 = 0x10000;
+                                                if ( i != 3 )
+                                                    v28 = sub_32363(*(unsigned __int8 *)(v24 + 3) ^ 0xFFu, 255);
+                                                v29 = sub_3228C(v28, v27);
+                                                *(_DWORD *)(v14 + 4 * i) += sub_3228C(v29, v25);
+                                            }
+                                            ++v23;
+                                            v20 = *v40;
+                                        }
+                                        while ( v23 < v20 );
+                                        v19 = *v49;
+                                        v17 = v43;
+                                        v21 = v42;
+                                    }
+                                    ++v21;
+                                }
+                                while ( v21 < v19 );
+                            }
+                            for ( j = 0LL; j != 4; ++j )
+                            {
+                                v31 = *(_DWORD *)(v14 + 4 * j);
+                                if ( (int)sub_3227F(v31, 255) < 0 )
+                                    v32 = 0;
+                                else
+                                    v32 = sub_3227F(v31, 255);
+                                v33 = sub_3225E(v32 + 0x8000);
+                                if ( (unsigned __int64)v33 >= 0xFF )
+                                    LOBYTE(v33) = -1;
+                                *(_BYTE *)(v17 + j) = v33;
+                            }
+                            v17 += 4LL;
+                            ++v55;
+                        }
+                        while ( v55 != v51 );
+                    }
+                    v15 = v47 + v57;
+                    if ( ++v56 == v48 )
+                        goto LABEL_40;
+                }
+                v58 = 0x8000000000000002uLL;
+            }
+        LABEL_40:
+            (*(void (**)(__int64))(qword_B2098 + 72))(v14);
+            v12 = v58;
+        }
+        else
+        {
+            v12 = 0x8000000000000009uLL;
+        }
+    }
+    if ( v53 )
+        sub_44B8E(a1);
+    if ( v54 )
+        sub_44B8E(a1);
+    return v12;
+}
+
+__int64 sub_4479F(int a1)
+{
+    int v1; // edx
+    __int64 result; // rax
+    
+    v1 = -a1;
+    if ( -a1 < 1 )
+        v1 = a1;
+    result = 0LL;
+    if ( v1 <= 0x8000 )
+        return 0x10000LL;
+    return result;
+}
+
+__int64 sub_4424F(int a1, int a2, int a3, int a4)
+{
+    return sub_44386(a2, a1, a3, a4, (__int64)sub_4479F, 0x8000);
+}
+
+__int64 sub_441BD(__int64 a1, __int64 a2, __int64 a3, __int64 a4)
+{
+    __int64 (*v4)(void); // rax
+    
+    if ( (unsigned int)dword_B1D7C < 8 )
+    {
+        if ( dword_B1D7C )
+        {
+            v4 = funcs_4421A[dword_B1D7C - 1];
+            return v4();
+        }
+    }
+    else
+    {
+        dword_B1D7C = 0;
+    }
+    v4 = sub_4424F;
+    if ( SHIDWORD(a4) > SHIDWORD(a3) )
+        v4 = sub_4421D;
+    if ( (int)a4 > (int)a3 )
+        v4 = sub_4421D;
+    return v4();
+}
+
+void sub_15784(UINT64 a1, UINT64 *a2, _QWORD *a3, _QWORD *a4)
+{
+    const char *v8; // rdx
+    UINT64 v9; // rcx
+    bool v10; // cf
+    const char *v11; // rax
+    char *v12; // rcx
+    _WORD *v13; // rax
+    UINT64 v14; // rax
+    UINT64 v15; // rdi
+    UINT64 v16; // rdi
+    UINT64 v17; // rax
+    UINT64 v18; // rcx
+    UINT64 v19; // rdx
+    int v20; // esi
+    UINT64 v21; // rdi
+    UINT64 v22; // rdi
+    UINT64 v23; // rdi
+    UINT64 v24; // rcx
+    UINT64 v25; // esi
+    UINT64 v26; // r12d
+    unsigned int v27; // edi
+    UINT64 v28; // eax
+    int v29; // esi
+    unsigned int v30; // eax
+    unsigned int v31; // esi
+    unsigned int v32; // ebx
+    unsigned int v33; // edi
+    UINT64 v34; // rsi
+    unsigned int v35; // eax
+    UINT64 v36; // r12
+    unsigned int v37; // edi
+    UINT64 v38; // rax
+    UINT64 v39; // rbx
+    UINT64 v40; // rcx
+    UINT64 v41; // [rsp+38h] [rbp-98h]
+    UINT64 v42; // [rsp+40h] [rbp-90h] BYREF
+    UINT64 v43; // [rsp+48h] [rbp-88h] BYREF
+    UINT64 v44; // [rsp+50h] [rbp-80h] BYREF
+    UINT64 v45; // [rsp+58h] [rbp-78h] BYREF
+    UINT64 v46; // [rsp+60h] [rbp-70h] BYREF
+    UINT64 v47; // [rsp+68h] [rbp-68h] BYREF
+    UINT64 v48; // [rsp+70h] [rbp-60h] BYREF
+    UINT64 v49; // [rsp+78h] [rbp-58h] BYREF
+    UINT64 v50; // [rsp+80h] [rbp-50h] BYREF
+    UINT64 v51; // [rsp+88h] [rbp-48h] BYREF
+    unsigned int v52; // [rsp+90h] [rbp-40h] BYREF
+    _DWORD v53[15]; // [rsp+94h] [rbp-3Ch] BYREF
+    
+    v47 = 0LL;
+    v51 = 0LL;
+    v50 = 0LL;
+    v48 = 0LL;
+    v49 = 0LL;
+    v45 = 0LL;
+    v52 = 0;
+    v53[0] = 0;
+    v46 = 0LL;
+    v42 = 0LL;
+    v43 = 0LL;
+    if ( a1 == 1 )
+    {
+        v8 = "Boot Logo";
+    }
+    else
+    {
+        if ( a1 != 2 )
+            goto LABEL_26;
+        v8 = "Boot Fail Logo";
+    }
+    if ( sub_1D76C(qword_B1DE0, (UINT64)v8, &v42, &v43) )
+        goto LABEL_6;
+    if ( !v43 )
+    {
+    LABEL_26:
+        *a2 = 0LL;
+        *a3 = 0LL;
+        *a4 = 0LL;
+        return;
+    }
+    v13 = sub_B57C(v42, v43);
+    v14 = sub_19F56(qword_B1E20, qword_B1E28, (UINT64)v13, 0LL, &v48, &v50);
+    v9 = v50;
+    EFI_LOCATE_HANDLE_BUFFER LocateHandleBuffer = mBootServices->LocateHandleBuffer;
+    EFI_HANDLE_PROTOCOL HandleProtocol = mBootServices->HandleProtocol;
+    if ( v14 < 0 || !v50 )
+        goto LABEL_7;
+    if ( LocateHandleBuffer(
+                            2LL,
+                            &gAppleImageConversionProtocolGuid,
+                            0LL,
+                            &v46,
+                            &v49) >= 0 )
+    {
+        sub_1D2F0(v49);
+        if ( v46 )
+        {
+            v15 = 0LL;
+            while ( 1 )
+            {
+                if ( HandleProtocol(
+                                    *(_QWORD *)(v49 + 8 * v15),
+                                    &gAppleImageConversionProtocolGuid,
+                                    &v47) < 0 )
+                    goto LABEL_6;
+                if ( (*(UINT64 (**)(UINT64, UINT64))(v47 + 16))(v50, v48) >= 0 )
+                    break;
+                if ( ++v15 >= v46 )
+                    goto LABEL_6;
+            }
+            sub_1D327(v49);
+            v49 = 0LL;
+            if ( (*(UINT64 (**)(UINT64, UINT64, unsigned int *, _DWORD *))(v47 + 24))(v50, v48, &v52, v53) < 0 )
+                goto LABEL_6;
+            v16 = (*(UINT64 (**)(UINT64, UINT64, UINT64 *, UINT64 *))(v47 + 32))(
+                                                                                 v50,
+                                                                                 v48,
+                                                                                 &v51,
+                                                                                 &v45);
+            sub_1D327(v50);
+            v50 = 0LL;
+            if ( v16 < 0 )
+            {
+                v9 = 0LL;
+                goto LABEL_7;
+            }
+            if ( v51 )
+            {
+                sub_1D2F0(v51);
+                v17 = v51;
+                if ( v51 )
+                {
+                    v18 = v45 >> 2;
+                    if ( v45 >> 2 )
+                    {
+                        v19 = 0LL;
+                        do
+                        {
+                            if ( *(_BYTE *)(v17 + 4 * v19 + 3) )
+                            {
+                                v20 = *(UINT8 *)(v17 + 4 * v19 + 3) ^ 0xFF;
+                                v21 = ((32897 * v20 * (unsigned int)*(UINT8 *)(v17 + 4 * v19 + 2)) >> 23)
+                                + (UINT64)BYTE2(dword_AD818);
+                                if ( v21 >= 0xFF )
+                                    LOBYTE(v21) = -1;
+                                *(_BYTE *)(v17 + 4 * v19 + 2) = v21;
+                                v22 = ((32897 * v20 * (unsigned int)*(UINT8 *)(v17 + 4 * v19 + 1)) >> 23)
+                                + (UINT64)BYTE1(dword_AD818);
+                                if ( v22 >= 0xFF )
+                                    LOBYTE(v22) = -1;
+                                *(_BYTE *)(v17 + 4 * v19 + 1) = v22;
+                                v23 = ((32897 * v20 * (unsigned int)*(UINT8 *)(v17 + 4 * v19)) >> 23)
+                                + (UINT64)(UINT8)dword_AD818;
+                                if ( v23 >= 0xFF )
+                                    LOBYTE(v23) = -1;
+                                *(_BYTE *)(v17 + 4 * v19) = v23;
+                            }
+                            ++v19;
+                        }
+                        while ( v18 != v19 );
+                    }
+                }
+            }
+            v44 = 0LL;
+            if ( sub_1D7D7(qword_B1DE0, (UINT64)"Boot Logo Scale", &v44) )
+            {
+                v44 = 125LL;
+                v24 = 125LL;
+            }
+            else
+            {
+                v24 = v44;
+            }
+            if ( (unsigned int)dword_AF114 <= 0x437 && v24 )
+            {
+                v25 = sub_32363((int)v24, 1000LL);
+                v26 = sub_32253(1LL);
+                sub_32253(1LL);
+                v27 = 16 * dword_AF114 / 9u;
+                if ( v27 != dword_AF110 )
+                    v26 = dword_AF110 * v26 / v27;
+                v28 = sub_32253((int)dword_AF110);
+                v29 = sub_3228C(v28, v25);
+                if ( v29 > (int)sub_32253(v52) )
+                {
+                    *a3 = v52;
+                LABEL_65:
+                    *a4 = v53[0];
+                    *a2 = v51;
+                    return;
+                }
+                v30 = sub_3227F(v26, v52);
+                v31 = sub_322EA((unsigned int)v29, v30);
+                v32 = sub_3228C(v31, v26);
+                v33 = sub_3227F(v31, v53[0]);
+                v34 = v52;
+                v41 = v53[0];
+                v35 = sub_3227F(v32, v52);
+                v36 = (unsigned int)sub_3225E(v35);
+                v37 = sub_3225E(v33);
+                v38 = sub_1D2B1(v45);
+                if ( v38 )
+                {
+                    v39 = v38;
+                    if ( sub_441BD(v38, v51, v41 + (v34 << 32), (v36 << 32) | v37) )
+                    {
+                        *a3 = v52;
+                        *a4 = v53[0];
+                        *a2 = v51;
+                        v40 = v39;
+                    }
+                    else
+                    {
+                        *a3 = (int)v36;
+                        *a4 = (int)v37;
+                        *a2 = v39;
+                        v40 = v51;
+                    }
+                    sub_1D327(v40);
+                    return;
+                }
+            }
+            *a3 = v52;
+            goto LABEL_65;
+        }
+    }
+LABEL_6:
+    v9 = v50;
+LABEL_7:
+    if ( v9 )
+        sub_1D327(v9);
+    if ( v49 )
+        sub_1D327(v49);
+    if ( v51 )
+        sub_1D327(v51);
+    if ( a1 == 2 )
+    {
+        v10 = (qword_B1DE8 & 0x40000) != 0;
+        if ( byte_B1F30 )
+        {
+            v11 = "CircleSlash2X";
+            v12 = "CircleSlashBlack2X";
+        }
+        else
+        {
+            v11 = "CircleSlash";
+            v12 = "CircleSlashBlack";
+        }
+    }
+    else
+    {
+        v10 = (qword_B1DE8 & 0x40000) != 0;
+        if ( byte_B1F30 )
+        {
+            v11 = "AppleLogo2X";
+            v12 = "AppleLogoBlack2X";
+        }
+        else
+        {
+            v11 = "AppleLogo";
+            v12 = "AppleLogoBlack";
+        }
+    }
+    if ( !v10 )
+        v12 = (char *)v11;
+    if ( sub_6B00(v12, (UINT64)a2, (UINT64)a3, (UINT64)a4) >= 0 )
+        sub_16D7E(*a2, *a3 * *a4);
+}
+
+
+
+UINT64 sub_15583(int a1)
+{
+    UINT64 result; // rax
+    UINT64 v2; // rsi
+    UINT64 v3; // rdi
+    UINT64 v4; // [rsp+30h] [rbp-50h] BYREF
+    UINT64 v5; // [rsp+38h] [rbp-48h] BYREF
+    UINT64 v6; // [rsp+40h] [rbp-40h] BYREF
+    UINT64 v7; // [rsp+48h] [rbp-38h] BYREF
+    UINT64 v8; // [rsp+50h] [rbp-30h] BYREF
+    UINT64 v9; // [rsp+58h] [rbp-28h] BYREF
+    UINT64 v10; // [rsp+60h] [rbp-20h] BYREF
+    _BYTE v11[17]; // [rsp+6Fh] [rbp-11h] BYREF
+    
+    result = 0xAAAAAAAAAAAAAAAAuLL;
+    v5 = 0xAAAAAAAAAAAAAAAAuLL;
+    v6 = 0xAAAAAAAAAAAAAAAAuLL;
+    v9 = 0LL;
+    
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    
+    if ( dword_AF158 == 1 && qword_AF138 )
+    {
+        if ( a1 == 1 )
+        {
+            v10 = 0LL;
+            v7 = 0xAAAAAAAAAAAAAAAAuLL;
+            v8 = 0xAAAAAAAAAAAAAAAAuLL;
+            v11[0] = 0;
+            v4 = 1LL;
+            if ( !GetVariable(
+                              L"S",
+                              &gAppleVendorVariableGuid,
+                              0LL,
+                              (UINTN*)&v4,
+                              v11)
+                && v11[0] )
+            {
+                UINT64 loc_10004 = 0x10004;
+                result = qword_B1DE8 & (UINT64)&loc_10004;
+                if ( (_DWORD)result != 4 )
+                    return result;
+                return sub_16EC5();
+            }
+            sub_15784(1LL, &v10, &v7, &v8);
+            sub_12453("Start DrawColorRectangle");
+            sub_152A7(0LL, 0LL, (unsigned int)dword_AF110, (unsigned int)dword_AF114);
+            result = sub_12453("End DrawColorRectangle");
+            if ( (qword_B1DE8 & 0x10000) == 0 )
+            {
+                if ( v10 )
+                {
+                    v2 = ((unsigned int)dword_AF110 - v7) >> 1;
+                    v3 = ((unsigned int)dword_AF114 - v8) >> 1;
+                    sub_12453("Start DrawDataRectangle");
+                    sub_15CE7(v2, v3, v7, v8, v10);
+                    sub_12453("End DrawDataRectangle");
+                    result = sub_1D327(v10);
+                    if ( (qword_B1DE8 & 4) != 0 )
+                        return sub_16EC5();
+                }
+            }
+        }
+        else
+        {
+            sub_15784(a1, &v9, &v5, &v6);
+            if ( v9 )
+            {
+                sub_152A7(0LL, 0LL, (unsigned int)dword_AF110, (unsigned int)dword_AF114);
+                sub_15CE7(((unsigned int)dword_AF110 - v5) >> 1, ((unsigned int)dword_AF114 - v6) >> 1, v5, v6, v9);
+                return sub_1D327(v9);
+            }
+        }
+    }
+    return result;
+}
+
+__int64 sub_20A3F(unsigned __int16 *a1)
+{
+    unsigned int v1; // r8d
+    unsigned __int16 v2; // r11
+    __int16 v3; // r9
+    unsigned __int16 v4; // cx
+    __int64 v5; // rdx
+    bool v6; // r10
+    __int64 v7; // rdx
+    __int64 v8; // rcx
+    __int64 result; // rax
+    
+    v1 = *((unsigned __int8 *)a1 + 2);
+    if ( *((_BYTE *)a1 + 2) )
+    {
+        v2 = *a1;
+        v3 = *a1 % 0x64u;
+        v4 = __ROR2__(23593 * *a1, 4);
+        v5 = 1LL;
+        if ( v1 > 1 )
+            v5 = v1;
+        v6 = v4 < 0xA4u && (_BYTE)v1 == 2;
+        v7 = 4 * v5;
+        v8 = 0LL;
+        LODWORD(result) = 0;
+        while ( 1 )
+        {
+            if ( (v2 & 3) == 0 )
+            {
+                if ( v3 )
+                {
+                    if ( (_BYTE)v1 == 2 )
+                        goto LABEL_13;
+                }
+                else if ( v6 )
+                {
+                LABEL_13:
+                    result = (unsigned int)(result + 29);
+                    goto LABEL_7;
+                }
+            }
+            result = (unsigned int)(*(_DWORD *)((char *)qword_AAA60 + v8) + result);
+        LABEL_7:
+            v8 += 4LL;
+            if ( v7 == v8 )
+                return result;
+        }
+    }
+    return 0LL;
+}
+
+void __fastcall sub_207F6(int a1, int a2)
+{
+    __int64 v4; // rax
+    __int64 v5; // rax
+    __int64 v6; // rax
+    __int64 (__fastcall *v7)(const __int16 *, void *, __int64, __int64, char *); // rax
+    __int64 v8; // rax
+    __int64 v9; // [rsp+30h] [rbp-40h] BYREF
+    char v10; // [rsp+3Eh] [rbp-32h] BYREF
+    char v11[49]; // [rsp+3Fh] [rbp-31h] BYREF
+    
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    EFI_GET_TIME GetTime = mRuntimeServices->GetTime;
+    
+    v11[0] = -86;
+    v9 = 1LL;
+    v4 = GetVariable(
+                     L"panicmedic",
+                     &gAppleBootVariableGuid,
+                     0LL,
+                     &v9,
+                     v11);
+    if ( v4 < 0 )
+    {
+        DEBUG ((DEBUG_INFO, "#[EB.P.TPM|!] %r <- RT.GV %S %g\n", v4, L"panicmedic", &gAppleBootVariableGuid));
+        v11[0] = 0;
+    }
+    else if ( v11[0] )
+    {
+        DEBUG ((DEBUG_INFO, "#[EB|P:PM] Shutdown\n"));
+        v5 = SetVariable(
+                         L"AAPL,PanicInfoLog",
+                         &gAppleBootVariableGuid,
+                         3LL,
+                         0LL,
+                         0LL);
+        DEBUG ((DEBUG_INFO, "#[EB.P.TPM|!] %r <- RT.SV- %S %g\n", v5, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+        v6 = SetVariable(
+                         L"panicmedic",
+                         &gAppleBootVariableGuid,
+                         7LL,
+                         0LL,
+                         0LL);
+        DEBUG ((DEBUG_INFO, "#[EB.P.TPM|!] %r <- RT.SV- %S %g\n", v6, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+        sub_15D44(0, 0);
+        if ( (qword_B1DE8 & 2) != 0 )
+        {
+            sub_15501(2LL);
+        }
+        else if ( sub_153D5() >= 0 )
+        {
+            sub_16556(0LL, 0LL);
+            sub_15583(2);
+        }
+        DEBUG ((DEBUG_INFO, "***************************************************************\n"));
+        DEBUG ((DEBUG_INFO, "Panic loop detected (%d in %3d seconds).  System will shut down.\n", a1, a2));
+        DEBUG ((DEBUG_INFO, "Try booting into the Recovery HD volume by holding Command + R.\n"));
+        DEBUG ((DEBUG_INFO, "***************************************************************\n"));
+        EFI_GET_NEXT_MONOTONIC_COUNT GetNextMonotonicCount = mBootServices->GetNextMonotonicCount;
+        GetNextMonotonicCount(30000000LL);
+        sub_97BF(2LL, 4u);
+        return;
+    }
+    DEBUG ((DEBUG_INFO, "#[EB|P:PM] Enable\n"));
+    v10 = 1;
+    v8 = SetVariable(L"panicmedic", &gAppleBootVariableGuid, 7LL, 1LL, &v10);
+    if ( v8 < 0 )
+        DEBUG ((DEBUG_INFO, "#[EB.P.TPM|!] %r <- RT.SV %S %g\n", v8, L"panicmedic", &gAppleBootVariableGuid));
+    byte_B1E10 = 1;
+}
+
+__int64 sub_16CB0(void)
+{
+    unsigned __int8 v0; // cf
+    const char *v1; // rax
+    char *v2; // rcx
+    __int64 result; // rax
+    __int64 v4[3]; // [rsp+28h] [rbp-18h] BYREF
+    
+    memset(v4, 170, sizeof(v4));
+    v0 = _bittest64((const signed __int32 *)&qword_B1DE8, 0x12u);
+    v1 = "PanicDialogBlack2X";
+    if ( !v0 )
+        v1 = "PanicDialog2X";
+    v2 = "PanicDialogBlack";
+    if ( !v0 )
+        v2 = "PanicDialog";
+    if ( byte_B1F30 )
+        v2 = (char *)v1;
+    result = sub_6B00(v2, (__int64)&v4[2], (__int64)v4, (__int64)&v4[1]);
+    if ( result >= 0 )
+    {
+        sub_16D7E(v4[2], v4[0] * v4[1]);
+        sub_152A7(0LL, 0LL, (unsigned int)dword_AF110, (unsigned int)dword_AF114);
+        sub_15CE7(
+                  ((unsigned __int64)(unsigned int)dword_AF110 - v4[0]) >> 1,
+                  ((unsigned __int64)(unsigned int)dword_AF114 - v4[1]) >> 1,
+                  v4[0],
+                  v4[1],
+                  v4[2]);
+        return sub_1D327(v4[2]);
+    }
+    return result;
+}
+
+__int64 sub_1528B()
+{
+    return sub_152A7(0LL, 0LL, (unsigned int)dword_AF110, (unsigned int)dword_AF114);
+}
+
+void sub_1FBBA(void)
+{
+    int v0; // r13d
+    __int64 v1; // rax
+    __int64 v2; // rax
+    __int64 v3; // rdi
+    __int64 *v4; // rdi
+    __int64 i; // rcx
+    __int64 v6; // rsi
+    unsigned __int64 v7; // rax
+    unsigned __int64 v8; // r15
+    bool v9; // cc
+    __int16 v10; // ax
+    __int64 v11; // rbx
+    __int64 v12; // rax
+    unsigned __int64 v13; // rsi
+    __int64 v14; // r12
+    __int64 v15; // r13
+    __int16 v16; // ax
+    __int64 v17; // rdi
+    int v18; // esi
+    char v19; // bl
+    __int64 v20; // rax
+    __int64 v21; // rax
+    __int64 v22; // rdi
+    __int64 v23; // rax
+    __int64 v24; // rax
+    __int64 v25; // rcx
+    _BYTE *v26; // rsi
+    __int64 v27; // rax
+    __int16 v28; // r12
+    unsigned int v29; // r13d
+    __int64 v30; // r15
+    unsigned int v31; // esi
+    unsigned int v32; // eax
+    unsigned int v33; // edx
+    unsigned int v34; // eax
+    int v35; // r8d
+    int v36; // r8d
+    int v37; // esi
+    int v38; // edi
+    __int64 v39; // rdi
+    __int64 v40; // rax
+    __int64 v41; // rax
+    int v42; // edi
+    __int64 v43; // rcx
+    int v44; // ebx
+    __int64 v45; // rax
+    __int64 v46; // [rsp+20h] [rbp-130h]
+    __int64 v47; // [rsp+20h] [rbp-130h]
+    __int64 v48; // [rsp+20h] [rbp-130h]
+    __int64 v49; // [rsp+28h] [rbp-128h] BYREF
+    __int64 v50; // [rsp+30h] [rbp-120h] BYREF
+    __int64 v51; // [rsp+38h] [rbp-118h] BYREF
+    _QWORD v52[10]; // [rsp+40h] [rbp-110h] BYREF
+    int v53; // [rsp+94h] [rbp-BCh]
+    unsigned int v54; // [rsp+98h] [rbp-B8h]
+    int v55; // [rsp+9Ch] [rbp-B4h]
+    __int64 v56; // [rsp+A0h] [rbp-B0h] BYREF
+    unsigned __int64 v57; // [rsp+A8h] [rbp-A8h] BYREF
+    unsigned __int64 v58; // [rsp+B0h] [rbp-A0h] BYREF
+    unsigned __int64 v59; // [rsp+B8h] [rbp-98h]
+    __int64 v60; // [rsp+C0h] [rbp-90h]
+    __int64 v61; // [rsp+C8h] [rbp-88h]
+    int v62; // [rsp+D0h] [rbp-80h]
+    __int16 v63; // [rsp+D4h] [rbp-7Ch]
+    __int16 v64; // [rsp+D6h] [rbp-7Ah]
+    unsigned __int64 v65; // [rsp+E0h] [rbp-70h] BYREF
+    __int64 v66; // [rsp+E8h] [rbp-68h] BYREF
+    _QWORD v67[2]; // [rsp+F0h] [rbp-60h] BYREF
+    __int64 v68; // [rsp+100h] [rbp-50h]
+    __int64 v69; // [rsp+108h] [rbp-48h]
+    int v70; // [rsp+114h] [rbp-3Ch]
+    
+    v57 = 0xAAAAAAAAAAAAAAAAuLL;
+    v65 = 0xAAAAAAAAAAAAAAAAuLL;
+    v49 = 4LL;
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    EFI_GET_TIME GetTime = mRuntimeServices->GetTime;
+    v1 = GetVariable(
+                     L"p",
+                     &gAppleBootVariableGuid,
+                     0LL,
+                     &v49,
+                     &dword_AD958);
+    if ( v1 < 0 )
+    {
+        if ( v1 != 0x800000000000000EuLL )
+            DEBUG ((DEBUG_INFO, "#[EB.P.DC|!] %r <- RT.GV %S %g\n", v1, "p", &gAppleBootVariableGuid));
+    }
+    else
+    {
+        if ( v49 == 4 )
+        {
+            DEBUG ((DEBUG_INFO, "#[EB.P.DC|PMT] %d\n", dword_AD958));
+            goto LABEL_8;
+        }
+        DEBUG ((DEBUG_INFO, "#[EB.P.DC|SZ!] %qd %d\n", v49, 4LL, v46));
+    }
+    dword_AD958 = 240;
+LABEL_8:
+    LOBYTE(v58) = 0;
+    LOBYTE(v67[0]) = 0;
+    v50 = 1LL;
+    v2 = GetVariable(
+                     L"AAPL,CoProcessorReboot",
+                     &gAppleBootVariableGuid,
+                     0LL,
+                     &v50,
+                     &v58);
+    if ( v2 < 0 )
+    {
+        v3 = v2;
+        DEBUG ((DEBUG_INFO, "#[EB|P:CPR] N\n"));
+        LOBYTE(v0) = 1;
+        if ( v3 != 0x800000000000000EuLL )
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCCPR|!] %r <- RT.GV %S %g\n", v3, L"AAPL,CoProcessorReboot", &gAppleBootVariableGuid));
+    }
+    else
+    {
+        DEBUG ((DEBUG_INFO, "#[EB|P:CPR] %d\n", (unsigned __int8)v58));
+        if ( (_BYTE)v58 )
+        {
+            SetVariable(
+                        L"AAPL,CoProcessorReboot",
+                        &gAppleBootVariableGuid,
+                        7LL,
+                        v50,
+                        v67);
+            v0 = 0;
+        }
+        else
+        {
+            LOBYTE(v0) = 1;
+        }
+    }
+    v4 = &v50;
+    for ( i = 23LL; i; --i )
+    {
+        *(_DWORD *)v4 = -1431655766;
+        v4 = (__int64 *)((char *)v4 + 4);
+    }
+    v67[0] = 0xAAAAAAAAAAAAAAAAuLL;
+    v67[1] = 0xAAAAAAAAAAAAAAAAuLL;
+    v56 = 0LL;
+    v6 = GetVariable(
+                     L"A",
+                     &gAppleBootVariableGuid,
+                     0LL,
+                     &v56,
+                     0LL);
+    if ( v6 != 0x8000000000000005uLL || !v56 )
+    {
+        DEBUG ((DEBUG_INFO, "#[EB|P:MPI] N\n"));
+        v19 = 1;
+        if ( v6 != 0x800000000000000EuLL || v56 )
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|!PIVAR] %r %qd\n", v6, v56, v47));
+        goto LABEL_45;
+    }
+    v70 = v0;
+    DEBUG ((DEBUG_INFO, "#[EB|P:MPI] Y\n"));
+    GetTime(v67, 0LL);
+    v64 = -21846;
+    v66 = 0LL;
+    v58 = 0x4C005000410041LL;
+    v59 = 0x6E00610050002CLL;
+    v60 = 0x6E004900630069LL;
+    v61 = 0x300030006F0066LL;
+    v62 = 3145776;
+    v63 = 0;
+    v69 = 0LL;
+    v7 = 0LL;
+    do
+    {
+        v8 = v7;
+        v9 = v7 <= 9;
+        v10 = 48;
+        if ( !v9 )
+            v10 = 55;
+        HIWORD(v62) = v8 + v10;
+        v66 = 0LL;
+        v11 = GetVariable(
+                          &v58,
+                          &gAppleBootVariableGuid,
+                          0LL,
+                          &v66,
+                          0LL);
+        if ( v11 < 0 )
+        {
+            if ( v11 == 0x8000000000000005uLL )
+            {
+                v69 += v66;
+            }
+            else if ( v11 == 0x800000000000000EuLL )
+            {
+                break;
+            }
+        }
+        v7 = v8 + 1;
+    }
+    while ( v8 != 15 );
+    if ( !v69 )
+    {
+        v11 = 0x8000000000000004uLL;
+        LOBYTE(v0) = v70;
+    LABEL_43:
+        DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|!] %r <- EB.P.PIC\n", v11));
+        goto LABEL_44;
+    }
+    v12 = sub_1D2B1(v69);
+    LOBYTE(v0) = v70;
+    if ( !v12 )
+    {
+        v11 = 0x8000000000000009uLL;
+        goto LABEL_43;
+    }
+    v68 = v12;
+    if ( v8 )
+    {
+        v13 = 0LL;
+        v14 = v69;
+        v15 = v68;
+        while ( 1 )
+        {
+            v16 = 48;
+            if ( v13 > 9 )
+                v16 = 55;
+            HIWORD(v62) = v13 + v16;
+            v66 = v14;
+            v11 = GetVariable(
+                              &v58,
+                              &gAppleBootVariableGuid,
+                              0LL,
+                              &v66,
+                              v15);
+            if ( v11 < 0 )
+                break;
+            v14 -= v66;
+            if ( v14 )
+            {
+                v15 += v66;
+                if ( v8 != ++v13 )
+                    continue;
+            }
+            goto LABEL_37;
+        }
+        v18 = -1431655766;
+        v17 = v68;
+    }
+    else
+    {
+    LABEL_37:
+        v17 = v68;
+        v18 = sub_E4B2(0LL, v68, v69);
+    }
+    sub_1D327(v17);
+    LOBYTE(v0) = v70;
+    if ( v11 < 0 )
+        goto LABEL_43;
+    LODWORD(v68) = v18;
+    v56 = 92LL;
+    v27 = GetVariable(
+                      L"AAPL,PanicInfoLog",
+                      &gAppleBootVariableGuid,
+                      0LL,
+                      &v56,
+                      &v50);
+    if ( v27 < 0 )
+    {
+        v39 = v27;
+        DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|!] %r <- RT.GV %S %g\n", v27, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+        if ( v39 != 0x800000000000000EuLL )
+        {
+        LABEL_96:
+            v19 = 0;
+            v41 = SetVariable(
+                              L"AAPL,PanicInfoLog",
+                              &gAppleBootVariableGuid,
+                              3LL,
+                              0LL,
+                              0LL);
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|!] %r <- RT.SV- %S %g\n", v41, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+            goto LABEL_45;
+        }
+        sub_E5B0(&v50, 92LL);
+        v50 = 4660LL;
+        LODWORD(v51) = v68;
+        sub_240D0((char *)v67, (char *)&v51 + 4, 0x10uLL);
+        v40 = SetVariable(
+                          L"AAPL,PanicInfoLog",
+                          &gAppleBootVariableGuid,
+                          3LL,
+                          92LL,
+                          &v50);
+        if ( v40 < 0 )
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|SV1!] %r <- RT.SV %S %g\n", v40, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+        else
+            DEBUG ((DEBUG_INFO, "#[EB|P:LOG1]\n"));
+    LABEL_44:
+        v19 = 0;
+        goto LABEL_45;
+    }
+    if ( (_DWORD)v50 != 4660 )
+    {
+        DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|PLV!] %ld %d\n", v50, 4660));
+        goto LABEL_96;
+    }
+    v28 = v67[0];
+    LOBYTE(v69) = BYTE2(v67[0]);
+    v54 = 3600 * BYTE4(v67[0]) + 60 * BYTE5(v67[0]) + BYTE6(v67[0]);
+    v53 = BYTE3(v67[0]);
+    v55 = -BYTE3(v67[0]);
+    v29 = 0;
+    v30 = 0LL;
+    while ( *((_WORD *)&v51 + 8 * v30 + 2) == v28 )
+    {
+        if ( *((_BYTE *)&v51 + 16 * v30 + 6) != (_BYTE)v69 )
+            break;
+        v31 = sub_20A3F((char *)&v51 + 16 * v30 + 4);
+        v32 = sub_20A3F(v67);
+        if ( v31 > v32 )
+            break;
+        if ( v32 == v31 )
+        {
+            v33 = 3600 * LOBYTE(v52[2 * v30]) + 60 * BYTE1(v52[2 * v30]) + BYTE2(v52[2 * v30]);
+            v34 = v54 - v33;
+            if ( v54 < v33 )
+                v34 = 0;
+        }
+        else
+        {
+            v35 = *((unsigned __int8 *)&v51 + 16 * v30 + 7);
+            if ( (unsigned __int8)v35 >= (unsigned __int8)v53 )
+                break;
+            v36 = v55 + v35;
+            v37 = 0;
+            v34 = 0;
+            do
+            {
+                v38 = 86400;
+                if ( !v37 )
+                    v38 = -3600 * LOBYTE(v52[2 * v30]) - 60 * BYTE1(v52[2 * v30]) - BYTE2(v52[2 * v30]) + 86400;
+                v34 += v38;
+                --v37;
+            }
+            while ( v36 != v37 );
+        }
+        if ( !v34 )
+            break;
+        if ( v34 > v29 )
+            v29 = v34;
+        if ( ++v30 == 5 )
+            goto LABEL_98;
+    }
+    v29 = 0;
+LABEL_98:
+    v42 = v51;
+    v43 = 0LL;
+    if ( (unsigned int)(HIDWORD(v50) + 1) <= 4 )
+        v43 = (unsigned int)(HIDWORD(v50) + 1);
+    v44 = v68;
+    LODWORD(v51) = v68;
+    HIDWORD(v50) = v43;
+    sub_240D0((char *)v67, (char *)&v51 + 16 * v43 + 4, 0x10uLL);
+    v45 = SetVariable(
+                      L"AAPL,PanicInfoLog",
+                      &gAppleBootVariableGuid,
+                      3LL,
+                      92LL,
+                      &v50);
+    if ( v45 < 0 )
+    {
+        DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSP|!] %r <- RT.SV %S %g\n", v45, L"AAPL,PanicInfoLog", &gAppleBootVariableGuid));
+        v19 = 0;
+    }
+    else
+    {
+        DEBUG ((DEBUG_INFO, "#[EB|P:SLOT] %d\n", HIDWORD(v50)));
+        if ( v42 == v44 )
+        {
+            DEBUG ((DEBUG_INFO, "#[EB|P:SKIP.3]\n"));
+            v19 = 1;
+        }
+        else
+        {
+            if ( v29 && v29 < dword_AD958 )
+            {
+                DEBUG ((DEBUG_INFO, "#[EB|P:STAT] %d in %d s\n", 5, v29));
+                sub_207F6(5LL, v29);
+            }
+            else
+            {
+                DEBUG ((DEBUG_INFO, "#[EB|P:SKIP.4] %d s\n", v29));
+            }
+            v19 = 0;
+        }
+    }
+    LOBYTE(v0) = v70;
+LABEL_45:
+    LOBYTE(v58) = 0;
+    v50 = 1LL;
+    v20 = GetVariable(
+                      L"p",
+                      &gAppleBootVariableGuid,
+                      0LL,
+                      &v50,
+                      &v58);
+    if ( v20 < 0 )
+    {
+        v22 = v20;
+        DEBUG ((DEBUG_INFO, "#[EB|P:BPI] N\n"));
+        if ( v22 != 0x800000000000000EuLL )
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSPG|!] %r <- RT.GV %S %g\n", v22, "p", &gAppleBootVariableGuid));
+    }
+    else
+    {
+        if ( v50 == 1 )
+        {
+            DEBUG ((DEBUG_INFO, "#[EB|P:BPI] Y (%d)\n", (unsigned __int8)v58));
+            v21 = SetVariable(
+                              L"p",
+                              &gAppleBootVariableGuid,
+                              3LL,
+                              0LL,
+                              0LL);
+            DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSPG|!] %r <- RT.SV- %S %g\n", v21, "p", &gAppleBootVariableGuid));
+            if ( (unsigned __int8)v58 >= 5u )
+                sub_207F6((unsigned __int8)v58, (unsigned int)dword_AD958);
+            goto LABEL_53;
+        }
+        DEBUG ((DEBUG_INFO, "#[EB.P.DCMOSPG|SZ!] %qd %d\n", v50, 1LL, v48));
+    }
+    if ( ((unsigned __int8)v19 & (unsigned __int8)v0) != 0 )
+        return;
+LABEL_53:
+    DEBUG ((DEBUG_INFO, "\n"));
+    DEBUG ((DEBUG_INFO, "**************************************************\n"));
+    DEBUG ((DEBUG_INFO, "This system was automatically rebooted after panic\n"));
+    DEBUG ((DEBUG_INFO, "**************************************************\n"));
+    if ( (qword_B1DE8 & 2) != 0 )
+    {
+        sub_15501(2LL);
+        v24 = qword_B2098;
+        v25 = 5000000LL;
+    }
+    else
+    {
+        sub_15D44(0, 0);
+        if ( sub_153D5() < 0 )
+            return;
+        sub_16556(0LL, 0LL);
+        sub_16CB0();
+        if ( (*(__int64 (**)(__int64, _QWORD, _QWORD, _QWORD, unsigned __int64 *))(qword_B2098 + 80))(
+                                                                                                      0x80000000LL,
+                                                                                                      0LL,
+                                                                                                      0LL,
+                                                                                                      0LL,
+                                                                                                      &v65) >= 0 )
+        {
+            v67[0] = 0xAAAAAAAAAAAAAAAAuLL;
+            v59 = 0xAAAAAAAAAAAAAAAAuLL;
+            v58 = 0xAAAAAAAAAAAAAAAAuLL;
+            v52[0] = 0xAAAAAAAAAAAAAAAAuLL;
+            (*(void (**)(unsigned __int64, __int64, __int64))(qword_B2098 + 88))(v65, 2LL, 100000000LL);
+            v50 = v65;
+            EFI_SIMPLE_TEXT_INPUT_PROTOCOL *ConIn = mSystemTable->ConIn;
+            EFI_EVENT WaitForKey = ConIn->WaitForKey;
+            EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+            //  v51 = *(_QWORD *)(*(_QWORD *)(qword_B2090 + 48) + 16LL);
+            if ( LocateProtocol(&gAppleBootVariableGuid, 0LL, v67) < 0 )
+            {
+                (*(void (**)(__int64, __int64 *, unsigned __int64 *))(qword_B2098 + 96))(2LL, &v50, &v57);
+            }
+            else
+            {
+                v52[0] = *(_QWORD *)(v67[0] + 16LL);
+                do
+                {
+                    if ( (*(__int64 (**)(__int64, __int64 *, unsigned __int64 *))(qword_B2098 + 96))(3LL, &v50, &v57) < 0 )
+                        break;
+                    if ( v57 != 2 )
+                        break;
+                    v23 = (*(__int64 (**)(_QWORD, unsigned __int64 *))(v67[0] + 8LL))(v67[0], &v58);
+                    if ( WORD2(v59) )
+                        break;
+                }
+                while ( v23 >= 0 );
+            }
+            (*(void (**)(unsigned __int64))(qword_B2098 + 112))(v65);
+        }
+        sub_1528B();
+        v24 = qword_B2098;
+        v25 = 1000000LL;
+    }
+    (*(void (**)(__int64))(v24 + 248))(v25);
+    sub_1E045();
+    if ( qword_B1DE0 )
+    {
+        v26 = sub_1D82E(qword_B1DE8, (unsigned __int8 *)qword_B1DE0, 0LL, 0LL);
+        sub_1D327(qword_B1DE0);
+        qword_B1DE0 = (__int64)v26;
+    }
+}
+
+__int64 __fastcall sub_BF7A(__int64 *a1)
+{
+    __int64 v2; // rax
+    __int64 v3; // rdi
+    __int64 v4; // rax
+    __int64 v5; // rbx
+    __int64 v6; // rax
+    __int64 v7; // rax
+    __int64 v9; // [rsp+28h] [rbp-38h] BYREF
+    __int64 v10; // [rsp+30h] [rbp-30h] BYREF
+    __int64 v11; // [rsp+38h] [rbp-28h] BYREF
+    unsigned int v12; // [rsp+40h] [rbp-20h] BYREF
+    _DWORD v13[7]; // [rsp+44h] [rbp-1Ch] BYREF
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    v2 = qword_AEA20;
+    if ( !qword_AEA20 )
+    {
+        v9 = 0LL;
+        v10 = 0LL;
+        v11 = 8LL;
+        if ( GetVariable(
+                         L"E",
+                         &gAppleVendorVariableGuid,
+                         0LL,
+                         &v11,
+                         &v9) >= 0 )
+        {
+            v11 = 8LL;
+            v4 = GetVariable(
+                             L"ExtendedFirmwareFeaturesMask",
+                             &gAppleVendorVariableGuid,
+                             0LL,
+                             &v11,
+                             &v10);
+            if ( v4 >= 0 )
+            {
+                v3 = v4;
+                v5 = v10;
+                v6 = v9;
+            LABEL_13:
+                qword_AEA20 = v5 & v6;
+                DEBUG ((DEBUG_INFO, "#[EB|FWFM] 0x%016qX\n", v5));
+                DEBUG ((DEBUG_INFO, "#[EB|FWFT] 0x%016qX\n", v9));
+                v2 = qword_AEA20;
+                goto LABEL_14;
+            }
+        }
+        v12 = 0;
+        v13[0] = 0;
+        v11 = 4LL;
+        v7 = GetVariable(
+                         L"F",
+                         &gAppleVendorVariableGuid,
+                         0LL,
+                         &v11,
+                         &v12);
+        if ( v7 < 0 )
+        {
+            v3 = v7;
+            v12 = 0;
+            v5 = 0LL;
+        }
+        else
+        {
+            v11 = 4LL;
+            v5 = 0LL;
+            v3 = GetVariable(
+                             L"FirmwareFeaturesMask",
+                             &gAppleVendorVariableGuid,
+                             0LL,
+                             &v11,
+                             v13);
+            if ( v3 >= 0 )
+            {
+                v6 = v12;
+                v5 = v13[0];
+            LABEL_12:
+                v9 = v6;
+                v10 = v5;
+                goto LABEL_13;
+            }
+            v12 = 0;
+            v13[0] = 0;
+        }
+        v6 = 0LL;
+        goto LABEL_12;
+    }
+    v3 = 0LL;
+LABEL_14:
+    *a1 = v2;
+    return v3;
+}
+
+bool sub_BF44(__int64 a1)
+{
+    __int64 v2; // rax
+    _QWORD v4[3]; // [rsp+28h] [rbp-18h] BYREF
+    
+    v4[0] = 0LL;
+    v2 = sub_BF7A(v4);
+    return v2 >= 0 && (v4[0] & a1) != 0;
+}
+
+double sub_100CB(const char *a1, __int64 a2)
+{
+    __int64 v4; // rax
+    double result; // xmm0_8
+    char v6; // bl
+    __int64 v7; // rax
+    __int64 v8; // rax
+    __int64 v9; // rax
+    __int64 v10; // rax
+    __int64 v11; // rax
+    __int64 v12; // rsi
+    __int64 (__fastcall *v13)(const char *, void *, __int64, __int64, __int64); // rbx
+    __int64 v14; // rax
+    __int64 v15; // rax
+    _BYTE v16[136]; // [rsp+30h] [rbp-B0h] BYREF
+    __int64 v17; // [rsp+B8h] [rbp-28h] BYREF
+    _DWORD v18[7]; // [rsp+C4h] [rbp-1Ch] BYREF
+    
+    EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
+    EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    EFI_FREE_POOL FreePool = mBootServices->FreePool;
+    memset(v16, 0, 0x80uLL);
+    v17 = 128LL;
+    v18[0] = 0;
+    if ( GetVariable(
+                     L"r",
+                     &gAppleBootVariableGuid,
+                     v18,
+                     &v17,
+                     v16)
+        || (unsigned int)sub_2826F(v16, "locked", 6LL) )
+    {
+        if ( a1 )
+        {
+            if ( (unsigned int)sub_2826F(a1, "__efiboot_recovery_reason_cmd_r__", a2) )
+            {
+                v4 = SetVariable(
+                                 L"r",
+                                 &gAppleBootVariableGuid,
+                                 7LL,
+                                 a2,
+                                 a1);
+                if ( v4 < 0 )
+                    DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV %S %g\n", v4, "r", &gAppleBootVariableGuid));
+                else
+                    DEBUG ((DEBUG_INFO, "#[EB|CS:SRBM] %s\n", a1));
+            LABEL_23:
+                if ( (unsigned __int8)sub_BF44(0x200000000LL) || (unsigned __int8)sub_BF44(0x800000LL) )
+                {
+                LABEL_28:
+                    v11 = sub_28B6E(qword_B1E18, *(_QWORD *)(qword_B1DD8 + 32));
+                    if ( !v11 )
+                        DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] NULL <- EDK.EADP\n"));
+                    v12 = v11;
+                    v13 = *(__int64 (__fastcall **)(const char *, void *, __int64, __int64, __int64))(qword_B20A0 + 88);
+                    v14 = sub_28B07(v11);
+                    v15 = v13("R", &gAppleVendorVariableGuid, 7LL, v14, v12);
+                    if ( v15 < 0 )
+                        DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV %S %g\n", v15, "R", &gAppleVendorVariableGuid));
+                    (*(void (__fastcall **)(__int64))(qword_B2098 + 72))(v12);
+                    return result;
+                }
+            LABEL_25:
+                v10 = (*(__int64 (__fastcall **)(const __int16 *, void *, __int64, __int64, const char *))(qword_B20A0 + 88))(
+                                                                                                                              L"internet-recovery-mode",
+                                                                                                                              &unk_AE920,
+                                                                                                                              7LL,
+                                                                                                                              17LL,
+                                                                                                                              "RecoveryModeDisk");
+                if ( v10 < 0 )
+                    DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV %S %g\n", v10, L"internet-recovery-mode", &unk_AE920));
+                else
+                    DEBUG ((DEBUG_INFO, "#[EB|IRM:RMD]\n"));
+                goto LABEL_28;
+            }
+            v6 = 0;
+        }
+        else
+        {
+            v6 = 1;
+        }
+        v7 = (*(__int64 (__fastcall **)(const char *, void *, _QWORD, _QWORD, _QWORD))(qword_B20A0 + 88))(
+                                                                                                          "r",
+                                                                                                          &gAppleBootVariableGuid,
+                                                                                                          0LL,
+                                                                                                          0LL,
+                                                                                                          0LL);
+        if ( v7 < 0 && v7 != 0x800000000000000EuLL )
+            DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV- %S %g\n", v7, "r", &gAppleBootVariableGuid));
+        if ( a1 )
+        {
+            if ( !v6 )
+                goto LABEL_25;
+            goto LABEL_23;
+        }
+    }
+    else
+    {
+        DEBUG ((DEBUG_INFO, "#[EB|CS:RBML]\n"));
+        if ( a1 )
+            goto LABEL_23;
+    }
+    v8 = (*(__int64 (__fastcall **)(const __int16 *, void *, _QWORD, _QWORD, _QWORD))(qword_B20A0 + 88))(
+                                                                                                         L"internet-recovery-mode",
+                                                                                                         &unk_AE920,
+                                                                                                         0LL,
+                                                                                                         0LL,
+                                                                                                         0LL);
+    if ( v8 < 0 && v8 != 0x800000000000000EuLL )
+        DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV- %S %g\n", v8, L"internet-recovery-mode", &unk_AE920));
+    v9 = (*(__int64 (__fastcall **)(const char *, void *, _QWORD, _QWORD, _QWORD))(qword_B20A0 + 88))(
+                                                                                                      "R",
+                                                                                                      &gAppleVendorVariableGuid,
+                                                                                                      0LL,
+                                                                                                      0LL,
+                                                                                                      0LL);
+    if ( v9 < 0 && v9 != 0x800000000000000EuLL )
+        DEBUG ((DEBUG_INFO, "#[EB.CS.SRBM|!] %r <- RT.SV- %S %g\n", v9, "R", &gAppleVendorVariableGuid));
+    return result;
+}
+
+void sub_9FE7(__int64 a1, __int64 a2)
+{
+    if ( a1 && a2 )
+        sub_100CB();
+    sub_22C97(1LL, "#[EB|B:RB]\n");
+    sub_97BF(1LL, 5u);
+    while ( 1 )
+        ;
+}
+
 #pragma mark ========================================= functions end ==================================
 
 EFI_STATUS
@@ -10815,12 +14857,18 @@ UefiMain (
     UINT64 v23;
     UINT64 v25; // rsi
     UINT64 v26; // rax
+    UINT64 v29;
+    const char *v30;
+    UINT64 v31;
     UINT64 v44[16]; // [rsp+30h] [rbp-190h] BYREF
     UINT32 v45[18]; // [rsp+B0h] [rbp-110h] BYREF
+    UINT64 v48[16];
+    UINT32 v49[18];
     UINT64 v56[3];
     memset(v56, 170, sizeof(v56));
     UINT64 v57 = 0;
     UINT64 v58 = 0;
+    UINT64 v62 = 0;
     UINT32 *v63;
     UINT64 savedregs;
     EFI_OS_INFO_PROTOCOL* v59 = NULL;
@@ -11136,15 +15184,15 @@ LABEL_52:
         *(UINT64 *)v49 = 128LL;
         LODWORD(v62) = 0;
         sub_5E29(64LL, 0LL, 25LL);
-        v29 = (*(UINT64 ( **)(const UINT16 *, void *, UINT64 *, UINT32 *, UINT64 *))(qword_B20A0 + 72))(
-                                                                                                        L"recovery-boot-mode",
-                                                                                                        &gAppleBootVariableGuid,
-                                                                                                        &v62,
-                                                                                                        v49,
-                                                                                                        v48);
+        v29 = GetVariable(
+                          L"recovery-boot-mode",
+                          &gAppleBootVariableGuid,
+                          &v62,
+                          v49,
+                          v48);
         if ( v29 )
         {
-            sub_22C97(1LL, "#[EB.B.MN|!] %r <- RT.GV %S %g\n", v29, L"recovery-boot-mode", &gAppleBootVariableGuid);
+            DEBUG ((DEBUG_INFO, "#[EB.B.MN|!] %r <- RT.GV %S %g\n", v29, L"recovery-boot-mode", &gAppleBootVariableGuid));
             v30 = "__efiboot_recovery_reason_cmd_r__";
             v31 = 33LL;
         }
