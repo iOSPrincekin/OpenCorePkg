@@ -3703,13 +3703,13 @@ UINT64 sub_12166(void)
     UINT64 result;
     
     asm volatile (
-                    "lfence\n\t"
-                    "rdtsc\n\t"
-                    "lfence\n\t"
-                    : "=a" (result)
-                    :
-                    :
-                    );
+                  "lfence\n\t"
+                  "rdtsc\n\t"
+                  "lfence\n\t"
+                  : "=a" (result)
+                  :
+                  :
+                  );
     return result;
 }
 
@@ -17465,7 +17465,7 @@ double sub_4CED(UINT64 a1, UINT64 a2)
     UINT64 v3; // rax
     double result; // xmm0_8
     EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
-
+    
     v2 = qword_AE970;
     if ( qword_AE970 )
         goto LABEL_4;
@@ -17746,13 +17746,13 @@ UINT64  sub_1F0B1(UINT64 a1)
 }
 
 UINT64  sub_27A50(
-                   UINT64 a1,
-                   UINT32 a2,
-                   UINT64 a3,
-                   int a4,
-                   int a5,
-                   void ( *a6)(UINT64, UINT64),
-                   UINT64 a7)
+                  UINT64 a1,
+                  UINT32 a2,
+                  UINT64 a3,
+                  int a4,
+                  int a5,
+                  void ( *a6)(UINT64, UINT64),
+                  UINT64 a7)
 {
     int v8; // esi
     bool v9; // r11
@@ -18269,10 +18269,10 @@ LABEL_2:
                     {
                         v34 = (*a4)++;
                         ((void ( *)(UINT8 *, _QWORD, void ( *)(UINT64, UINT64), UINT64))v33)(
-                                                                                                          *v34,
-                                                                                                          (UINT32)v10,
-                                                                                                          a2,
-                                                                                                          a3);
+                                                                                             *v34,
+                                                                                             (UINT32)v10,
+                                                                                             a2,
+                                                                                             a3);
                     }
                 }
                 else if ( v12 == 69 )
@@ -18296,22 +18296,22 @@ LABEL_2:
 
 _BYTE * sub_28194(UINT64 a1, UINT64 a2)
 {
-  _BYTE *v2; // r8
-  _BYTE *result; // rax
-
-  v2 = *(_BYTE **)a2;
-  result = *(_BYTE **)(a2 + 8);
-  if ( result && v2 == result )
-  {
-    *result = 0;
-  }
-  else
-  {
-    result = v2 + 1;
-    *(_QWORD *)a2 = (_QWORD)v2 + 1;
-    *v2 = a1;
-  }
-  return result;
+    _BYTE *v2; // r8
+    _BYTE *result; // rax
+    
+    v2 = *(_BYTE **)a2;
+    result = *(_BYTE **)(a2 + 8);
+    if ( result && v2 == result )
+    {
+        *result = 0;
+    }
+    else
+    {
+        result = v2 + 1;
+        *(_QWORD *)a2 = (_QWORD)v2 + 1;
+        *v2 = a1;
+    }
+    return result;
 }
 
 UINT64 sub_28131(UINT64 a1, const char *a2, ...)
@@ -18678,7 +18678,7 @@ UefiMain (
     UINT64 v57 = 0;
     UINT64 v58 = 0;
     _QWORD *v60;
-   // UINT64 ( **v61)(_QWORD, UINT64 *); // [rsp+168h] [rbp-58h] BYREF
+    // UINT64 ( **v61)(_QWORD, UINT64 *); // [rsp+168h] [rbp-58h] BYREF
     EFI_SERVICE_BINDING_PROTOCOL* v61;
     UINT64 v62 = 0;
     UINT32 *v63;
@@ -19179,7 +19179,7 @@ LABEL_105:
                 0LL,
                 0LL);
     sub_12453("Start InitBootStruct");
-    sub_C0FD(qword_B1DD8, qword_B1DE0);
+    sub_C0FD((UINT64)qword_B1DD8, (char*)qword_B1DE0);
     sub_12453("End InitBootStruct");
     sub_12453("Start LoadRAMDisk");
     sub_1ABE0(qword_B1E20, qword_B1E28);
