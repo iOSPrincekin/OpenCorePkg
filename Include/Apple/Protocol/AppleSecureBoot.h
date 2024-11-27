@@ -322,13 +322,13 @@ EFI_STATUS
   );
 
 struct APPLE_SECURE_BOOT_PROTOCOL_ {
-  UINTN                                  Revision;
-  APPLE_SB_SET_AVAILABILITY              SetAvailability;
-  APPLE_SB_VERIFY_IMG4_BY_PATH           VerifyImg4ByPath;
-  APPLE_SB_VERIFY_IMG4                   VerifyImg4;
-  APPLE_SB_GET_POLICY                    GetPolicy;
-  APPLE_SB_GET_FAILURE_REASON            GetFailureReason;
-  APPLE_SB_SET_FAILURE_REASON            SetFailureReason;
+  UINTN                                  Revision;        // 8
+  APPLE_SB_SET_AVAILABILITY              SetAvailability;  // 16
+  APPLE_SB_VERIFY_IMG4_BY_PATH           VerifyImg4ByPath;  // 24
+  APPLE_SB_VERIFY_IMG4                   VerifyImg4;   // 32
+  APPLE_SB_GET_POLICY                    GetPolicy;    // 40
+  APPLE_SB_GET_FAILURE_REASON            GetFailureReason;  // 48
+  APPLE_SB_SET_FAILURE_REASON            SetFailureReason;  // 56
   APPLE_SB_GET_KERNEL_FAILURE_REASON     GetKernelFailureReason;
   APPLE_SB_SET_KERNEL_FAILURE_REASON     SetKernelFailureReason;
   APPLE_SB_VERIFY_WINDOWS_BY_PATH        VerifyWindowsByPath;
