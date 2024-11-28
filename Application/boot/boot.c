@@ -35,6 +35,7 @@
 #include <Protocol/Hash.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/ServiceBinding.h>
+#include <Protocol/DevicePathPropertyDatabase.h>
 
 
 #include <Library/UefiLib.h>
@@ -274,6 +275,8 @@ UINT8 byte_AD1DA = 0;
 
 UINT8 byte_AD1DB = 0;
 
+UINT64 off_AD210 = 0;
+
 UINT32 dword_AD218 = 0;
 
 UINT8 byte_AD220 = 0;
@@ -282,9 +285,11 @@ UINT8 byte_AD221 = 0;
 
 UINT32 dword_AD244 = 0;
 
+char unk_AD2A0[] = {0,0,0,0,0,0,0x1,0,0x80,0,0,0,0,0,0,0};
+
 char off_AC720[0x18] = {0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0x3c,0,0,0,0,0,0,0};
 
-UINT64 off_AD210 = 0;
+
 
 
 #define off_AD250_count 10
@@ -376,6 +381,8 @@ const char* off_AD930[off_AD930_count] = {
 char* byte_AD960 = NULL;
 
 EFI_GUID unk_ADB30 = { 0xE87B4CCA, 0xE365, 0x42D1, { 0xB1, 0xF5, 0x1A, 0xEE, 0xE1, 0xA7, 0xC6, 0x40 }};
+// gAppleNetBootProtocolGuid
+EFI_GUID unk_ADB70 = { 0xE87B4CCA, 0xE365, 0x42D1, { 0xB1, 0xF5, 0x1A, 0xEE, 0xE1, 0xA7, 0xC6, 0x40 }};
 // gAppleDiskIoProtocolGuid
 EFI_GUID unk_ADB80 = { 0x5B27263B, 0x9083, 0x415E, { 0x88, 0x9E, 0x64, 0x32, 0xCA, 0xA9, 0xB8, 0x13 }};
 
@@ -414,6 +421,8 @@ StringStruct2* qword_AE9D8 = NULL;
 char byte_AE9E0[0x40] = {};
 
 UINT64 qword_AEA20 = 0;
+
+char unk_AEA30[0x400] = {};
 
 char *qword_AEE30 = NULL;
 
@@ -14782,10 +14791,10 @@ UINT64 sub_28B6E(UINT64 a1, UINT64 a2)
         return sub_28AD1(a2);
     if ( !a2 )
         return sub_28AD1(a1);
-    for ( i = a1; (*(char *)i & 0x7F) != 0x7F || *(char *)(i + 1) != 0xFF; i += *(UINT16 *)(i + 2) )
+    for ( i = a1; (*(unsigned char *)i & 0x7F) != 0x7F || *(unsigned char *)(i + 1) != 0xFF; i += *(UINT16 *)(i + 2) )
         ;
     v5 = 4 - a1;
-    for ( j = a2; (*(char *)j & 0x7F) != 0x7F || *(char *)(j + 1) != 0xFF; j += *(UINT16 *)(j + 2) )
+    for ( j = a2; (*(unsigned char *)j & 0x7F) != 0x7F || *(unsigned char *)(j + 1) != 0xFF; j += *(UINT16 *)(j + 2) )
         ;
     v7 = j - a2 + 4;
     v8 = i - a1;
@@ -18360,7 +18369,7 @@ UINT64 sub_C71A(void)
         v2 = *(char *)v0 & 0x7F;
         if ( v2 == 3 )
             break;
-        if ( v2 == 127 && *(char *)(v0 + 1) == 0xFF )
+        if ( v2 == 127 && *(unsigned char *)(v0 + 1) == 0xFF )
             return v1;
     LABEL_7:
         v0 += *(UINT16 *)(v0 + 2);
@@ -18867,7 +18876,7 @@ UINT64 sub_14707(EFI_HANDLE a1, UINT64 a2, UINT64 a3)
                     return 0LL;
                 }
             }
-            else if ( v6 == 127 && *(char *)(v5 + 1) == 0xFF )
+            else if ( v6 == 127 && *(unsigned char *)(v5 + 1) == 0xFF )
             {
                 return v4;
             }
@@ -19060,7 +19069,7 @@ LABEL_21:
     for ( i = (UINT64)qword_B1E18; ; i += v20 | ((UINT64)v21 << 8) )
     {
         v19 = *(char *)i & 0x7F;
-        if ( v19 == 127 && *(char *)(i + 1) == 0xFF )
+        if ( v19 == 127 && *(unsigned char *)(i + 1) == 0xFF )
             break;
         v20 = *(char *)(i + 2);
         v21 = *(char *)(i + 3);
@@ -19105,21 +19114,21 @@ LABEL_21:
     return 0LL;
 }
 
-__int64 sub_90CD(void)
+UINT64 sub_90CD(void)
 {
     return (unsigned int)dword_AD218;
 }
 
-UINT64 sub_1BA31(__int64 a1, UINT64 a2)
+UINT64 sub_1BA31(UINT64 a1, UINT64 a2)
 {
-    __int64 v4; // rcx
+    UINT64 v4; // rcx
     UINT64 result; // rax
     UINT64 v6[3]; // [rsp+28h] [rbp-18h] BYREF
     
     v6[0] = 0xAAAAAAAAAAAAAAAAuLL;
     v4 = *(_QWORD *)(a1 + 8);
     if ( v4 )
-        return (*(__int64 ( **)(__int64, UINT64))(v4 + 56))(v4, a2);
+        return (*(UINT64 ( **)(UINT64, UINT64))(v4 + 56))(v4, a2);
     result = sub_1A2B1(a1, v6);
     if ( result >= 0 )
     {
@@ -19145,17 +19154,17 @@ char * sub_282A1(char *a1, const char *a2)
     return result;
 }
 
-unsigned __int64 sub_E274(__int64 a1, unsigned int a2, unsigned int a3)
+UINT64 sub_E274(UINT64 a1, unsigned int a2, unsigned int a3)
 {
     int v6; // eax
-    __int64 v7; // rax
-    __int64 v8; // ebx
+    UINT64 v7; // rax
+    UINT64 v8; // ebx
     char v10; // [rsp+20h] [rbp-30h]
-    unsigned __int64 v11; // [rsp+28h] [rbp-28h] BYREF
+    UINT64 v11; // [rsp+28h] [rbp-28h] BYREF
     
     v11 = 0xAAAAAAAAAAAAAAAAuLL;
     v6 = sub_2822A((const char*)a1);
-    v7 = (__int64)sub_1D2B1(v6 + 1);
+    v7 = (UINT64)sub_1D2B1(v6 + 1);
     if ( !v7 )
         return 0x8000000000000009uLL;
     v8 = v7;
@@ -19165,26 +19174,26 @@ unsigned __int64 sub_E274(__int64 a1, unsigned int a2, unsigned int a3)
     return 0LL;
 }
 
-__int64 sub_1AD06(_QWORD *a1, UINT64 *a2, _QWORD *a3)
+UINT64 sub_1AD06(_QWORD *a1, UINT64 *a2, _QWORD *a3)
 {
-    __int64 v6; // rax
-    __int64 v7; // r14
-    __int64 v8; // rax
-    __int64 v9; // r15
-    __int64 v10; // r13
+    UINT64 v6; // rax
+    UINT64 v7; // r14
+    UINT64 v8; // rax
+    UINT64 v9; // r15
+    UINT64 v10; // r13
     UINT64 v11; // rbx
     UINT32 v12; // r12d
-    __int64 v13; // rsi
+    UINT64 v13; // rsi
     UINT32 v14; // eax
     int v15; // edi
-    __int64 v16; // rdi
+    UINT64 v16; // rdi
     UINT64 *v17; // rsi
     _QWORD *v18; // rax
-    __int64 v19; // rax
+    UINT64 v19; // rax
     _QWORD v21[4]; // [rsp+20h] [rbp-B0h] BYREF
     UINT64 v22; // [rsp+40h] [rbp-90h] BYREF
     UINT64 v23; // [rsp+48h] [rbp-88h] BYREF
-    __int64 v24; // [rsp+50h] [rbp-80h]
+    UINT64 v24; // [rsp+50h] [rbp-80h]
     _QWORD *v25; // [rsp+58h] [rbp-78h]
     _QWORD *v26; // [rsp+60h] [rbp-70h]
     UINT64 *v27; // [rsp+68h] [rbp-68h]
@@ -19235,7 +19244,7 @@ __int64 sub_1AD06(_QWORD *a1, UINT64 *a2, _QWORD *a3)
         goto LABEL_8;
     }
     memset(v21, 170, 28);
-    v6 = sub_1BA31((__int64)a1, 0LL);
+    v6 = sub_1BA31((UINT64)a1, 0LL);
     if ( v6 < 0 )
         return v6;
     v28 = 28LL;
@@ -19244,10 +19253,10 @@ __int64 sub_1AD06(_QWORD *a1, UINT64 *a2, _QWORD *a3)
         return v6;
     if ( v28 < 0x1C )
         return v7;
-    v6 = sub_1BA31((__int64)a1, 0LL);
+    v6 = sub_1BA31((UINT64)a1, 0LL);
     if ( v6 < 0 )
         return v6;
-    v6 = sub_1A2B1((__int64)a1, &v22);
+    v6 = sub_1A2B1((UINT64)a1, &v22);
     if ( v6 < 0 )
         return v6;
     v25 = a1;
@@ -19344,7 +19353,7 @@ LABEL_8:
         if ( v13 )
         {
             v16 = v13;
-            v7 = sub_1BA31((__int64)v25, v13);
+            v7 = sub_1BA31((UINT64)v25, v13);
             v17 = v27;
             v18 = v26;
             if ( v7 < 0 )
@@ -19365,11 +19374,11 @@ LABEL_8:
     return v7;
 }
 
-__int64 sub_1ABE0(__int64 a1, EFI_FILE_PROTOCOL* a2)
+UINT64 sub_1ABE0(UINT64 a1, EFI_FILE_PROTOCOL* a2)
 {
-    __int64 v2; // rsi
-    __int64 v3; // rax
-    __int64 v4; // rax
+    UINT64 v2; // rsi
+    UINT64 v3; // rax
+    UINT64 v4; // rax
     char *v5; // rdi
     UINT64 v7[9]; // [rsp+28h] [rbp-48h] BYREF
     
@@ -19394,7 +19403,7 @@ __int64 sub_1ABE0(__int64 a1, EFI_FILE_PROTOCOL* a2)
                         sub_E617("#[EB.LD.LRD|TS!] NULL <- EB.MM.AKM %qd\n", v7[6]);
                     v2 = sub_1A3A5(v7, &v7[6], v5);
                     if ( v2 >= 0 )
-                        sub_E274((__int64)"RAMDisk", (unsigned int)((UINT64)v5 & 0xffffffff), (unsigned int)v7[6]);
+                        sub_E274((UINT64)"RAMDisk", (unsigned int)((UINT64)v5 & 0xffffffff), (unsigned int)v7[6]);
                 }
                 sub_1A5FA(v7);
                 goto LABEL_16;
@@ -19415,22 +19424,22 @@ __int64 sub_1ABE0(__int64 a1, EFI_FILE_PROTOCOL* a2)
     return 0LL;
 }
 
-__int64 sub_15301(void)
+UINT64 sub_15301(void)
 {
     
     EFI_CLOSE_EVENT CloseEvent = mBootServices->CloseEvent;
     CloseEvent(qword_B1F38);
     qword_B1F38 = 0LL;
     return sub_152A7(
-                     ((unsigned __int64)(unsigned int)dword_AF110 - qword_AF118) >> 1,
-                     qword_AF128 + (((unsigned __int64)(unsigned int)dword_AF114 - qword_AF120) >> 1),
+                     ((UINT64)(unsigned int)dword_AF110 - qword_AF118) >> 1,
+                     qword_AF128 + (((UINT64)(unsigned int)dword_AF114 - qword_AF120) >> 1),
                      qword_AF118,
                      qword_AF120);
 }
 
-__int64 sub_11CEF(__int64 *a1, char *a2)
+UINT64 sub_11CEF(UINT64 *a1, char *a2)
 {
-    __int64 v2; // rsi
+    UINT64 v2; // rsi
     
     v2 = *a1;
     if ( !*a1 )
@@ -19444,20 +19453,20 @@ __int64 sub_11CEF(__int64 *a1, char *a2)
     return v2;
 }
 
-__int64 sub_B8E6(__int64 a1)
+UINT64 sub_B8E6(UINT64 a1)
 {
     int v2; // eax
-    __int64 v3; // r14
+    UINT64 v3; // r14
     EFI_CONFIGURATION_TABLE* v4; // rbx
-    unsigned __int64 v5; // rdi
+    UINT64 v5; // rdi
     void* v6; // rsi
     char v7; // al
-    __int64 v8; // r12
-    unsigned __int64 v9; // rbx
-    unsigned __int64 v10; // rdi
-    __int64 v11; // rsi
-    __int64 result; // rax
-    __int64 v13; // r12
+    UINT64 v8; // r12
+    UINT64 v9; // rbx
+    UINT64 v10; // rdi
+    UINT64 v11; // rsi
+    UINT64 result; // rax
+    UINT64 v13; // r12
     
     v2 = sub_2822A((const char*)a1);
     UINTN NumberOfTableEntries = mSystemTable->NumberOfTableEntries;
@@ -19483,14 +19492,14 @@ __int64 sub_B8E6(__int64 a1)
 LABEL_10:
     if ( !v6 )
         return 0LL;
-    v7 = *(_BYTE *)(v6 + 15);
+    v7 = *(char *)(v6 + 15);
     if ( v7 == 1 )
         return 0LL;
     if ( v7 )
     {
         v13 = *(_QWORD *)(v6 + 24);
         v9 = 0LL;
-        v10 = ((unsigned __int64)*(unsigned int *)(v13 + 4) - 36) >> 3;
+        v10 = ((UINT64)*(unsigned int *)(v13 + 4) - 36) >> 3;
         if ( v10 )
         {
             while ( 1 )
@@ -19511,7 +19520,7 @@ LABEL_10:
     {
         v8 = *(unsigned int *)(v6 + 16);
         v9 = 0LL;
-        v10 = ((unsigned __int64)*(unsigned int *)(v8 + 4) - 36) >> 2;
+        v10 = ((UINT64)*(unsigned int *)(v8 + 4) - 36) >> 2;
         if ( v10 )
         {
             while ( 1 )
@@ -19534,19 +19543,19 @@ LABEL_23:
 
 char *sub_E040(void)
 {
-    __int64 *v0; // rax
-    __int64 v1; // rax
+    UINT64 *v0; // rax
+    UINT64 v1; // rax
     unsigned int v2; // edx
-    __int64 v3; // rcx
+    UINT64 v3; // rcx
     UINTN v4; // edx
-    __int64 v5; // rax
-    __int64 v6; // rdi
+    UINT64 v5; // rax
+    UINT64 v6; // rdi
     char *v7; // rsi
     EFI_COPY_MEM CopyMem = mBootServices->CopyMem;
     EFI_SET_MEM SetMem = mBootServices->SetMem;
     if ( !byte_AE9E0[0] )
     {
-        v0 = (__int64 *)sub_1207F("/efi/platform", 0LL);
+        v0 = (UINT64 *)sub_1207F("/efi/platform", 0LL);
         if ( v0 && (v1 = sub_11CEF(v0, "Model")) != 0 && (v2 = *(_DWORD *)(v1 + 8)) != 0 )
         {
             v3 = *(_QWORD *)(v1 + 16);
@@ -19557,18 +19566,18 @@ char *sub_E040(void)
         }
         else
         {
-            v5 = sub_B8E6((__int64)"FACP");
+            v5 = sub_B8E6((UINT64)"FACP");
             if ( v5 )
             {
-                if ( *(_BYTE *)(v5 + 8) < 3u )
+                if ( *(char *)(v5 + 8) < 3u )
                     v6 = *(unsigned int *)(v5 + 40);
                 else
                     v6 = *(_QWORD *)(v5 + 140);
                 v7 = byte_AE9E0;
                 CopyMem(byte_AE9E0, (void*)v6 + 16, 8LL);
-                while ( ((unsigned __int8)*v7 | 0x20) != 0x20 )
+                while ( ((UINT8)*v7 | 0x20) != 0x20 )
                     ++v7;
-                sub_28131((__int64)v7, "%d,%d", HIWORD(*(_DWORD *)(v6 + 24)), (unsigned __int16)*(_DWORD *)(v6 + 24));
+                sub_28131((UINT64)v7, "%d,%d", HIWORD(*(_DWORD *)(v6 + 24)), (UINT16)*(_DWORD *)(v6 + 24));
             }
         }
         if ( !byte_AE9E0[0] )
@@ -19577,160 +19586,363 @@ char *sub_E040(void)
     return byte_AE9E0;
 }
 
-__int64  sub_C81C(_QWORD *a1, __int64 a2, double a3)
+UINT64 sub_219D1(__int64 a1, char *a2)
 {
-    __int64 v3; // r12
-    __int64 v4; // rdx
+    UINT64 result; // rax
+    
+    result = 0x8000000000000002uLL;
+    if ( a1 && a2 && *(_DWORD *)a1 == 11 )
+    {
+        *a2 = *(char *)(a1 + 16);
+        return 0LL;
+    }
+    return result;
+}
+
+unsigned __int64 sub_219F7(__int64 a1, _QWORD *a2)
+{
+    unsigned __int64 result; // rax
+    
+    result = 0x8000000000000002uLL;
+    if ( a1 && *(_DWORD *)a1 == 11 && a2 )
+    {
+        if ( *(char *)(a1 + 16) )
+        {
+            *a2 = *(_QWORD *)(a1 + 24);
+            return 0LL;
+        }
+    }
+    return result;
+}
+
+__int64 sub_E149(void)
+{
+    StringStruct2* v0; // rax
+    StringStruct2* v1; // r14d
+    UINTN i; // rcx
+    void* v3; // rbx
+    EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL* v5; // [rsp+28h] [rbp-38h] BYREF
+    unsigned __int64 v6[6]; // [rsp+30h] [rbp-30h] BYREF
+    
+    v6[0] = 0xAAAAAAAAAAAAAAAAuLL;
+    EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+    DPP_DATABASE_GET_PROPERTY_BUFFER GetPropertyBuffer = v5->GetPropertyBuffer;
+    v0 = sub_1207F("/efi", 0LL);
+    if ( v0 )
+    {
+        v1 = v0;
+        v5 = (EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL*)0xAAAAAAAAAAAAAAAAuLL;
+        if ( LocateProtocol(&gEfiDevicePathPropertyDatabaseProtocolGuid, 0LL, (void**)&v5) >= 0 )
+        {
+            v6[0] = 4096LL;
+            for ( i = 4096LL; ; i = v6[0] )
+            {
+                v3 = sub_1D2B1(i);
+                if ( !v3 )
+                    sub_E617("#[EB.BST.ADPP|!] NULL <- EB.M.BMA %qd\n", v6[0]);
+                if ( GetPropertyBuffer(v5, v3, v6) != 0x8000000000000005uLL )
+                    break;
+                sub_1D327(v3);
+            }
+            if ( v3 )
+            {
+                sub_11BA4(v1, "device-properties", v6[0], v3, 1);
+                sub_1D327(v3);
+            }
+        }
+    }
+    return 0LL;
+}
+
+unsigned __int64 sub_68FF(char *a1, _QWORD *a2)
+{
+    unsigned __int64 v2; // rsi
+    char** v3; // rdi
+    
+    v2 = 0x800000000000000EuLL;
+    v3 = (char**)off_AD210;
+    if ( off_AD210 )
+    {
+        while ( (unsigned int)sub_28246(a1, v3[1]) )
+        {
+            v3 = (char**)*v3;
+            if ( !v3 )
+                return v2;
+        }
+        *a2 = (_QWORD)v3;
+        return 0LL;
+    }
+    return v2;
+}
+
+char * sub_16A1D(__int64 a1)
+{
+    int v2; // ebx
+    __int64 v3; // rax
+    int v4; // edi
+    int v5; // r9d
+    int v6; // r8d
+    UINT64 v7; // edx
+    int v8; // ecx
+    char v9; // al
+    bool v10; // cf
+    const char *v11; // rdx
+    const char *v12; // rcx
+    char *result; // rax
+    char *v14; // rsi
+    unsigned __int64 v15; // rsi
+    unsigned __int64 v16; // rax
+    unsigned __int64 v17; // r8
+    __int64 v18; // [rsp+28h] [rbp-38h] BYREF
+    unsigned __int64 v19; // [rsp+30h] [rbp-30h] BYREF
+    __int64 v20[5]; // [rsp+38h] [rbp-28h] BYREF
+    
+    v20[0] = 0xAAAAAAAAAAAAAAAAuLL;
+    v18 = 0xAAAAAAAAAAAAAAAAuLL;
+    *(_QWORD *)(a1 + 1240) = 0LL;
+    v2 = 0;
+    sub_16556(a1 + 1192, 0LL);
+    v3 = *(_QWORD *)(a1 + 1240);
+    if ( v3 )
+    {
+        v4 = *(_DWORD *)(a1 + 1196);
+        v5 = *(_DWORD *)(a1 + 1200);
+        v6 = *(_DWORD *)(a1 + 1204);
+        v2 = *(_DWORD *)(a1 + 1208);
+    }
+    else
+    {
+        *(_QWORD *)(a1 + 1240) = 0LL;
+        *(_QWORD *)(a1 + 1196) = 0LL;
+        *(_QWORD *)(a1 + 1204) = 0LL;
+        v6 = 0;
+        v5 = 0;
+        v4 = 0;
+        LODWORD(v3) = 0;
+    }
+    v7 = qword_B1DE8;
+    v8 = ((qword_B1DE8 & 0x20) == 0) + 1;
+    *(_DWORD *)(a1 + 1192) = v8;
+    *(_DWORD *)(a1 + 1048) = v3 & 0xffffffff;
+    *(_DWORD *)(a1 + 1056) = v4;
+    *(_DWORD *)(a1 + 1060) = v5;
+    *(_DWORD *)(a1 + 1064) = v6;
+    *(_DWORD *)(a1 + 1068) = v2;
+    *(_DWORD *)(a1 + 1052) = v8;
+    v9 = byte_B1F30;
+    if ( byte_B1F30 )
+        *(_BYTE *)(a1 + 6) |= 2u;
+    v10 = (v7 & 0x40000) != 0;
+    v11 = "CircleSlashBlack2X";
+    if ( !v10 )
+        v11 = "CircleSlash2X";
+    v12 = "CircleSlashBlack";
+    if ( !v10 )
+        v12 = "CircleSlash";
+    if ( v9 )
+        v12 = v11;
+    v19 = 0xAAAAAAAAAAAAAAAAuLL;
+    result = (char *)sub_68FF((char*)v12, &v19);
+    if ( (__int64)result >= 0 )
+    {
+        v20[0] = *(unsigned int *)(v19 + 64);
+        v18 = v20[0];
+        v14 = (char *)sub_1CA67((UINT64*)v20, 0LL);
+        if ( !v14 )
+            sub_E617("#[EB.G.RGI|CLUT!] NULL <- EB.MM.AKM %qd\n", v20[0]);
+        sub_E274((__int64)"FailedCLUT", (unsigned int)((UINT64)v14 & 0xffffffff), (unsigned int)v20[0]);
+        sub_240D0(*(char **)(v19 + 56), v14, v20[0]);
+        v20[0] = *(unsigned int *)(v19 + 32) + 32LL;
+        v18 = v20[0];
+        v15 = sub_1CA67((UINT64*)&v18, 0LL);
+        if ( !v15 )
+            sub_E617("#[EB.G.RGI|FI!] NULL <- EB.MM.AKM %qd\n", v18);
+        sub_E274((UINT64)"FailedImage", (unsigned int)((UINT64)v15 & 0xffffffff), (unsigned int)v20[0]);
+        v16 = v19;
+        *(_DWORD *)v15 = *(unsigned __int16 *)(v19 + 16);
+        *(_DWORD *)(v15 + 4) = *(unsigned __int16 *)(v16 + 18);
+        *(_DWORD *)(v15 + 8) = 0;
+        v17 = *(unsigned int *)(v16 + 32);
+        *(_DWORD *)(v15 + 12) = (_DWORD)v17;
+        return sub_240D0(*(char **)(v16 + 24), (char *)(v15 + 32), v17);
+    }
+    return result;
+}
+
+__int64 sub_282BC(__int64 a1, __int64 a2, __int64 a3)
+{
+    __int64 result; // rax
+    __int64 i; // rcx
+    char v5; // r9
+    
+    result = a1;
+    if ( a3 )
+    {
+        for ( i = 0LL; i != a3; ++i )
+        {
+            v5 = *(_BYTE *)(a2 + i);
+            *(_BYTE *)(result + i) = v5;
+            if ( !v5 )
+                break;
+        }
+    }
+    return result;
+}
+
+UINT64 sub_C81C(_QWORD *a1, UINT64 a2, double a3)
+{
+    UINT64 v3; // r12
+    UINT64 v4; // rdx
     StringStruct2* v5; // rax
     char* v6; // rdx
-    __int64 v7; // rax
+    UINT64 v7; // rax
     char *v8; // rcx
-    __int64 v9; // r8
-    __int64 v10; // r13
+    UINT64 v9; // r8
+    UINT64 v10; // r13
     char *v11; // rdi
-    __int64 v12; // rax
+    UINT64 v12; // rax
     void *v13; // r14
-    __int64 v14; // rax
+    UINT64 v14; // rax
     char *v15; // rbx
-    signed __int64 v16; // r15
-    __int64 v17; // rax
-    __int64 v18; // rax
-    __int64 v19; // rsi
-    unsigned __int64 v20; // r12
-    __int64 v21; // r13
+    UINT64 v16; // r15
+    UINT64 v17; // rax
+    UINT64 v18; // rax
+    UINT64 v19; // rsi
+    UINT64 v20; // r12
+    UINT64 v21; // r13
     unsigned int *v22; // rsi
-    __int64 v23; // rbx
-    __int64 v24; // rax
+    UINT64 v23; // rbx
+    UINT64 v24; // rax
     char v25; // cl
     unsigned int v26; // ebx
-    __int64 v27; // rax
+    UINT64 v27; // rax
     int v28; // eax
-    __int16 v29; // bx
-    __int64 v30; // rdx
-    __int64 v31; // rsi
-    __int64 v32; // rax
-    __int64 v33; // rdi
-    __int64 v34; // rax
-    __int64 v35; // rdi
-    __int64 v36; // rdx
-    __int64 v37; // r13
-    unsigned __int64 v38; // r14
-    __int64 v39; // r12
-    __int64 v40; // rsi
-    __int64 v41; // rax
+    UINT16 v29; // bx
+    UINT64 v30; // rdx
+    StringStruct2* v31; // rsi
+    UINT64 v32; // rax
+    UINT64 v33; // rdi
+    UINT64 v34; // rax
+    GUID* v35; // rdi
+    UINT64 v36; // rdx
+    StringStruct2 * v37; // r13
+    UINT64 v38; // r14
+    StringStruct2 * v39; // r12
+    StringStruct2* v40; // rsi
+    StringStruct2* v41; // rax
     _DWORD *v42; // rbx
-    int v43; // esi
+    StringStruct2* v43; // esi
     int v44; // eax
     const char *v45; // rdi
     int v46; // eax
-    __int64 v47; // rdx
-    __int64 v48; // rax
-    __int64 v49; // rdx
-    __int64 v50; // rdi
+    UINT64 v47; // rdx
+    UINT64 v48; // rax
+    UINT64 v49; // rdx
+    UINT64 v50; // rdi
     int v51; // eax
     int v52; // eax
-    __int64 v53; // rax
-    __int64 v54; // r9
+    UINT64 v53; // rax
+    UINT64 v54; // r9
     int v55; // r8d
     int v56; // r8d
-    __int64 v57; // rax
+    UINT64 v57; // rax
     int v58; // r8d
-    unsigned __int64 v59; // rsi
+    UINT64 v59; // rsi
     char *v60; // rdi
     char *v61; // rax
     char *v62; // r15
-    __int64 v63; // rsi
-    __int64 v64; // rax
-    __int64 v65; // rax
+    UINT64 v63; // rsi
+    UINT64 v64; // rax
+    UINT64 v65; // rax
     int v66; // ecx
-    __int64 v67; // rax
-    __int16 v68; // dx
-    __int16 v69; // ax
-    __int16 v70; // dx
-    __int64 v71; // r8
-    __int64 v72; // rax
-    __int64 v73; // r8
-    unsigned __int8 v74; // di
+    UINT64 v67; // rax
+    UINT16 v68; // dx
+    UINT16 v69; // ax
+    UINT16 v70; // dx
+    UINT64 v71; // r8
+    UINT64 v72; // rax
+    UINT64 v73; // r8
+    UINT8 v74; // di
     bool v75; // cc
-    unsigned __int8 v76; // cl
-    __int64 v77; // rax
-    __int64 v78; // rcx
-    __int64 v84; // rsi
+    UINT8 v76; // cl
+    UINT64 v77; // rax
+    UINT64 v78; // rcx
+    UINT64 v84; // rsi
     char *v85; // rbx
-    unsigned __int64 v86; // rsi
-    __int64 v87; // rbx
-    __int64 v88; // rcx
-    unsigned __int64 *v89; // rbx
-    __int64 *v90; // r15
-    __int64 v91; // rsi
-    __int64 v92; // rax
-    __int64 v93; // rax
-    unsigned __int64 *v94; // rsi
-    __int64 *v95; // rbx
-    __int64 v96; // rax
+    UINT64 v86; // rsi
+    UINT64 v87; // rbx
+    UINT64 v88; // rcx
+    UINT64 *v89; // rbx
+    UINT64 *v90; // r15
+    UINT64 v91; // rsi
+    UINT64 v92; // rax
+    UINT64 v93; // rax
+    UINT64 *v94; // rsi
+    UINT64 *v95; // rbx
+    UINT64 v96; // rax
     _DWORD *v97; // rcx
-    __int64 v98; // r15
-    __int64 v99; // rax
-    __int64 v100; // rdx
-    unsigned __int64 v101; // r8
+    UINT64 v98; // r15
+    UINT64 v99; // rax
+    UINT64 v100; // rdx
+    UINT64 v101; // r8
     _DWORD *v102; // r13
-    __int64 v103; // r12
-    unsigned __int64 v104; // r15
-    unsigned __int64 v105; // r14
-    unsigned __int64 v106; // r9
+    UINT64 v103; // r12
+    UINT64 v104; // r15
+    UINT64 v105; // r14
+    UINT64 v106; // r9
     int v107; // r8d
-    unsigned __int64 v108; // rcx
-    unsigned __int64 v109; // rdi
-    __int64 v110; // r11
-    unsigned __int64 v111; // rbx
+    UINT64 v108; // rcx
+    UINT64 v109; // rdi
+    UINT64 v110; // r11
+    UINT64 v111; // rbx
     unsigned int v112; // r10d
-    __int64 v113; // rbx
-    unsigned __int64 v114; // rbx
+    UINT64 v113; // rbx
+    UINT64 v114; // rbx
     int v115; // eax
     int v116; // eax
-    unsigned __int64 v118; // r8
-    unsigned __int64 v119; // rax
-    unsigned __int64 v120; // rdi
-    unsigned __int64 v121; // rdi
-    __int64 v122; // rbx
-    __int64 v123; // rax
-    __int64 v124; // [rsp+20h] [rbp-240h]
-    __int64 v125; // [rsp+20h] [rbp-240h]
-    __int64 v126; // [rsp+20h] [rbp-240h]
-    __int64 v127; // [rsp+20h] [rbp-240h]
-    __int64 v128; // [rsp+20h] [rbp-240h]
-    __int64 v129; // [rsp+20h] [rbp-240h]
-    __int64 v130; // [rsp+20h] [rbp-240h]
-    __int64 v131; // [rsp+20h] [rbp-240h]
-    __int64 v132; // [rsp+20h] [rbp-240h]
+    UINT64 v118; // r8
+    UINT64 v119; // rax
+    UINT64 v120; // rdi
+    UINT64 v121; // rdi
+    UINT64 v122; // rbx
+    UINT64 v123; // rax
+    UINT64 v124; // [rsp+20h] [rbp-240h]
+    UINT64 v125; // [rsp+20h] [rbp-240h]
+    UINT64 v126; // [rsp+20h] [rbp-240h]
+    UINT64 v127; // [rsp+20h] [rbp-240h]
+    UINT64 v128; // [rsp+20h] [rbp-240h]
+    UINT64 v129; // [rsp+20h] [rbp-240h]
+    UINT64 v130; // [rsp+20h] [rbp-240h]
+    UINT64 v131; // [rsp+20h] [rbp-240h]
+    UINT64 v132; // [rsp+20h] [rbp-240h]
     char v133[128]; // [rsp+40h] [rbp-220h] BYREF
     _QWORD v134[9]; // [rsp+C0h] [rbp-1A0h] BYREF
-    unsigned __int64 v135; // [rsp+108h] [rbp-158h] BYREF
-    unsigned __int64 v136; // [rsp+110h] [rbp-150h] BYREF
-    unsigned __int64 v137; // [rsp+118h] [rbp-148h]
-    __int64 v138; // [rsp+120h] [rbp-140h]
-    __int64 v139; // [rsp+128h] [rbp-138h]
+    UINT64 v135; // [rsp+108h] [rbp-158h] BYREF
+    UINT64 v136; // [rsp+110h] [rbp-150h] BYREF
+    UINT64 v137; // [rsp+118h] [rbp-148h]
+    UINT64 v138; // [rsp+120h] [rbp-140h]
+    UINT64 v139; // [rsp+128h] [rbp-138h]
     _QWORD v140[4]; // [rsp+130h] [rbp-130h] BYREF
-    unsigned __int64 v141; // [rsp+150h] [rbp-110h] BYREF
-    __int64 v142[3]; // [rsp+158h] [rbp-108h] BYREF
-    unsigned __int64 v143; // [rsp+170h] [rbp-F0h]
+    UINT64 v141; // [rsp+150h] [rbp-110h] BYREF
+    UINT64 v142[3]; // [rsp+158h] [rbp-108h] BYREF
+    UINT64 v143; // [rsp+170h] [rbp-F0h]
     char *v144; // [rsp+178h] [rbp-E8h] BYREF
-    __int64 v145[3]; // [rsp+180h] [rbp-E0h] BYREF
+    UINT64 v145[3]; // [rsp+180h] [rbp-E0h] BYREF
     _QWORD *v146; // [rsp+198h] [rbp-C8h]
-    __int64 v147; // [rsp+1A0h] [rbp-C0h]
-    unsigned __int64 v148; // [rsp+1A8h] [rbp-B8h]
-    unsigned __int64 v149; // [rsp+1B0h] [rbp-B0h] BYREF
+    UINT64 v147; // [rsp+1A0h] [rbp-C0h]
+    UINT64 v148; // [rsp+1A8h] [rbp-B8h]
+    UINT64 v149; // [rsp+1B0h] [rbp-B0h] BYREF
     _DWORD *v150; // [rsp+1B8h] [rbp-A8h]
-    __int64 (**v151)(_QWORD, unsigned __int64 *, __int64); // [rsp+1C0h] [rbp-A0h] BYREF
-    unsigned __int64 v152; // [rsp+1C8h] [rbp-98h] BYREF
+    EFI_DEVICE_PATH_PROTOCOL  *v151;
+    UINT64 v152; // [rsp+1C8h] [rbp-98h] BYREF
     _QWORD v153[3]; // [rsp+1D0h] [rbp-90h] BYREF
-    unsigned __int64 v154; // [rsp+1E8h] [rbp-78h] BYREF
-    unsigned __int64 v155; // [rsp+1F0h] [rbp-70h] BYREF
-    unsigned __int64 v156; // [rsp+1F8h] [rbp-68h] BYREF
-    unsigned __int64 v157; // [rsp+200h] [rbp-60h] BYREF
+    UINT64 v154; // [rsp+1E8h] [rbp-78h] BYREF
+    UINT64 v155; // [rsp+1F0h] [rbp-70h] BYREF
+    UINT64 v156; // [rsp+1F8h] [rbp-68h] BYREF
+    UINT64 v157; // [rsp+200h] [rbp-60h] BYREF
     unsigned int v158; // [rsp+20Ch] [rbp-54h] BYREF
-    unsigned __int64 v159; // [rsp+210h] [rbp-50h] BYREF
-    unsigned __int64 v160; // [rsp+218h] [rbp-48h] BYREF
+    UINT64 v159; // [rsp+210h] [rbp-50h] BYREF
+    UINT64 v160; // [rsp+218h] [rbp-48h] BYREF
     char v161[57]; // [rsp+227h] [rbp-39h] BYREF
     
     v147 = a2;
@@ -19745,7 +19957,7 @@ __int64  sub_C81C(_QWORD *a1, __int64 a2, double a3)
     v158 = -1431655766;
     v3 = qword_B1E40;
     memset(v133, 0xAAu, sizeof(v133));
-    v151 = (__int64 (**)(_QWORD, unsigned __int64 *, __int64))0xAAAAAAAAAAAAAAAALL;
+    v151 = (UINT64 (**)(_QWORD, UINT64 *, UINT64))0xAAAAAAAAAAAAAAAALL;
     memset(v145, 170, sizeof(v145));
     memset(v140, 170, sizeof(v140));
     memset(v142, 170, sizeof(v142));
@@ -19755,9 +19967,28 @@ __int64  sub_C81C(_QWORD *a1, __int64 a2, double a3)
     v5 = sub_1207F("/efi/platform", v4);
     EFI_GET_VARIABLE GetVariable = mRuntimeServices->GetVariable;
     EFI_SET_VARIABLE SetVariable = mRuntimeServices->SetVariable;
+    EFI_COPY_MEM CopyMem = mBootServices->CopyMem;
+    EFI_SET_MEM SetMem = mBootServices->SetMem;
+    
+    EFI_HANDLE_PROTOCOL HandleProtocol = mBootServices->HandleProtocol;
+    EFI_LOCATE_PROTOCOL LocateProtocol = mBootServices->LocateProtocol;
+    
+    CHAR16 *FirmwareVendor = mSystemTable->FirmwareVendor;
+    
+    UINT64 FirmwareRevision = mSystemTable->FirmwareRevision;
+    
+    UINTN NumberOfTableEntries = mSystemTable->NumberOfTableEntries;
+    
+    EFI_CONFIGURATION_TABLE *ConfigurationTable = mSystemTable->ConfigurationTable;
+    
+    EFI_TABLE_HEADER Hdr = mSystemTable->Hdr;
+    char* aPlistVersion10 = "<plist version=\"1.0\"><dict><key>PlistPrefixKey</key>";
+    char* aDictPlist = "</dict></plist>";
+    
+    EFI_HANDLE DeviceHandle = qword_B1DD8->DeviceHandle;
     if ( v5 )
     {
-        if ( !sub_11CEF((__int64*)v5, "system-id") )
+        if ( !sub_11CEF((UINT64*)v5, "system-id") )
         {
             v134[0] = 0xAAAAAAAAAAAAAAAAuLL;
             v134[1] = 0xAAAAAAAAAAAAAAAAuLL;
@@ -19781,21 +20012,22 @@ __int64  sub_C81C(_QWORD *a1, __int64 a2, double a3)
                 }
                 else
                 {
-                    if ( MEMORY[0xFFFFFF00] != 0xEA )
+                    char* c_ptr = (char*)0xFFFFFF00;
+                    if ( *c_ptr != 0xEA )
                         goto LABEL_11;
-                    (*(void (**)(_QWORD *, void *, __int64))(qword_B2098 + 352))(v134, &unk_AD2A0, 16LL);
+                    CopyMem(v134, &unk_AD2A0, 16LL);
                     v7 = qword_B2098;
                     v9 = 6LL;
                     v8 = (char *)&v134[1] + 2;
-                    v6 = 4294967041LL;
+                    v6 = (char*)4294967041LL;
                 }
-                (*(void (**)(char *, __int64, __int64))(v7 + 352))(v8, v6, v9);
-                (*(void (**)(const char *, void *, __int64, __int64, _QWORD *))(qword_B20A0 + 88))(
-                                                                                                   "p",
-                                                                                                   &gAppleBootVariableGuid,
-                                                                                                   7LL,
-                                                                                                   16LL,
-                                                                                                   v134);
+                (*(void (**)(char *, char *, UINT64))(v7 + 352))(v8, v6, v9);
+                SetVariable(
+                            L"p",
+                            &gAppleBootVariableGuid,
+                            7LL,
+                            16LL,
+                            v134);
             }
         }
     }
@@ -19809,75 +20041,75 @@ LABEL_11:
     v152 = 0LL;
     v153[0] = 32LL;
     sub_E5B0(v134, 32LL);
-    v12 = (*(__int64 (**)(const char *, void *, _QWORD, _QWORD *, _QWORD *))(qword_B20A0 + 72))(
-                                                                                                "I",
-                                                                                                &unk_ADAD0,
-                                                                                                0LL,
-                                                                                                v153,
-                                                                                                v134);
+    v12 = GetVariable(
+                      L"I",
+                      &gAppleVendorVariableGuid,
+                      0LL,
+                      v153,
+                      v134);
     v150 = (_DWORD *)v3;
     if ( v12 == 0x8000000000000005uLL )
     {
         v11 = (char *)sub_1D2B1(v153[0]);
         if ( !v11 )
         {
-            sub_22C97(1LL, "#[EB.BST.GIP|CIP!] NULL <- EB.M.BMA %qd\n", v153[0]);
+            DEBUG ((DEBUG_INFO, "#[EB.BST.GIP|CIP!] NULL <- EB.M.BMA %qd\n", v153[0]));
             v16 = 0x8000000000000005uLL;
             goto LABEL_55;
         }
     }
     v13 = 0LL;
-    v14 = (*(__int64 (**)(const char *, void *, _QWORD, _QWORD *, char *))(qword_B20A0 + 72))(
-                                                                                              "I",
-                                                                                              &unk_ADAD0,
-                                                                                              0LL,
-                                                                                              v153,
-                                                                                              v11);
+    v14 = GetVariable(
+                      L"I",
+                      &gAppleVendorVariableGuid,
+                      0LL,
+                      v153,
+                      v11);
     if ( v14 < 0 )
     {
         v16 = v14;
     }
     else
     {
-        sub_22C97(1LL, "#[EB|GIP:PHS.1] %e\n", a3);
+        DEBUG ((DEBUG_INFO, "#[EB|GIP:PHS.1] %e\n", a3));
         v153[0] = 1024LL;
         v13 = &unk_AEA30;
         sub_E5B0(&unk_AEA30, 1024LL);
-        if ( (*(__int64 (**)(const __int16 *, void *, _QWORD, _QWORD *, void *))(qword_B20A0 + 72))(
-                                                                                                    L"IASInstallPhaseList",
-                                                                                                    &unk_ADAD0,
-                                                                                                    0LL,
-                                                                                                    v153,
-                                                                                                    &unk_AEA30) == 0x8000000000000005uLL
+        if ( GetVariable(
+                         L"IASInstallPhaseList",
+                         &gAppleVendorVariableGuid,
+                         0LL,
+                         v153,
+                         &unk_AEA30) == 0x8000000000000005uLL
             && (v13 = (void *)sub_1D2B1(v153[0])) == 0LL )
         {
-            sub_22C97(1LL, "#[EB.BST.GIP|IPL!] NULL <- EB.M.BMA %qd\n", v153[0]);
+            DEBUG ((DEBUG_INFO, "#[EB.BST.GIP|IPL!] NULL <- EB.M.BMA %qd\n", v153[0]));
             v13 = 0LL;
             v16 = 0x8000000000000005uLL;
         }
         else
         {
             v15 = 0LL;
-            v16 = (*(__int64 (**)(const __int16 *, void *, _QWORD, _QWORD *, void *))(qword_B20A0 + 72))(
-                                                                                                         L"IASInstallPhaseList",
-                                                                                                         &unk_ADAD0,
-                                                                                                         0LL,
-                                                                                                         v153,
-                                                                                                         v13);
+            v16 = GetVariable(
+                              L"IASInstallPhaseList",
+                              &gAppleVendorVariableGuid,
+                              0LL,
+                              v153,
+                              v13);
             if ( v16 < 0 )
                 goto LABEL_46;
             *(_DWORD *)(v10 + 1188) = 0;
-            v17 = sub_1D2B1(v153[0] + 67LL);
+            v17 = (UINT64)sub_1D2B1(v153[0] + 67LL);
             if ( v17 )
             {
                 v15 = (char *)v17;
-                sub_240B0(v17, aPlistVersion10, 52LL);
+                sub_240B0((void*)v17, aPlistVersion10, 52LL);
                 sub_240B0(v15 + 52, v13, v153[0]);
                 sub_240B0(&v15[v153[0] + 52], aDictPlist, 15LL);
-                v16 = sub_1F414((__int64)v15, v153[0] + 67LL, (__int64 *)&v149);
+                v16 = sub_1F414((UINT64)v15, v153[0] + 67LL, (UINT64 *)&v149);
                 if ( v16 >= 0 )
                 {
-                    v18 = sub_2165C(v149, (__int64)"PlistPrefixKey");
+                    v18 = sub_2165C(v149, (UINT64)"PlistPrefixKey");
                     if ( v18 )
                     {
                         v19 = v18;
@@ -19888,7 +20120,7 @@ LABEL_11:
                             {
                                 v143 = v10;
                                 v20 = 0LL;
-                                v148 = (unsigned __int64)v15;
+                                v148 = (UINT64)v15;
                                 while ( 1 )
                                 {
                                     v154 = 0xAAAAAAAAAAAAAAAAuLL;
@@ -19898,7 +20130,7 @@ LABEL_11:
                                     if ( (unsigned int)sub_212BE(v22) != 2 )
                                         goto LABEL_39;
                                     v161[0] = 0;
-                                    v23 = sub_2165C((__int64)v22, (__int64)"InstallPhasePercentageKey");
+                                    v23 = sub_2165C((UINT64)v22, (UINT64)"InstallPhasePercentageKey");
                                     v154 = 0LL;
                                     v24 = sub_219D1(v23, v161);
                                     v25 = v161[0];
@@ -19918,17 +20150,17 @@ LABEL_11:
                                         goto LABEL_33;
                                 LABEL_35:
                                     v26 = 0xFFFF * (int)v154 / 0x64u;
-                                    sub_22C97(1LL, "#[EB|GIP:PCT] 0x%lx\n", v154);
-                                    v27 = sub_2165C((__int64)v22, (__int64)"InstallPhase");
+                                    DEBUG ((DEBUG_INFO, "#[EB|GIP:PCT] 0x%lx\n", v154));
+                                    v27 = sub_2165C((UINT64)v22, (UINT64)"InstallPhase");
                                     if ( (sub_216B8(v27, &v144) & 0x8000000000000000uLL) != 0LL )
                                         v144 = "none";
-                                    sub_22C97(1LL, "#[EB|GIP:PHS.2] %e\n", a3);
+                                    DEBUG ((DEBUG_INFO, "#[EB|GIP:PHS.2] %e\n", a3));
                                     v28 = sub_28246(v11, v144);
                                     v29 = *(_WORD *)(v143 + 1188) + v26;
                                     if ( !v28 )
                                     {
                                         *(_WORD *)(v143 + 1190) = v29;
-                                        v3 = (__int64)v150;
+                                        v3 = (UINT64)v150;
                                         v15 = (char *)v148;
                                         goto LABEL_46;
                                     }
@@ -19939,7 +20171,7 @@ LABEL_11:
                                     v19 = v21;
                                     if ( v20 >= v152 )
                                     {
-                                        v3 = (__int64)v150;
+                                        v3 = (UINT64)v150;
                                         goto LABEL_46;
                                     }
                                 }
@@ -19949,7 +20181,7 @@ LABEL_11:
                 }
                 goto LABEL_46;
             }
-            sub_22C97(1LL, "#[EB.BST.GIP|TMP!] NULL <- EB.M.BMA %qd\n", v153[0]);
+            DEBUG ((DEBUG_INFO, "#[EB.BST.GIP|TMP!] NULL <- EB.M.BMA %qd\n", v153[0]));
         }
     }
     v15 = 0LL;
@@ -19963,11 +20195,11 @@ LABEL_46:
 LABEL_55:
     if ( !v16 )
         *(char *)(v3 + 7) |= 1u;
-    if ( (*(__int64 (**)(_QWORD, void *, _QWORD))(qword_B2098 + 152))(
-                                                                      *(_QWORD *)(qword_B1DD8 + 24),
-                                                                      &unk_ADB70,
-                                                                      &v151) >= 0
-        || (*(__int64 (**)(void *, _QWORD, _QWORD))(qword_B2098 + 320))(&unk_ADB70, 0LL, &v151) >= 0 )
+    if ( HandleProtocol(
+                        DeviceHandle,
+                        &unk_ADB70,
+                        (void**)&v151) >= 0
+        || LocateProtocol(&unk_ADB70, 0LL, (void*)&v151) >= 0 )
     {
         LOBYTE(v30) = 1;
         v31 = sub_1207F("/chosen", v30);
@@ -20008,61 +20240,61 @@ LABEL_55:
         }
     }
 LABEL_69:
-    v35 = *(_QWORD *)(qword_B2090 + 112);
+    v35 = &ConfigurationTable[0].VendorGuid;
     LOBYTE(v30) = 1;
     v37 = sub_1207F("/efi/configuration-table", v30);
     if ( !v37 )
         sub_E617("#[EB.BST.FBS|!] NULL <- EB.DT.FN %s %s\n", "+", "/efi/configuration-table");
-    if ( *(_QWORD *)(qword_B2090 + 104) )
+    if ( NumberOfTableEntries )
     {
         v38 = 0LL;
         do
         {
-            sub_BEBA(v35, (__int64)v133);
+            sub_BEBA((UINT64*)v35);
             v39 = sub_11D29(v37, v133);
             if ( !v39 )
                 sub_E617("#[EB.BST.FBS|!] NULL <- EB.DT.AC %s, %s\n", "/efi/configuration-table", v133);
             LOBYTE(v124) = 0;
-            sub_11BA4(v39, (unsigned int)"guid", 16, v35, v124);
+            sub_11BA4(v39, "guid", 16, (char*)v35, v124);
             LOBYTE(v125) = 0;
-            sub_11BA4(v39, (unsigned int)"table", 8, v35 + 16, v125);
-            if ( (unsigned __int8)sub_46304(v35, &gEfiAcpi20TableGuid) )
+            sub_11BA4(v39, "table", 8, (char*)v35 + 16, v125);
+            if ( (UINT8)sub_46304(v35, &gEfiAcpi20TableGuid) )
             {
                 LOBYTE(v124) = 0;
-                sub_11BA4(v39, (unsigned int)"alias", 8, (unsigned int)"ACPI_20", v124);
+                sub_11BA4(v39, "alias", 8, "ACPI_20", v124);
             }
-            if ( (unsigned __int8)sub_46304(v35, &unk_ADCA0) )
+            if ( (UINT8)sub_46304(v35, &gEfiAcpi10TableGuid) )
             {
                 LOBYTE(v124) = 0;
-                sub_11BA4(v39, (unsigned int)"alias", 5, (unsigned int)"ACPI", v124);
+                sub_11BA4(v39, "alias", 5, "ACPI", v124);
             }
             ++v38;
             v35 += 24LL;
         }
-        while ( *(_QWORD *)(qword_B2090 + 104) > v38 );
+        while ( NumberOfTableEntries > v38 );
     }
     LOBYTE(v36) = 1;
     v40 = sub_1207F("/efi/runtime-services", v36);
     if ( !v40 )
         sub_E617("#[EB.BST.FBS|!] NULL <- EB.DT.FN %s %s\n", "+", "/efi/runtime-services");
     LOBYTE(v124) = 0;
-    sub_11BA4(v40, (unsigned int)"table", 8, qword_B2090 + 88, v124);
+    sub_11BA4(v40, "table", 8, (char*)mRuntimeServices, v124);
     v41 = sub_1207F("/efi", 0LL);
     v42 = v150;
     if ( v41 )
     {
         v43 = v41;
-        v44 = sub_463B0(*(_WORD **)(qword_B2090 + 24));
+        v44 = sub_463B0(FirmwareVendor);
         LOBYTE(v126) = 0;
-        sub_11BA4(v43, (unsigned int)"firmware-vendor", 2 * v44 + 2, *(_QWORD *)(qword_B2090 + 24), v126);
+        sub_11BA4(v43, "firmware-vendor", 2 * v44 + 2, (char*)FirmwareVendor, v126);
         LOBYTE(v127) = 0;
-        sub_11BA4(v43, (unsigned int)"firmware-revision", 4, qword_B2090 + 32, v127);
+        sub_11BA4(v43, "firmware-revision", 4, (char*)FirmwareRevision, v127);
         v45 = "EFI32";
         if ( *((char *)v42 + 4) == 64 )
             v45 = "EFI64";
         v46 = sub_2822A(v45);
         LOBYTE(v128) = 0;
-        sub_11BA4(v43, (unsigned int)"firmware-abi", v46 + 1, (_DWORD)v45, v128);
+        sub_11BA4(v43, "firmware-abi", v46 + 1, (char*)v45, v128);
     }
     sub_E149();
     LOBYTE(v47) = 1;
@@ -20071,7 +20303,7 @@ LABEL_69:
     {
         LODWORD(v134[0]) = 1;
         LOBYTE(v126) = 0;
-        sub_11BA4(v48, (unsigned int)"x86_64", 4, (unsigned int)v134, v126);
+        sub_11BA4(v48, "x86_64", 4, v134, v126);
     }
     sub_16A1D(v42);
     sub_282BC(v42 + 2, v147, 1024LL);
@@ -20157,12 +20389,12 @@ LABEL_69:
     v152 = 0LL;
     memset(v153, 170, sizeof(v153));
     v154 = 24LL;
-    if ( (*(__int64 (**)(const __int16 *, void *, _QWORD, unsigned __int64 *, _QWORD *))(qword_B20A0 + 72))(
-                                                                                                            L"Persistent-memory-note",
-                                                                                                            &gAppleBootVariableGuid,
-                                                                                                            0LL,
-                                                                                                            &v154,
-                                                                                                            v153) >= 0
+    if ( (*(UINT64 (**)(const UINT16 *, void *, _QWORD, UINT64 *, _QWORD *))(qword_B20A0 + 72))(
+                                                                                                L"Persistent-memory-note",
+                                                                                                &gAppleBootVariableGuid,
+                                                                                                0LL,
+                                                                                                &v154,
+                                                                                                v153) >= 0
         && v154 == 24 )
     {
         v59 = v153[0];
@@ -20172,28 +20404,28 @@ LABEL_69:
             if ( v153[2] )
             {
                 v149 = v153[0];
-                v61 = (char *)sub_1CA67((__int64 *)&v149, &v152);
+                v61 = (char *)sub_1CA67((UINT64 *)&v149, &v152);
                 v62 = v61;
                 if ( v59 <= v149 )
                 {
                     sub_240D0(v60, v61, v59);
                     v153[2] = v62;
-                    (*(void (**)(const __int16 *, void *, __int64, unsigned __int64, _QWORD *))(qword_B20A0 + 88))(
-                                                                                                                   L"Persistent-memory-note",
-                                                                                                                   &gAppleBootVariableGuid,
-                                                                                                                   7LL,
-                                                                                                                   v154,
-                                                                                                                   v153);
+                    (*(void (**)(const UINT16 *, void *, UINT64, UINT64, _QWORD *))(qword_B20A0 + 88))(
+                                                                                                       L"Persistent-memory-note",
+                                                                                                       &gAppleBootVariableGuid,
+                                                                                                       7LL,
+                                                                                                       v154,
+                                                                                                       v153);
                 }
                 else
                 {
                     sub_1CC2B(v61, v152);
-                    (*(void (**)(const __int16 *, void *, _QWORD, _QWORD, _QWORD))(qword_B20A0 + 88))(
-                                                                                                      L"Persistent-memory-note",
-                                                                                                      &gAppleBootVariableGuid,
-                                                                                                      0LL,
-                                                                                                      0LL,
-                                                                                                      0LL);
+                    (*(void (**)(const UINT16 *, void *, _QWORD, _QWORD, _QWORD))(qword_B20A0 + 88))(
+                                                                                                     L"Persistent-memory-note",
+                                                                                                     &gAppleBootVariableGuid,
+                                                                                                     0LL,
+                                                                                                     0LL,
+                                                                                                     0LL);
                 }
             }
         }
@@ -20230,8 +20462,8 @@ LABEL_116:
     if ( v67 && *(char *)(v67 + 8) == 1 )
     {
         *((_QWORD *)v42 + 145) = *(_QWORD *)(v67 + 44);
-        v42[292] = *(unsigned __int8 *)(v67 + 54);
-        v42[293] = *(unsigned __int8 *)(v67 + 55);
+        v42[292] = *(UINT8 *)(v67 + 54);
+        v42[293] = *(UINT8 *)(v67 + 55);
     }
     v68 = *((_WORD *)v42 + 3);
     v69 = v68 | 1;
@@ -20243,24 +20475,24 @@ LABEL_116:
             v69 = v70;
         *((_WORD *)v42 + 3) = v69 | ((unsigned int)qword_B1DE8 >> 14) & 4;
     }
-    if ( (*(__int64 (**)(void *, _QWORD, __int64 *))(qword_B2098 + 320))(&unk_ADBD0, 0LL, &qword_B1E60) >= 0 )
+    if ( (*(UINT64 (**)(void *, _QWORD, UINT64 *))(qword_B2098 + 320))(&unk_ADBD0, 0LL, &qword_B1E60) >= 0 )
     {
         LOWORD(v153[0]) = 0;
         LOBYTE(v71) = 1;
-        v72 = (*(__int64 (**)(__int64, __int64, __int64, _QWORD *))(qword_B1E60 + 8))(
-                                                                                      qword_B1E60,
-                                                                                      1297306723LL,
-                                                                                      v71,
-                                                                                      v153);
+        v72 = (*(UINT64 (**)(UINT64, UINT64, UINT64, _QWORD *))(qword_B1E60 + 8))(
+                                                                                  qword_B1E60,
+                                                                                  1297306723LL,
+                                                                                  v71,
+                                                                                  v153);
         v74 = v153[0];
         if ( v72 < 0 )
             v74 = 0;
         LOBYTE(v73) = 2;
-        if ( (*(__int64 (**)(__int64, __int64, __int64, _QWORD *))(qword_B1E60 + 8))(
-                                                                                     qword_B1E60,
-                                                                                     1297301859LL,
-                                                                                     v73,
-                                                                                     v153) >= 0 )
+        if ( (*(UINT64 (**)(UINT64, UINT64, UINT64, _QWORD *))(qword_B1E60 + 8))(
+                                                                                 qword_B1E60,
+                                                                                 1297301859LL,
+                                                                                 v73,
+                                                                                 v153) >= 0 )
         {
             LOBYTE(v153[0]) += BYTE1(v153[0]) >> 7;
             v75 = LOBYTE(v153[0]) <= v74;
@@ -20275,18 +20507,18 @@ LABEL_116:
     sub_22DC7(8LL);
     sub_11EEE(0LL, &v155);
     v160 = v155;
-    v159 = sub_1CA67((__int64 *)&v160, 0LL);
+    v159 = sub_1CA67((UINT64 *)&v160, 0LL);
     if ( !v159 )
         sub_E617("#[EB.BST.FBS|DT!] NULL <- EB.MM.AKM %qd\n", v160);
     sub_11EEE(&v159, &v155);
     v42[268] = v159;
     v42[269] = v155;
     sub_11E6F();
-    v77 = sub_1C900(&v156, v145, (__int64)v146, (__int64)&v157, (__int64)&v158);
+    v77 = sub_1C900(&v156, v145, (UINT64)v146, (UINT64)&v157, (UINT64)&v158);
     if ( v77 < 0 )
         sub_E617("#[EB.BST.FBS|!] %r <- EB.MM.GBMM\n", v77);
     v140[0] = v145[0] + v156;
-    sub_1CA30(v145[0], LODWORD(v145[0]) + v156, v157, v158, (__int64)&v145[1], (__int64)&v145[2]);
+    sub_1CA30(v145[0], LODWORD(v145[0]) + v156, v157, v158, (UINT64)&v145[1], (UINT64)&v145[2]);
     sub_1D327(v145[0]);
     v145[0] = 0LL;
     v78 = v145[2] + 11;
@@ -20318,7 +20550,7 @@ LABEL_143:
     ++v145[1];
     v142[0] = (unsigned int)sub_468F6(v78, 12);
     v142[1] = 0LL;
-    v86 = sub_1CA67(v142, (unsigned __int64 *)&v142[1]);
+    v86 = sub_1CA67(v142, (UINT64 *)&v142[1]);
     if ( !v86 )
         sub_E617("#[EB.BST.FBS|RT!] NULL <- EB.MM.AKM %qd\n", v142[0]);
     v156 += v145[1] * v157;
@@ -20326,7 +20558,7 @@ LABEL_143:
     v88 = qword_B1E38;
     if ( !qword_B1E38 )
     {
-        if ( (*(__int64 (**)(void *, _QWORD, __int64 *))(qword_B2098 + 320))(&unk_ADC90, 0LL, &qword_B1E38) < 0 )
+        if ( (*(UINT64 (**)(void *, _QWORD, UINT64 *))(qword_B2098 + 320))(&unk_ADC90, 0LL, &qword_B1E38) < 0 )
         {
             qword_B1E38 = 0LL;
             goto LABEL_147;
@@ -20335,10 +20567,10 @@ LABEL_143:
         if ( !qword_B1E38 )
             goto LABEL_147;
     }
-    (*(void (**)(__int64, unsigned __int64, __int64, _QWORD))(v88 + 56))(v88, v86, v87, 0LL);
+    (*(void (**)(UINT64, UINT64, UINT64, _QWORD))(v88 + 56))(v88, v86, v87, 0LL);
 LABEL_147:
     v156 += 2 * v157 + 512;
-    v159 = sub_1CA67((__int64 *)&v156, &v141);
+    v159 = sub_1CA67((UINT64 *)&v156, &v141);
     if ( !v159 )
         sub_E617("#[EB.BST.FBS|MM!] NULL <- EB.MM.AKM %qd\n", v156);
     v137 = v86;
@@ -20348,7 +20580,7 @@ LABEL_147:
     sub_22DC7(9LL);
     LOBYTE(v147) = 1;
     v89 = &v155;
-    v90 = (__int64 *)&v156;
+    v90 = (UINT64 *)&v156;
     v148 = 0x8000000000000002uLL;
     while ( 1 )
     {
@@ -20356,12 +20588,12 @@ LABEL_147:
         while ( 1 )
         {
             v155 = 0LL;
-            v92 = (*(__int64 (**)(unsigned __int64 *, _QWORD, _QWORD *, unsigned __int64 *, unsigned int *))(qword_B2098 + 56))(
-                                                                                                                                v89,
-                                                                                                                                0LL,
-                                                                                                                                v146,
-                                                                                                                                &v157,
-                                                                                                                                &v158);
+            v92 = (*(UINT64 (**)(UINT64 *, _QWORD, _QWORD *, UINT64 *, unsigned int *))(qword_B2098 + 56))(
+                                                                                                           v89,
+                                                                                                           0LL,
+                                                                                                           v146,
+                                                                                                           &v157,
+                                                                                                           &v158);
             if ( v92 != 0x8000000000000005uLL )
                 sub_E617("#[EB.BST.FBS|!] %r <- BS.GMM\n", v92);
             if ( v155 > v156 )
@@ -20373,12 +20605,12 @@ LABEL_147:
                     sub_E617("#[EB.BST.FBS|MM.2!] NULL <- EB.MM.AKM %qd\n", v156);
             }
             v160 = v156;
-            v93 = (*(__int64 (**)(unsigned __int64 *, unsigned __int64, _QWORD *, unsigned __int64 *, unsigned int *))(qword_B2098 + 56))(
-                                                                                                                                          &v160,
-                                                                                                                                          v159,
-                                                                                                                                          v146,
-                                                                                                                                          &v157,
-                                                                                                                                          &v158);
+            v93 = (*(UINT64 (**)(UINT64 *, UINT64, _QWORD *, UINT64 *, unsigned int *))(qword_B2098 + 56))(
+                                                                                                           &v160,
+                                                                                                           v159,
+                                                                                                           v146,
+                                                                                                           &v157,
+                                                                                                           &v158);
             if ( !v93 )
                 break;
             if ( !--v91 )
@@ -20398,9 +20630,9 @@ LABEL_147:
         v97[260] = v157;
         v97[261] = v158;
         sub_12453("Start ExitBootServices");
-        v99 = (*(__int64 (**)(__int64, _QWORD))(qword_B2098 + 232))(qword_B1DD0, *v146);
+        v99 = (*(UINT64 (**)(UINT64, _QWORD))(qword_B2098 + 232))(qword_B1DD0, *v146);
         v101 = v148;
-        if ( (unsigned __int8)v147 > 4u || v99 != v148 )
+        if ( (UINT8)v147 > 4u || v99 != v148 )
             break;
         LOBYTE(v147) = v147 + 1;
         sub_22C97(1LL, "#[EB.BST.FBS|!] %r <- BS.Exit\n", v148);
@@ -20478,7 +20710,7 @@ LABEL_147:
                     - 1;
                     *(_QWORD *)(v106 + v104 + 16) = 0LL;
                     *(_DWORD *)(v106 + v104) = *(_DWORD *)v108;
-                    *(_QWORD *)(v108 + 24) = ((unsigned __int64)(*(_QWORD *)(v104 + 8) - v122) >> 12)
+                    *(_QWORD *)(v108 + 24) = ((UINT64)(*(_QWORD *)(v104 + 8) - v122) >> 12)
                     - ((((*(_QWORD *)(v104 + 8) - v122) & 0xFFF) == 0)
                        - 1LL);
                     v106 *= 2LL;
@@ -21099,7 +21331,7 @@ LABEL_105:
     sub_C0FD((UINT64)qword_B1DD8, (char*)qword_B1DE0);
     sub_12453("End InitBootStruct");
     sub_12453("Start LoadRAMDisk");
-    sub_1ABE0((__int64)qword_B1E20, qword_B1E28);
+    sub_1ABE0((UINT64)qword_B1E20, qword_B1E28);
     sub_12453("End LoadRAMDisk");
     if ( qword_B1F38 )
     {

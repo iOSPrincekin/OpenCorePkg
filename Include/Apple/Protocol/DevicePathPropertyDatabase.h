@@ -174,16 +174,16 @@ EFI_STATUS
 /// The structure exposed by the EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL.
 struct EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL {
   /// The revision of the installed protocol.
-  UINT64                              Revision;
+  UINT64                              Revision;  // 8
 
   /// Locates a device property in the database and returns its value into Value.
-  DPP_DATABASE_GET_PROPERTY           GetProperty;
+  DPP_DATABASE_GET_PROPERTY           GetProperty;  // 16
 
   /// Sets the sepcified property of the given device path to the provided Value.
-  DPP_DATABASE_SET_PROPERTY           SetProperty;
+  DPP_DATABASE_SET_PROPERTY           SetProperty;  // 24
 
   /// Removes the sepcified property from the given device path.
-  DPP_DATABASE_REMOVE_PROPERTY        RemoveProperty;
+  DPP_DATABASE_REMOVE_PROPERTY        RemoveProperty;  // 32
 
   /// Returns a Buffer of all device properties into Buffer.
   DPP_DATABASE_GET_PROPERTY_BUFFER    GetPropertyBuffer;
