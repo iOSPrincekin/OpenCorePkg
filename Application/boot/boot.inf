@@ -47,10 +47,23 @@
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
   gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
   gEfiConsoleControlProtocolGuid
-  
+  gAppleImageConversionProtocolGuid
+  gAppleFramebufferInfoProtocolGuid
+  gAppleKeyMapAggregatorProtocolGuid
+  gAppleRtcRamProtocolGuid
+  gAppleSecureBootProtocolGuid
+  gAppleSmcIoProtocolGuid
+  gEfiBlockIoCryptoProtocolGuid
+  gEfiDevicePathPropertyDatabaseProtocolGuid
+  gEfiDiskIoProtocolGuid
+  gEfiHashProtocolGuid
+  gEfiHashServiceBindingProtocolGuid
+  gEfiUserInterfaceThemeProtocolGuid
 
 [Guids]
   gAppleOSLoadedNamedEventGuid
+  gAppleApfsVolumeInfoGuid
+    gEfiHashAlgorithmSha1Guid
   
   
 [LibraryClasses]
