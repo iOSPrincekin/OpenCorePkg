@@ -13699,8 +13699,8 @@ UINT64 sub_4424F(int a1, int a2, int a3, int a4)
 __int64 sub_3893A(unsigned int a1, int a2)
 {
     unsigned int v2; // esi
-    int v3; // eax
-    signed int v5; // eax
+    __int64 v3; // eax
+    __int64 v5; // eax
     
     v2 = a1;
     if ( (a1 & 0xFFFEFFFF) == 0 )
@@ -13708,7 +13708,7 @@ __int64 sub_3893A(unsigned int a1, int a2)
     if ( a2 < 0 )
     {
         v5 = sub_3893A(a1, (unsigned int)(a2 + 1));
-        return sub_322F7(v5, v2);
+        return sub_322F7((int)v5, v2);
     }
     if ( !a2 )
         return 0x10000;
@@ -13717,7 +13717,7 @@ __int64 sub_3893A(unsigned int a1, int a2)
         if ( a2 != 1 )
         {
             v3 = sub_3893A(a1, (unsigned int)(a2 - 1));
-            return sub_3228C(v2, v3);
+            return sub_3228C(v2, (int)v3);
         }
         return v2;
     }
@@ -13727,15 +13727,15 @@ __int64 sub_3893A(unsigned int a1, int a2)
 __int64 sub_4499A(signed int a1)
 {
     signed int v1; // esi
-    signed int v2; // eax
-    int v3; // edi
-    signed int v4; // eax
-    int v5; // eax
+    __int64 v2; // eax
+    __int64 v3; // edi
+    __int64 v4; // eax
+    __int64 v5; // eax
     unsigned int v6; // edi
-    signed int v7; // eax
-    int v8; // edi
-    int v9; // eax
-    int v10; // edi
+    __int64 v7; // eax
+    __int64 v8; // edi
+    __int64 v9; // eax
+    __int64 v10; // edi
     
     v1 = -a1;
     if ( -a1 < 1 )
@@ -13746,19 +13746,19 @@ __int64 sub_4499A(signed int a1)
         if ( v1 < 0x20000 )
         {
             v7 = sub_3893A((unsigned int)v1, 2LL);
-            v8 = sub_3227F(v7, 5);
+            v8 = sub_3227F((int)v7, 5);
             v9 = sub_3893A((unsigned int)v1, 3LL);
-            v10 = sub_3228C(v8 - v9, 0x8000);
+            v10 = sub_3228C((int)v8 - (int)v9, 0x8000);
             return v10 + 0x20000 - (unsigned int)sub_3227F(v1, 4);
         }
     }
     else
     {
         v2 = sub_3893A((unsigned int)v1, 3LL);
-        v3 = sub_3227F(v2, 3);
+        v3 = sub_3227F((int)v2, 3);
         v4 = sub_3893A((unsigned int)v1, 2LL);
-        v5 = sub_3227F(v4, 5);
-        return (unsigned int)sub_3228C(v3 - v5, 0x8000) + 0x10000;
+        v5 = sub_3227F((int)v4, 5);
+        return sub_3228C((int)v3 - (int)v5, 0x8000) + 0x10000;
     }
     return v6;
 }
@@ -14330,7 +14330,7 @@ void sub_1FBBA(void)
     UINT64 v21; // rax
     UINT64 v22; // rdi
     UINT64 v23; // rax
-    UINT64 v24; // rax
+    EFI_BOOT_SERVICES * v24; // rax
     UINT64 v25; // rcx
     char *v26; // rsi
     UINT64 v27; // rax
@@ -20517,7 +20517,7 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
     _BYTE v19[2048]; // [rsp+30h] [rbp-930h] BYREF
     _BYTE v20[200]; // [rsp+830h] [rbp-130h] BYREF
     UINT64 v21; // [rsp+8F8h] [rbp-68h] BYREF
-    __int64 v22; // [rsp+900h] [rbp-60h] BYREF
+    UINT64 v22; // [rsp+900h] [rbp-60h] BYREF
     __int64 v23; // [rsp+908h] [rbp-58h] BYREF
     __int64 v24; // [rsp+910h] [rbp-50h] BYREF
     __int64 v25; // [rsp+918h] [rbp-48h] BYREF
@@ -20539,7 +20539,7 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
     EFI_SET_MEM SetMem = mBootServices->SetMem;
     SetMem(v19, 2048LL, 0LL);
     SetMem(v20, 200LL, 0LL);
-    v10 = sub_48E2(v20, 100LL,0);
+    v10 = sub_48E2((__int64)v20, 100LL,0);
     if ( v10 < 0 )
     {
         v13 = v10;
@@ -20547,10 +20547,10 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
     }
     else
     {
-        sub_28F54(v19, 1024LL, L"%S.%S", L"usr\\standalone\\OS.dmg.root_hash");
+        sub_28F54((CHAR16*)v19, 1024LL, "%S.%S", L"usr\\standalone\\OS.dmg.root_hash");
         DEBUG ((DEBUG_INFO, "#[EB|RH:PF] %S\n", L"usr\\standalone\\OS.dmg.root_hash"));
         DEBUG ((DEBUG_INFO, "#[EB|RH:MF] <\"%E\">\n", v4));
-        v11 = sub_19F56(qword_B1E20, qword_B1E28, (__int64)L"usr\\standalone\\OS.dmg.root_hash", 0LL, &v23, &v25);
+        v11 = sub_19F56((UINT64)qword_B1E20, qword_B1E28, L"usr\\standalone\\OS.dmg.root_hash", 0LL, (UINT64*)&v23, (CHAR16**)&v25);
         if ( v11 < 0 )
         {
             v13 = v11;
@@ -20559,7 +20559,7 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
         }
         else
         {
-            v12 = sub_19F56(qword_B1E20, qword_B1E28, (__int64)v19, 0LL, &v24, v26);
+            v12 = sub_19F56((UINT64)qword_B1E20, qword_B1E28, (CHAR16*)v19, 0LL, (UINT64*)&v24, (CHAR16* *)v26);
             v13 = v12;
             if ( v12 < 0 )
             {
@@ -20577,10 +20577,10 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
                 if ( v16 )
                 {
                     v17 = v16;
-                    SetMem(v15, v22, 0LL);
-                    SetMem(v17, v21, 0LL);
-                    CopyMem(v15, v25, v23);
-                    CopyMem(v17, v26[0], v24);
+                    SetMem((VOID*)v15, v22, 0LL);
+                    SetMem((VOID*)v17, v21, 0LL);
+                    CopyMem((VOID*)v15, (VOID*)v25, v23);
+                    CopyMem((VOID*)v17, (VOID*)v26[0], v24);
                     *a1 = v15;
                     *v7 = v23;
                     *a3 = v17;
@@ -20601,10 +20601,10 @@ unsigned __int64 sub_4536(unsigned __int64 *a1, __int64 *a2, unsigned __int64 *a
         }
     }
     if ( v26[0] )
-        sub_1D327(v26[0]);
+        sub_1D327((void*)v26[0]);
 LABEL_15:
     if ( v25 )
-        sub_1D327(v25);
+        sub_1D327((void*)v25);
     return v13;
 }
 
